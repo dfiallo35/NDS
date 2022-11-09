@@ -1,4 +1,4 @@
-class element:
+class Element:
     """
     Base class for all the simulation elements.
     """
@@ -6,48 +6,43 @@ class element:
         self.name = name
 
 
-class mapelement(element):
+class MapElement(Element):
     """
     Base class for all the map elements.
     """
-    def __init__(self, name, forain):
+    def __init__(self, name, extension:float, forain):
         super().__init__(name)
         self.forain = forain
+        self.extension = extension
 
 
 
-
-class nation(mapelement):
-    def __init__(self, name: str, contain: list, traits: list):
-        super().__init__(name, get_forain())
+class Nation(MapElement):
+    def __init__(self, name: str, extension:float, contain: list, traits: list, forain: list):
+        super().__init__(name, extension, forain)
         self.contain = contain
         self.traits = traits
-
-        def get_forain(self):
-            forain=[]
-            for province in self.contain:
-                if not (province in self.contain):
-                    forain.append(province.forain)
-            return set(forain)
+        self.forain = forain
+        
 
 
-class province(mapelement):
-    def __init__(self, name: str, developmen: int, population: int, forain: list):
-        super().__init__(name, forain)
+class Province(MapElement):
+    def __init__(self, name: str, extension:float, developmen: int, population: int, forain: list):
+        super().__init__(name, extension, forain)
         self.developmen = developmen
         self.population = population
 
 
-class sea(mapelement):
-    def __init__(self, name: str, forain: list):
-        super().__init__(name, forain)
+class Sea(MapElement):
+    def __init__(self, name: str, extension:float, forain: list):
+        super().__init__(name, extension, forain)
 
 
-class neutral(mapelement):
-    def __init__(self, name: str, forain: list):
-        super().__init__(name, forain)
+class Neutral(MapElement):
+    def __init__(self, name: str, extension:float, forain: list):
+        super().__init__(name, extension, forain)
 
 
-class trait(element):
+class Trait(Element):
     def __init__(self, name: str):
         super().__init__(name)
