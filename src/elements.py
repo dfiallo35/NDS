@@ -50,7 +50,7 @@ class Nation(Element):
 
     @property
     def contains(self):
-        return self.provinces.keys()
+        return list(self.provinces.keys())
 
 
 class Province(MapElement):
