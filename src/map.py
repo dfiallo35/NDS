@@ -92,6 +92,16 @@ class Map:
         return neutral
 
 
+
+    def update(self, element: str, **kwargs):
+        """
+        Update an element
+        :param element: the element
+        :param kwargs: the new values
+        """
+        if self.mapelementsdict.get(element):
+            self.mapelementsdict[element].__dict__.update(kwargs)
+
     def nation_neighbours(self, nation: str):
         """
         Get the nation neighbours
