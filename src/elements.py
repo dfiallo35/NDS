@@ -1,17 +1,24 @@
 class Element:
     """
     Base class for all the simulation elements.
+    :param name: the element name
     """
     def __init__(self, name: str):
         self.name = name
+
+    def __str__(self):
+        return self.name
 
 
 class MapElement(Element):
     """
     Base class for all the map elements.
+    :param name: the element name
+    :param extension: the element extension
     """
-    def __init__(self, name):
+    def __init__(self, name: str, extension: float):
         super().__init__(name)
+        self.extension = extension
 
 
 class Nation(Element):
@@ -47,9 +54,9 @@ class Nation(Element):
 
 
 class Province(MapElement):
-    def __init__(self, name: str, extension:float, developmen: int, population: int):
+    def __init__(self, name: str, extension:float, development: int, population: int):
         super().__init__(name, extension)
-        self.developmen = developmen
+        self.development = development
         self.population = population
 
 
