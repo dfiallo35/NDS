@@ -116,8 +116,12 @@ class Map:
         :param element: the element
         :param kwargs: the new values
         """
-        if self.mapelementsdict.get(element):
-            self.mapelementsdict[element].__dict__.update(kwargs)
+        self.__not_exist_element(element)
+
+        updates= kwargs.copy()
+        updates= self.__add_update(element, updates)
+        self.mapelementsdict[element].__dict__.update(updates)
+
 
     def nation_neighbours(self, nation: str):
         """
