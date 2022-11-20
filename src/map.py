@@ -38,24 +38,53 @@ class Map:
         self.nationdict[name]= nat
         return nat
 
-    def add_province(self, name: str, extension: float, developmen: int, population: int, neighbours: list):
-        self.__detect_element(name, self.provincedict)
-        prov= Province(name, extension, developmen, population)
+
+    def add_province(self, name: str, extension: float, development: int, population: int, neighbours: list= []):
+        '''
+        Add a province to the map
+        :param name: the province name
+        :param extension: the province extension
+        :param developmen: the province development
+        :param population: the province population
+        :param neighbours: the province neighbours
+        '''
+        self.__exist_element(name)
+        self.__not_exist_elements(neighbours)
+
+        prov= Province(name, extension, development, population)
         self.provincedict[name]= prov
         self.province_neighbours.add_node(name)
         self.__add_edges(name, neighbours)
         return prov
 
-    def add_sea(self, name: str, extension: float, neighbours: list):
-        self.__detect_element(name, self.neutraldict)
+
+    def add_sea(self, name: str, extension: float, neighbours: list= []):
+        '''
+        Add a sea to the map
+        :param name: the sea name
+        :param extension: the sea extension
+        :param neighbours: the sea neighbours
+        '''
+        self.__exist_element(name)
+        self.__not_exist_elements(neighbours)
+
         sea= Sea(name, extension, neighbours)
         self.seadict[name]= sea
         self.province_neighbours.add_node(name)
         self.__add_edges(name, neighbours)
         return sea
 
-    def add_neutral(self, name: str, extension: float, neighbours: list):
-        self.__detect_element(name, self.provincedict)
+
+    def add_neutral(self, name: str, extension: float, neighbours: list= []):
+        '''
+        Add a neutral to the map
+        :param name: the neutral name
+        :param extension: the neutral extension
+        :param neighbours: the neutral neighbours
+        '''
+        self.__exist_element(name)
+        self.__not_exist_elements(neighbours)
+
         neutral= Neutral(name, extension, neighbours)
         self.provincedict[name]= neutral
         self.province_neighbours.add_node(name)
