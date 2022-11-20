@@ -20,9 +20,21 @@ class Map:
         """
         return {**self.nationdict, **self.provincedict, **self.neutraldict, **self.seadict}
 
-    def add_nation(self, name: str, extension: float, contain: list, traits: list):
-        self.__detect_element(name, self.nationdict)
-        nat= Nation(name, extension, contain, traits)
+    def add_nation(self, name: str, provinces: list, traits: list= []):
+        '''
+        Add a nation to the map
+        :param name: the nation name
+        :param provinces: contains the provinces of the nation
+        :param traits: the nation traits
+        '''
+        self.__exist_element(name)
+        self.__not_exist_elements(provinces)
+
+        province_instances= dict()
+        for prov in provinces:
+            province_instances[prov]= self.provincedict[prov]
+        
+        nat= Nation(name, province_instances, traits)
         self.nationdict[name]= nat
         return nat
 
