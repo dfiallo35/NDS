@@ -9,6 +9,7 @@ class Map:
         self.provincedict = dict()
         self.neutraldict = dict()
         self.seadict = dict()
+        self.traitdict = dict()
 
         # Graph of the provinces, sea and neutral neighbours
         self.province_neighbours= Graph()
