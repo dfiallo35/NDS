@@ -2,6 +2,7 @@ from elements import *
 import networkx as nx
 from networkx import Graph
 
+#TODO: traits and traits of nations
 class Map:
     def __init__(self) -> None:
         self.nationdict = dict()
@@ -109,17 +110,18 @@ class Map:
         :return: the nation neighbours
         """
         neighbours = []
-        for province in self.nationdict[nation].contain:
+        for province in self.nationdict[nation].provinces:
             neighbours.extend(self.province_neighbours[province])
         neighbours = list(set(neighbours))
 
         nation_neighbours = []
         for nat in self.nationdict:
-            for province in self.nationdict[nat].contain:
+            for province in self.nationdict[nat].provinces:
                 if province in neighbours:
                     nation_neighbours.append(nat)
         nation_neighbours = list(set(nation_neighbours))
         return nation_neighbours
+
 
     def __add_edges(self, province: str, neighbours: list):
         """
