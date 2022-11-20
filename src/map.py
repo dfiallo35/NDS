@@ -124,12 +124,41 @@ class Map:
                 raise Exception("Map element not found")
 
 
-
-    def __detect_element(self, name: str, elements_dict: dict):
+    def __exist_element(self, element: str):
         """
-        Detect if an element is already in the map
+        Detect if the element exists in the map
         :param name: the element name
         :param elements_dict: the dictionary of the elements
         """
-        if elements_dict.get(name) != None:
-            raise Exception("Element already exists")
+        if self.mapelementsdict.get(element):
+            raise Exception(f"The Element {element} already exists")
+
+
+    def __exist_elements(self, elements: list):
+        """
+        Detect if elements exist on the map
+        :param elements: the elements list
+        :param elements_dict: the dictionary of the elements
+        """
+        for element in elements:
+            if not self.mapelementsdict.get(element):
+                raise Exception(f"The Element {element} already exists")
+
+    def __not_exist_element(self, element: str):
+        """
+        Detect if the element not exists in the map
+        :param name: the element name
+        :param elements_dict: the dictionary of the elements
+        """
+        if not self.mapelementsdict.get(element):
+            raise Exception(f"The Element {element} not exists")
+    
+    def __not_exist_elements(self, elements: list):
+        """
+        Detect if elements not exist on the map
+        :param elements: the elements list
+        :param elements_dict: the dictionary of the elements
+        """
+        for element in elements:
+            if not self.mapelementsdict.get(element):
+                raise Exception(f"The Element {element} not exists")
