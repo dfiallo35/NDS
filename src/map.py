@@ -92,7 +92,23 @@ class Map:
         self.__add_edges(name, neighbours)
         return neutral
 
+   
+    def __add_update(self, element: str, updates):
+        if updates.get('provinces'):
+            for prov in updates['provinces']:
+                self.mapelementsdict[element].provinces[prov]= self.provincedict[prov]
+            updates.pop('provinces')
 
+        if updates.get('neighbours'):
+            self.__add_edges(element, updates['neighbours'])
+            updates.pop('neighbours')
+        
+        if updates.get('traits'):
+            for trait in updates['traits']:
+                self.mapelementsdict[element].traits[trait]= self.traitdict[trait]
+            updates.pop('traits')
+        return updates
+        
 
     def update(self, element: str, **kwargs):
         """
