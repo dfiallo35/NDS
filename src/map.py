@@ -12,6 +12,13 @@ class Map:
         # Graph of the provinces, sea and neutral neighbours
         self.province_neighbours= Graph()
 
+    @property
+    def mapelementsdict(self):
+        """
+        Get the map elements
+        :return: the map elements
+        """
+        return {**self.nationdict, **self.provincedict, **self.neutraldict, **self.seadict}
 
     def add_nation(self, name: str, extension: float, contain: list, traits: list):
         self.__detect_element(name, self.nationdict)
