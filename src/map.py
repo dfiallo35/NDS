@@ -2,9 +2,9 @@ from elements import *
 import networkx as nx
 from networkx import Graph
 
-#TODO: traits and traits of nations
-#TODO: delete from map
-#TODO: delete updates
+#todo: traits and traits of nations
+#todo: delete from map
+#todo: delete updates
 class Map:
     def __init__(self) -> None:
         self.nationdict = dict()
