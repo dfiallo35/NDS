@@ -1,48 +1,63 @@
-import ply.yacc as yacc
+from sly import Parser
+from lexer import *
 
-# Get the token map from the lexer.  This is required.
-from lexer import tokens
+class CalcParser(Parser):
+    tokens = CalcLexer.tokens
 
-def p_expression_plus(p):
-    'expression : expression PLUS term'
-    p[0] = p[1] + p[3]
+    precedence = (
+        ('left', '+', '-'),
+        ('left', '*', '/'),
+        ('right', 'UMINUS'),
+        )
 
-def p_expression_minus(p):
-    'expression : expression MINUS term'
-    p[0] = p[1] - p[3]
+    def __init__(self):
+        self.names = { }
 
-def p_expression_term(p):
-    'expression : term'
-    p[0] = p[1]
+    @_('NAME "=" expr')
+    def statement(self, p):
+        self.names[p.NAME] = p.expr
 
-def p_term_times(p):
-    'term : term TIMES factor'
-    p[0] = p[1] * p[3]
+    @_('expr')
+    def statement(self, p):
+        print(p.expr)
 
-def p_term_div(p):
-    'term : term DIVIDE factor'
-    p[0] = p[1] / p[3]
+    @_('expr "+" expr')
+    def expr(self, p):
+        return p.expr0 + p.expr1
 
-def p_term_factor(p):
-    'term : factor'
-    p[0] = p[1]
+    @_('expr "-" expr')
+    def expr(self, p):
+        return p.expr0 - p.expr1
 
-def p_factor_num(p):
-    'factor : NUMBER'
-    p[0] = p[1]
+    @_('expr "*" expr')
+    def expr(self, p):
+        return p.expr0 * p.expr1
 
-def p_factor_expr(p):
-    'factor : LPAREN expression RPAREN'
-    p[0] = p[2]
+    @_('expr "/" expr')
+    def expr(self, p):
+        return p.expr0 / p.expr1
 
-# Error rule for syntax errors
-def p_error(p):
-    print("Syntax error in input!")
+    @_('"-" expr %prec UMINUS')
+    def expr(self, p):
+        return -p.expr
 
-# Build the parser
-parser = yacc.yacc()
+    @_('"(" expr ")"')
+    def expr(self, p):
+        return p.expr
 
-s = '1+1*5   +  5'
+    @_('NUMBER')
+    def expr(self, p):
+        return p.NUMBER
 
-result = parser.parse(s)
-print(result)
+    @_('NAME')
+    def expr(self, p):
+        try:
+            return self.names[p.NAME]
+        except LookupError:
+            print("Undefined name '%s'" % p.NAME)
+            return 0
+
+if __name__ == '__main__':
+    lexer = CalcLexer()
+    parser = CalcParser()
+    parser.parse(lexer.tokenize('''5*6*3-5+6*4'''))
