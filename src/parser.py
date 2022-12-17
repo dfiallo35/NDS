@@ -1,3 +1,4 @@
+from argparse import _ActionStr, _AppendConstAction
 from sly import Parser
 from lexer import *
 
@@ -13,11 +14,11 @@ class CalcParser(Parser):
     def __init__(self):
         self.names = { }
 
-    @_('NAME "=" expr')
+    @_AppendConstAction('NAME "=" expr')
     def statement(self, p):
         self.names[p.NAME] = p.expr
 
-    @_('expr')
+    @_ActionStr('expr')
     def statement(self, p):
         print(p.expr)
 

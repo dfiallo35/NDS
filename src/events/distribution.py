@@ -36,3 +36,21 @@ class Exponential(Distribution):
         '''
         return int(self.distribution.rvs(loc=1, scale=self.scale))
 
+
+
+
+# a= ss.geom
+# print(a.rvs(p=0.7, size=10))
+
+# a= Exponential(scale=10)
+# print(a.randvar())
+
+
+# b= ss.expon
+# print(b.rvs(scale= 100))
+
+
+# a= ss.rv_continuous()
+# b= ss.rv_discrete(values= ([1,2,3,4], [.4,.2,.1,.3]))
+
+# print(b.rvs())
