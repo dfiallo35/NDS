@@ -1,4 +1,5 @@
 from event import *
+from elements import *
 from queue import PriorityQueue
 
 class Queue:
