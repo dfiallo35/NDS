@@ -1,4 +1,17 @@
-from distribution import *
+#Distribution
+try:
+    from events.distribution import *
+except:
+    from distribution import *
+
+#Map
+try:
+    from elements.map import *
+except:
+    from ..elements.map import *
+
+
+#note: un evento siempre define un cambio en el estado del mapa
 
 
 class Event:
@@ -14,8 +27,11 @@ class Event:
         Returns if the event is enabled
         '''
         return self.enabled
+    
+    def __str__(self) -> str:
+        return f'{self.__class__.__name__}'
 
-    def execute(self):
+    def execute(self, map: Map, **kwargs):
         '''
         Execute the event
         '''
