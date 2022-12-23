@@ -46,6 +46,44 @@ class Uniform(Distribution):
 
 
 
+# Discrete distributions
+
+class Poisson(Distribution):
+    def __init__(self, scale: int=1):
+        super().__init__(distribution=ss.poisson, scale=scale)
+
+    def randvar(self):
+        return int(self.distribution.rvs(loc=1, scale=self.scale))
+
+
+class Bernoulli(Distribution):
+    def __init__(self, scale: int=1):
+        super().__init__(distribution=ss.bernoulli, scale=scale)
+
+    def randvar(self):
+        return int(self.distribution.rvs(loc=1, scale=self.scale))
+
+
+class Binomial(Distribution):
+    def __init__(self, scale: int=1): 
+        super().__init__(distribution=ss.binom, scale=scale)
+        
+    def randvar(self):
+        return int(self.distribution.rvs(loc=1, scale=self.scale))
+    
+
+# Multivariate distributions
+
+class Multinomial(Distribution):
+    def __init__(self, scale: int=1): 
+        super().__init__(distribution=ss.multinomial, scale=scale)
+    
+    def randvar(self):
+        return int(self.distribution.rvs(loc=1, scale=self.scale))
+
+
+
+
 # a= ss.geom
 # print(a.rvs(p=0.7, size=10))
 
