@@ -10,7 +10,7 @@ from networkx import Graph
 #todo: delete from map
 #todo: delete updates
 
-#fix: repeated provinces in nations
+
 class Map:
     def __init__(self) -> None:
         self.nationdict = dict()
@@ -23,14 +23,15 @@ class Map:
         self.province_neighbours= Graph()
 
     @property
-    def mapelementsdict(self):
+    def mapelementsdict(self) -> dict:
         """
         Get the map elements
         :return: the map elements
         """
         return {**self.nationdict, **self.provincedict, **self.neutraldict, **self.seadict}
+    
     @property
-    def nation_province(self):
+    def nation_province(self) -> dict[list]:
         """
         Get the nation provinces
         :return: the nation provinces
@@ -46,6 +47,9 @@ class Map:
         '''
         self.__exist_element(name)
         self.__not_exist_elements(provinces)
+        for nat in self.nationdict.values():
+            self.__one_exist_in(provinces, nat.contains)
+
 
         province_instances= dict()
         for prov in provinces:
@@ -210,3 +214,11 @@ class Map:
         for element in elements:
             if not self.mapelementsdict.get(element):
                 raise Exception(f"The Element {element} not exists")
+    
+    def __exist_in(self, element: str, elements: list[str]):
+        if element in elements:
+            raise Exception(f"The Element {element} already exists")
+    
+    def __one_exist_in(self, elements1: list[str], elements2: list[str]):
+        for el in elements1:
+            self.__exist_in(el, elements2)
