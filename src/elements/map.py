@@ -29,6 +29,13 @@ class Map:
         :return: the map elements
         """
         return {**self.nationdict, **self.provincedict, **self.neutraldict, **self.seadict}
+    @property
+    def nation_province(self):
+        """
+        Get the nation provinces
+        :return: the nation provinces
+        """
+        return {name: [province for province in nation.provinces] for name, nation in self.nationdict.items()}
 
     def add_nation(self, name: str, provinces: list, traits: list= []):
         '''
