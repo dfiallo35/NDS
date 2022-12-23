@@ -37,6 +37,13 @@ class Exponential(Distribution):
         return int(self.distribution.rvs(loc=1, scale=self.scale))
 
 
+class Uniform(Distribution):
+    def __init__(self, scale: int = 1):
+        super().__init__(distribution= ss.uniform, scale= scale)
+    
+    def randvar(self):
+        return int(self.distribution.rvs(loc=1, scale=self.scale))
+
 
 
 # a= ss.geom

@@ -16,14 +16,21 @@ m.update('Habana', development= 20)
 
 class population_growth(Event):
     def __init__(self):
-        self.distribution= Exponential(1)
+        self.distribution= Uniform(1)
         self.enabled= True
     
     def execute(self, map: Map, **kwargs):
         for province in map.provincedict.values():
-            province.population= province.population * 1.01
+            province.population= province.population * 1.03
 
-
+class mortality(Event):
+    def __init__(self):
+        self.distribution= Uniform(1)
+        self.enabled= True
+    
+    def execute(self, map: Map, **kwargs):
+        for province in map.provincedict.values():
+            province.population= province.population * 0.99
 
 
 
@@ -33,7 +40,7 @@ class population_growth(Event):
 def Simulation_test():
 
     print(list(m.provincedict.values())[0].population)
-    a= Simulate(m, Queue(population_growth())).simulate(10)
+    a= Simulate(m, Queue(population_growth(), mortality())).simulate(10)
 
     print(list(m.provincedict.values())[0].population)
 
