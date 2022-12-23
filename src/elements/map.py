@@ -1,10 +1,16 @@
-from elements import *
+try:
+    from elements.elements import *
+except:
+    from elements import *
+
 import networkx as nx
 from networkx import Graph
 
 #todo: traits and traits of nations
 #todo: delete from map
 #todo: delete updates
+
+#fix: repeated provinces in nations
 class Map:
     def __init__(self) -> None:
         self.nationdict = dict()
