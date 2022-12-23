@@ -1,7 +1,7 @@
 from elements.elements import *
 from elements.map import *
-from simulation import *
-from events import *
+from simulation.simulation import *
+from events.event import *
 
 m = Map()
 m.add_province('Matanzas', 10, 10, 120)

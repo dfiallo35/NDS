@@ -1,7 +1,16 @@
-from events.event import *
-from elements.elements import *
-from elements.elements import *
-from elements.map import Map
+try:
+    from events.event import *
+    from elements.elements import *
+    from elements.map import Map
+except:
+    from pathlib import Path
+    import sys
+    sys.path.append(str(Path(__file__).resolve().parents[1]))
+    
+    from events.event import *
+    from elements.elements import *
+    from elements.map import Map
+
 from queue import PriorityQueue
 
 class Queue:

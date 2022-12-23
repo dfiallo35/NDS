@@ -1,14 +1,14 @@
-#Distribution
 try:
     from events.distribution import *
-except:
-    from distribution import *
-
-#Map
-try:
     from elements.map import *
-except:
-    from ..elements.map import *
+except:    
+    from pathlib import Path
+    import sys
+    sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+    from elements.map import *
+    from events.distribution import *
+
 
 
 #note: un evento siempre define un cambio en el estado del mapa
