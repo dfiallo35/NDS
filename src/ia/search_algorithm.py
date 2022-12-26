@@ -18,10 +18,11 @@ class Queue:
 def search(domain, initial_state, goal_state, heuristic):
     return bfsearch(domain, initial_state, goal_state, heuristic)
 
-def bfsearch(domain, initial_state, goal_state, heuristic,case_goal_state):
+def bfsearch(domain, initial_state, goal_state, heuristic,case_goal_state,select_state):
     """Breadth-first search algorithm."""
     queue = Queue()
     visited = set()
+    path=[]
     queue.push((0, initial_state))
     while not queue.empty():
         state = queue.pop()
@@ -32,10 +33,11 @@ def bfsearch(domain, initial_state, goal_state, heuristic,case_goal_state):
             if(goal_state(case_goal_state,state)):
                 return state
             h_values= apply_heuristic(domain,state,heuristic) 
-            for next_state in next(domain, state, h_values):                
-                queue.push()
-
-    return state
+            for next_state in next(domain, state, h_values):      
+                if select_state(next_state):        
+                    queue.push(next_state)
+                    path.append(next_state)
+    return state,path
 
 
 def apply_heuristic(domain,state,h):
