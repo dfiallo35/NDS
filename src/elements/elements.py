@@ -73,7 +73,7 @@ class Neutral(MapElement):
 
 
 class Trait(Element):
-    def __init__(self, name: str):
+    def __init__(self, name: str, type: str):
         super().__init__(name)
 
 
@@ -88,7 +88,19 @@ class Time(Element):
     def get_time(self):
         return self.time
     
-    def to_days(self, time: int):
+    @property
+    def days(self):
+        return self.to_days().time
+    
+    @property
+    def months(self):
+        return self.to_months().time
+    
+    @property
+    def years(self):
+        return self.to_years().time
+    
+    def to_days(self):
         '''
         Convert the time to days
         :param time: the time to be converted
@@ -96,7 +108,7 @@ class Time(Element):
         '''
         ...
     
-    def to_months(self, time: int):
+    def to_months(self):
         '''
         Convert the time to months
         :param time: the time to be converted
@@ -104,7 +116,7 @@ class Time(Element):
         '''
         ...
     
-    def to_years(self, time: int):
+    def to_years(self):
         '''
         Convert the time to years
         :param time: the time to be converted
@@ -119,29 +131,29 @@ class Day(Time):
     def __str__(self):
         return str(self.time) + ' days'
     
-    def to_days(self, time: int):
+    def to_days(self):
         '''
         Convert the time to days
         :param time: the time to be converted
         :return: the time converted to days
         '''
-        return Day(self.name, time)
+        return Day(self.name, self.time)
     
-    def to_months(self, time: int):
+    def to_months(self):
         '''
         Convert the time to months
         :param time: the time to be converted
         :return: the time converted to months
         '''
-        return Month(self.name, time / 30)
+        return Month(self.name, self.time / 30)
     
-    def to_years(self, time: int):
+    def to_years(self):
         '''
         Convert the time to years
         :param time: the time to be converted
         :return: the time converted to years
         '''
-        return Year(self.name, time / 365)
+        return Year(self.name, self.time / 365)
 
 class Month(Time):
     def __init__(self, name: str, time: int):
@@ -150,29 +162,29 @@ class Month(Time):
     def __str__(self):
         return str(self.time) + ' months'
     
-    def to_days(self, time: int):
+    def to_days(self):
         '''
         Convert the time to days
         :param time: the time to be converted
         :return: the time converted to days
         '''
-        return Day(self.name, time * 30)
+        return Day(self.name, self.time * 30)
     
-    def to_months(self, time: int):
+    def to_months(self):
         '''
         Convert the time to months
         :param time: the time to be converted
         :return: the time converted to months
         '''
-        return Month(self.name, time)
+        return Month(self.name, self.time)
     
-    def to_years(self, time: int):
+    def to_years(self):
         '''
         Convert the time to years
         :param time: the time to be converted
         :return: the time converted to years
         '''
-        return Year(self.name, time / 12)
+        return Year(self.name, self.time / 12)
 
 class Year(Time):
     def __init__(self, name: str, time: int):
@@ -181,13 +193,13 @@ class Year(Time):
     def __str__(self):
         return str(self.time) + ' years'
     
-    def to_days(self, time: int):
+    def to_days(self):
         '''
         Convert the time to days
         :param time: the time to be converted
         :return: the time converted to days
         '''
-        return Day(self.name, time * 365)
+        return Day(self.name, self.time * 365)
     
     def to_months(self, time: int):
         '''
@@ -197,10 +209,10 @@ class Year(Time):
         '''
         return Month(self.name, time * 12)
     
-    def to_years(self, time: int):
+    def to_years(self):
         '''
         Convert the time to years
         :param time: the time to be converted
         :return: the time converted to years
         '''
-        return Year(self.name, time)
+        return Year(self.name, self.time)
