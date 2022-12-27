@@ -22,7 +22,10 @@ class Queue:
         
         for arg in events:
             self.push((0, arg))
-        
+    
+    @property
+    def event_list(self):
+        return list(self.events.values())
 
     def push(self, element: tuple[Time,Event]) -> None:
         '''
@@ -89,7 +92,9 @@ class Queue:
 #todo: add decisions to simulation
 #todo: time in Time not int
 
+#todo: decide without event
 
+#check: add and disable events
 class Simulate:
     def __init__(self, map: Map, initial_events: Queue):
         self.event_queue = initial_events
@@ -108,8 +113,19 @@ class Simulate:
             for time, event in self.event_queue.pop():
                 if event.is_enabled:
                     print(time, event)
-                    event.execute(self.map)
+
+                    #execute the event and return de dictionary
+                    #the eventdict is a dictionary with: {'add events': <list of events to be added to the queue>, 'disable': <list of events to be disabled>}
+                    eventdict: dict= event.execute(self.map)
+                    if eventdict.get('add events'):
+                        self.add_events(time, eventdict['add events'])
+                    if eventdict.get('disable'):
+                        self.disable_events(eventdict['disable'])
+                    
+                    #generate the next event
                     self.generate_event(event, time)
+
+                    #the nations make decisions based on the event and the map
                     self.decide(map, event, time)
 
 
@@ -117,10 +133,27 @@ class Simulate:
         '''
         Generate an event and add it to the queue
         :param event: the event to be generated
-        :param time: the time the event should occur
+        :param time: the current time of the simulation
         '''
         if event.is_enabled:
             self.event_queue.push((time + event.next(), event))
+    
+    def add_events(self,time: int, events: list[str]):
+        '''
+        Add a list of events to the queue given from the current event
+        :param events: the list of events to be added
+        :param time: the current time of the simulation
+        '''
+        for event in [self.map.events[ev] for ev in events]:
+            self.generate_event(event, time)
+    
+    def disable_events(self, events: list[str]):
+        '''
+        Disable an event
+        :param event: the event to be disabled
+        '''
+        for event in [self.map.events[ev] for ev in events]:
+            event.enabled= False
     
     def decide(self, map: Map, event: Event, time: int):
         '''
