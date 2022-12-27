@@ -14,35 +14,32 @@ m.add_province('Madrid', 10, 10, 120)
 
 m.update('Habana', development= 20)
 
-class population_growth(Event):
-    def __init__(self):
-        self.distribution= Uniform(1)
-        self.enabled= True
+# class population_growth(Event):
+#     def __init__(self):
+#         super().__init__(name='population_growth' ,distribution= Uniform(1), category= 'Social', enabled= True)
     
-    def execute(self, map: Map, **kwargs):
-        for province in map.provincedict.values():
-            province.population= province.population * 1.03
+#     def execute(self, map: Map, **kwargs):
+#         for province in map.provincedict.values():
+#             province.population= province.population * 1.03
 
-class mortality(Event):
-    def __init__(self):
-        self.distribution= Uniform(1)
-        self.enabled= True
+# class mortality(Event):
+#     def __init__(self):
+#         super().__init__(name='mortality' ,distribution= Uniform(1), category= 'Social', enabled= True)
     
-    def execute(self, map: Map, **kwargs):
-        for province in map.provincedict.values():
-            province.population= province.population * 0.99
+#     def execute(self, map: Map, **kwargs):
+#         for province in map.provincedict.values():
+#             province.population= province.population * 0.99
 
 
-
-
+m.add_event(name='population_growth' ,distribution= Uniform(1), category= 'Social', enabled= True, execute= lambda map, **kwargs: [setattr(province, 'population', province.population * 1.03) for province in map.provincedict.values()])
+m.add_event(name='mortality' ,distribution= Uniform(1), category= 'Social', enabled= True, execute= lambda map, **kwargs: [setattr(province, 'population', province.population * 0.99) for province in map.provincedict.values()])
 
 
 def Simulation_test():
-
     print(list(m.provincedict.values())[0].population)
-    a= Simulate(m, Queue(population_growth(), mortality())).simulate(10)
+    a= Simulate(m, Queue(m.event_list)).simulate(10)
 
-    print(list(m.provincedict.values())[0].population)
+    print([i.population for i in list(m.provincedict.values())])
 
 
 Simulation_test()
