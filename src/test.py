@@ -14,6 +14,9 @@ m.add_province('Madrid', 10, 10, 120)
 
 m.update('Habana', development= 20)
 
+m.add_category('Social')
+
+
 # class population_growth(Event):
 #     def __init__(self):
 #         super().__init__(name='population_growth' ,distribution= Uniform(1), category= 'Social', enabled= True)
@@ -31,8 +34,18 @@ m.update('Habana', development= 20)
 #             province.population= province.population * 0.99
 
 
-m.add_event(name='population_growth' ,distribution= Uniform(1), category= 'Social', enabled= True, execute= lambda map, **kwargs: [setattr(province, 'population', province.population * 1.03) for province in map.provincedict.values()])
-m.add_event(name='mortality' ,distribution= Uniform(1), category= 'Social', enabled= True, execute= lambda map, **kwargs: [setattr(province, 'population', province.population * 0.99) for province in map.provincedict.values()])
+def population_growth(map, **kwargs):
+    for province in map.provincedict.values():
+        province.population= province.population * 1.03
+    return {}
+m.add_event(name='population_growth' ,distribution= Uniform(1), category= 'Social', enabled= True, execute= population_growth)
+
+def mortality(map, **kwargs):
+    for province in map.provincedict.values():
+        province.population= province.population * 0.99
+    return {}
+m.add_event(name='mortality' ,distribution= Uniform(1), category= 'Social', enabled= True, execute= mortality)
+
 
 
 def Simulation_test():
