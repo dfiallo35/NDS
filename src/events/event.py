@@ -1,25 +1,37 @@
 try:
     from events.distribution import *
-    from elements.map import *
 except:    
     from pathlib import Path
     import sys
     sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-    from elements.map import *
     from events.distribution import *
 
 
 
-#note: un evento siempre define un cambio en el estado del mapa
+class Category:
+    def __init__(self, name: str):
+        self.name= name
+        self.decisions= list()
+    
+    def add_decision(self, decision):
+        self.decisions.append(decision)
+    
+    def __str__(self) -> str:
+        return f'{self.name}'
 
-
-class Event:
-    distribution: Distribution
-    enabled: bool
-
+class Politic(Category):
     def __init__(self):
-        ...
+        super().__init__('Politic')
+
+class Economic(Category):
+    def __init__(self):
+        super().__init__('Economic')
+
+class Social(Category):
+    def __init__(self):
+        super().__init__('Social')
+
 #note: un evento siempre define un cambio en el estado del mapa
 
 
