@@ -130,6 +130,15 @@ class Map:
         self.__add_edges(name, neighbours)
         return neutral
     
+    def add_category(self, name: str):
+        '''
+        Add a category to the map
+        :param name: the category name
+        '''
+        cat= Category(name)
+        self.categories[name]= cat
+        return cat
+    
     def add_decision_to_category(self, category: str, decision: Event):
         '''
         Add a decision to a Category. If the Category doesn't exist, it will be created
@@ -148,6 +157,9 @@ class Map:
         Add an event to the map. If the event already exists, it will be updated
         :param event: the event
         '''
+        if not self.categories.get(category):
+            raise Exception(f'The category {category} doesn\'t exist')
+        
         event= Event(name, distribution, category, enabled)
         event.execute= execute
         self.events[event.name]= event
