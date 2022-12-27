@@ -6,20 +6,21 @@ except:
     from pathlib import Path
     import sys
     sys.path.append(str(Path(__file__).resolve().parents[1]))
-    
+
     from events.event import *
     from elements.elements import *
     from elements.map import Map
 
 from queue import PriorityQueue
+a = PriorityQueue()
 
 class Queue:
-    def __init__(self, *args):
+    def __init__(self, events: list[Event]= []):
         self.queue = PriorityQueue()
         self.events= dict()
         self.event_index= 0
         
-        for arg in args:
+        for arg in events:
             self.push((0, arg))
         
 
@@ -83,29 +84,33 @@ class Queue:
 
 
 
-#todo: events add events to the queue
+#todo: events add events to the queue(param enent_queue in execute or return events in list)
+
 #todo: add decisions to simulation
 #todo: time in Time not int
+
+
 class Simulate:
     def __init__(self, map: Map, initial_events: Queue):
         self.event_queue = initial_events
         self.map = map
 
-    def simulate(self, end_time: int):
+    def simulate(self, end_time: int) -> None:
         '''
         Run the simulation for a certain amount of time
         :param time: the time the simulation should run
         '''
         while not self.event_queue.empty():
             if self.event_queue.look()[0] > end_time:
-                print('break in ', end_time, 'next ', self.event_queue.look()[0])
+                print('break in', end_time, 'next', self.event_queue.look()[0])
                 break
 
             for time, event in self.event_queue.pop():
-                print(time, event)
-                event.execute(self.map)
-                self.generate_event(event, time)
-                self.decide(map, event, time)
+                if event.is_enabled:
+                    print(time, event)
+                    event.execute(self.map)
+                    self.generate_event(event, time)
+                    self.decide(map, event, time)
 
 
     def generate_event(self, event: Event, time: int):
