@@ -1,7 +1,13 @@
 try:
     from elements.elements import *
+    from events.event import *
 except:
-    from elements import *
+    from pathlib import Path
+    import sys
+    sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+    from elements.elements import *
+    from events.event import *
 
 import networkx as nx
 from networkx import Graph
@@ -18,6 +24,10 @@ class Map:
         self.neutraldict = dict()
         self.seadict = dict()
         self.traitdict = dict()
+
+        self.categories= dict()
+        self.events= dict()
+        self.decisions= dict()
 
         # Graph of the provinces, sea and neutral neighbours
         self.province_neighbours= Graph()
@@ -38,6 +48,14 @@ class Map:
         """
         return {name: [province for province in nation.provinces] for name, nation in self.nationdict.items()}
 
+    @property
+    def event_list(self):
+        '''
+        Get the events list
+        :return: the events list
+        '''
+        return self.events.values()
+
     def add_nation(self, name: str, provinces: list, traits: list= []):
         '''
         Add a nation to the map
@@ -48,7 +66,7 @@ class Map:
         self.__exist_element(name)
         self.__not_exist_elements(provinces)
         for nat in self.nationdict.values():
-            self.__one_exist_in(provinces, nat.contains)
+            self.__one_of_list_exist_in_list(provinces, nat.contains)
 
 
         province_instances= dict()
@@ -111,9 +129,39 @@ class Map:
         self.province_neighbours.add_node(name)
         self.__add_edges(name, neighbours)
         return neutral
+    
+    def add_decision_to_category(self, category: str, decision: Event):
+        '''
+        Add a decision to a Category. If the Category doesn't exist, it will be created
+        :param category: the category
+        :param decision: the decision
+        '''
+        cat= self.categories.get(category)
+        if cat:
+            cat.add_decision(decision)
+        else:
+            self.categories[category]= Category(category)
+            self.categories[category].add_decision(decision)
+    
+    def add_event(self, name: str, distribution: Distribution, category: str, enabled: bool, execute, decisions: list= []):
+        '''
+        Add an event to the map. If the event already exists, it will be updated
+        :param event: the event
+        '''
+        event= Event(name, distribution, category, enabled)
+        event.execute= execute
+        self.events[event.name]= event
+        self.decisions[event.name]= decisions
+        return event
+    
 
    
     def __add_update(self, element: str, updates):
+        '''
+        Add the updates to the element
+        :param element: the element
+        :param updates: the updates
+        '''
         if updates.get('provinces'):
             for prov in updates['provinces']:
                 self.mapelementsdict[element].provinces[prov]= self.provincedict[prov]
@@ -215,10 +263,29 @@ class Map:
             if not self.mapelementsdict.get(element):
                 raise Exception(f"The Element {element} not exists")
     
-    def __exist_in(self, element: str, elements: list[str]):
+    def __exist_in_list(self, element: str, elements: list[str]):
+        '''
+        Detect if the element exists in the list and raise an exception if it does
+        :param element: the element
+        :param elements: the elements list
+        '''
         if element in elements:
             raise Exception(f"The Element {element} already exists")
     
-    def __one_exist_in(self, elements1: list[str], elements2: list[str]):
+    def __one_of_list_exist_in_list(self, elements1: list[str], elements2: list[str]):
+        '''
+        Detect if one element exists in the list and raise an exception if it does
+        :param elements1: the elements list
+        :param elements2: the elements list
+        '''
         for el in elements1:
-            self.__exist_in(el, elements2)
+            self.__exist_in_list(el, elements2)
+    
+    def __exist_in_dict(self, element: str, elements: dict):
+        '''
+        Detect if the element exists in the dict and raise an exception if it does
+        :param element: the element
+        :param elements: the elements dict
+        '''
+        if elements.get(element):
+            raise Exception(f"The Element {element} already exists")
