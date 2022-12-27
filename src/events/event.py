@@ -20,6 +20,17 @@ class Event:
 
     def __init__(self):
         ...
+#note: un evento siempre define un cambio en el estado del mapa
+
+
+#todo: unique events(works only one time)
+
+class Event:
+    def __init__(self, name: str, distribution: Distribution, category: Category, enabled: bool= True):
+        self.name= name
+        self.category= category
+        self.distribution= distribution
+        self.enabled= enabled
     
     @property
     def is_enabled(self) -> bool:
@@ -31,7 +42,7 @@ class Event:
     def __str__(self) -> str:
         return f'{self.__class__.__name__}'
 
-    def execute(self, map: Map, **kwargs):
+    def execute(self, map, **kwargs):
         '''
         Execute the event
         '''
@@ -43,7 +54,9 @@ class Event:
         '''
         return self.distribution.randvar()
     
-
+    def __str__(self) -> str:
+        return f'{self.name}'
+    
 
 
 
