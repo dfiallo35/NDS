@@ -1,26 +1,106 @@
 from sly import Lexer, Parser
 
-class CalcLexer(Lexer):
-    tokens = { 'NAME', 'NUMBER', 'PLUS', 'TIMES', 'MINUS', 'DIVIDE', 'ASSIGN', 'LPAREN', 'RPAREN' }
+class NDSLexer(Lexer):
+    tokens = {'NATION', 'PROVINCE', 'SEA', 'NEUTRAL', 'EVENT', 'DISTRIBUTION',
+            'NAME',
+            'NUMBER',
+            'ASSIGN', 'LINEEND', 'COMMA',
+            'LPAREN', 'RPAREN', 'LBRAKET', 'RBRAKET', 'LKEY', 'RKEY',
+            'FOR', 'WHILE', 'IF', 'ELSE',
+            'GREATER', 'LESS', 'XPLUS', 'XMINUS',
+            'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'EQUALS'}
     ignore = ' \t'
 
 
-    # Tokens
-    NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
+    #ELEMENTS
+    NATION= 'nation\s+'
+    def NATION(self, t):
+        t.value = str(t.value).strip()
+        return t
+    
+    PROVINCE= r'province\s+'
+    def PROVINCE(self, t):
+        t.value = str(t.value).strip()
+        return t
+    
+    SEA= r'sea\s+'
+    def SEA(self, t):
+        t.value = str(t.value).strip()
+        return t
+    
+    NEUTRAL= r'neutral\s+'
+    def NEUTRAL(self, t):
+        t.value = str(t.value).strip()
+        return t
+    
+    EVENT= r'event\s+'
+    def EVENT(self, t):
+        t.value = str(t.value).strip()
+        return t
+    
+    DISTRIBUTION= r'distribution\s+'
+    def DISTRIBUTION(self, t):
+        t.value = str(t.value).strip()
+        return t
+    
+    #PARAMETERS
+    #todo: add parameters if needed
+
+
+    #LOOPS
+    FOR= r'for\s+'
+    def FOR(self, t):
+        t.value = str(t.value).strip()
+        return t
+    
+    WHILE= r'while\s+'
+    def WHILE(self, t):
+        t.value = str(t.value).strip()
+        return t
+    
+    #CONDITIONS
+    IF= r'if\s+'
+    def IF(self, t):
+        t.value = str(t.value).strip()
+        return t
+    
+    ELSE= r'else\s+'
+    def ELSE(self, t):
+        t.value = str(t.value).strip()
+        return t
+    
+    #VARIABLES
+    NAME= r'[a-zA-Z][a-zA-Z0-9_]*[a-zA-Z0-9]*'
+    #CONSTANTS
     NUMBER = r'\d+'
 
     # Special symbols
+    ASSIGN = r':'
+    LINEEND= r';'
+    COMMA= r','
+
+    LPAREN = r'\('
+    RPAREN = r'\)'
+    LBRAKET= r'\['
+    RBRAKET= r'\]'
+    LKEY= r'\{'
+    RKEY= r'\}'
+
+    XPLUS= r'\+\+'
+    XMINUS= r'--'
+
     PLUS = r'\+'
     MINUS = r'-'
     TIMES = r'\*'
     DIVIDE = r'/'
-    ASSIGN = r'='
-    LPAREN = r'\('
-    RPAREN = r'\)'
 
+    EQUALS= r'='
+    GREATER= r'>'
+    LESS= r'<'
 
     # Ignored pattern
     ignore_newline = r'\n+'
+    ignore_comment = r'\#.*'
 
     # Extra action for newlines
     def ignore_newline(self, t):
@@ -30,8 +110,11 @@ class CalcLexer(Lexer):
         print("Illegal character '%s'" % t.value[0])
         self.index += 1
 
-class CalcParser(Parser):
-    tokens = CalcLexer.tokens
+
+
+
+class NDSParser(Parser):
+    tokens = NDSLexer.tokens
 
     precedence = (
         ('left', 'PLUS', 'MINUS'),
