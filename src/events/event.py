@@ -36,13 +36,15 @@ class Social(Category):
 
 
 #todo: unique events(works only one time)
-
+#todo: instant events (works when the event is created)
 class Event:
-    def __init__(self, name: str, distribution: Distribution, category: Category, enabled: bool= True):
+    def __init__(self, name: str, distribution: Distribution, category: Category, execution, enabled: bool= True, type: str= None):
         self.name= name
         self.category= category
         self.distribution= distribution
         self.enabled= enabled
+        self.type= type
+        self.execution= execution
     
     @property
     def is_enabled(self) -> bool:
@@ -52,13 +54,15 @@ class Event:
         return self.enabled
     
     def __str__(self) -> str:
-        return f'{self.__class__.__name__}'
+        return f'{self.name}'
 
     def execute(self, map, **kwargs):
         '''
         Execute the event
         '''
-        ...
+        if self.type == 'unique':
+            self.enabled= False
+        return self.execution(map, **kwargs)
 
     def next(self) -> float:
         '''
