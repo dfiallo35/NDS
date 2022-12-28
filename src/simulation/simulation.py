@@ -114,11 +114,11 @@ class Simulate:
                 if event.is_enabled and self.map.events[event.name].is_enabled:
                     print(time, event)
 
-                    #execute the event and return de dictionary
+                    #execute the event and return a dictionary
                     #the eventdict is a dictionary with: {'enable': <list of events to be added to the queue>, 'disable': <list of events to be disabled>}
                     eventdict: dict= event.execute(self.map)
                     if eventdict.get('enable'):
-                        self.add_events(time, eventdict['enable'])
+                        self.enable_events(time, eventdict['enable'])
                     if eventdict.get('disable'):
                         self.disable_events(eventdict['disable'])
                     
@@ -138,7 +138,7 @@ class Simulate:
         if event.is_enabled:
             self.event_queue.push((time + event.next(), event))
     
-    def add_events(self,time: int, events: list[str]):
+    def enable_events(self,time: int, events: list[str]):
         '''
         Add a list of events to the queue given from the current event
         :param events: the list of events to be added
