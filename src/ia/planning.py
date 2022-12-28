@@ -1,4 +1,4 @@
-
+from search_algorithm import *
 
 class Problem:
     def __init__(self,actions) -> None:
@@ -14,14 +14,20 @@ class Problem:
     def apply_action_to_state(self,action,state):
         """return the new state after apply it an action"""
         ...
+    def next_states(self,state):
+        """return the next states from the state"""
+        ...
+    def select_state(self,state):
+        """Check if this state is valid or is a good state"""
+        ...
 
-
-class PlanningProblem(Problem): 
-
-    def __init__(self, initial, actions):
+class PlanningProblem(Problem):
+    """General Planning Problem"""
+    def __init__(self, initial, actions:list):
         super().__init__(actions)
         self.initial = initial
         self.actions = actions
+        states=StateNode(initial)
 
 class Action:
     
@@ -33,19 +39,20 @@ class Action:
     def check_preconds(self,action):
         ...
     
-    def make_action(self):
+    def make_action(self):        
         ...
 
 class StateNode:
-    def __init__(self,state,father):
-        self.state=state
-        self.father=father
+    """node of the tree to define the states space"""
+    def __init__(self, state, parent=None) -> None:
+        self.state = state
+        self.parent = parent
         self.sons=[]
+
+    def add_son(self,son):
+        self.sons.append(son)
     
-    def get_father(self):
-        return self.father
-    
-    
+
         
 
       

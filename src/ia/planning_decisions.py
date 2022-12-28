@@ -25,8 +25,8 @@ class Decision(Action):
     def __init__(self, action, precond, effect ):
        super().__init__(action, precond, effect)
 
-    def check_preconds(self,action):
+    def check_preconds(self,state):
         ...
     
-    def make_action(self):
+    def make_action(self,state):
         ...
