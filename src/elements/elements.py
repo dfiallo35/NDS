@@ -72,9 +72,14 @@ class Neutral(MapElement):
         self.extension = extension
 
 
+#todo: add affinity values limits
 class Trait(Element):
-    def __init__(self, name: str, type: str):
+    def __init__(self, name: str, affinity: dict[str: int]):
         super().__init__(name)
+        self.affinity = affinity
+    
+    def __str__(self):
+        return self.name + ' ' + str(self.afinity)
 
 
 

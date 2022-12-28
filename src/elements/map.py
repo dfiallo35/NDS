@@ -16,6 +16,8 @@ from networkx import Graph
 #todo: delete from map
 #todo: delete updates
 
+#todo: __exist_element for every element
+
 
 class Map:
     def __init__(self) -> None:
@@ -137,6 +139,17 @@ class Map:
         self.province_neighbours.add_node(name)
         self.__add_edges(name, neighbours)
         return neutral
+    
+    def add_trait(self, name: str, affinity: list[tuple[str, int]]):
+        '''
+        Add a trait to the map
+        :param name: the trait name
+        :param affinity: the affinity of the trait with the categories
+        '''
+        self.__exist_element(name)
+        trait= Trait(name= name, affinity= {str(category): int(value) for category, value in affinity})
+        self.traitdict[name]= trait
+        return trait
     
     def add_category(self, name: str):
         '''
