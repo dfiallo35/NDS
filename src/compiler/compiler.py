@@ -9,11 +9,11 @@ class NDSLexer(Lexer):
             'FOR', 'WHILE', 'IF', 'ELSE',
             'GREATER', 'LESS', 'XPLUS', 'XMINUS',
             'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'EQUALS'}
-    ignore = ' \t'
+    ignore = "\t \n"
 
 
     #ELEMENTS
-    NATION= 'nation\s+'
+    NATION= r'nation\s+'
     def NATION(self, t):
         t.value = str(t.value).strip()
         return t
@@ -115,68 +115,82 @@ class NDSLexer(Lexer):
 
 class NDSParser(Parser):
     tokens = NDSLexer.tokens
+    debugfile = 'parser.out'
 
     precedence = (
-        ('left', 'PLUS', 'MINUS'),
-        ('left', 'TIMES', 'DIVIDE'),
-        ('right', 'UMINUS'),
+        # ('left', 'PLUS', 'MINUS'),
+        # ('left', 'TIMES', 'DIVIDE'),
+        # ('right', 'UMINUS'),
         )
 
     def __init__(self):
-        self.names = { }
+        self.elements = {
+            'nations': {},
+            'provinces': {},
+            'seas': {},
+            'neutrals': {},
+        } 
 
-    @_('NAME ASSIGN expr')
-    def statement(self, p):
-        self.names[p.NAME] = p.expr
 
-    @_('expr')
-    def statement(self, p):
-        print(p.expr)
+    @_('NATION NAME params LINEEND', 'PROVINCE NAME params LINEEND', 'SEA NAME params LINEEND', 'NEUTRAL NAME params LINEEND', 'element')
+    def element(self, p):
+        print(1, p.NAME, p.params)
+        if p[0] == 'nation':
+            self.elements['nations'][p.NAME] = p.params
+            return p.NAME
+        elif p[0] == 'province':
+            self.elements['provinces'][p.NAME] = p.params
+            return p.NAME
+        elif p[0] == 'sea':
+            self.elements['seas'][p.NAME] = p.params
+            return p.NAME
+        elif p[0] == 'neutral':
+            self.elements['neutrals'][p.NAME] = p.params
+            return p.NAME
+    
 
-    @_('expr PLUS expr')
-    def expr(self, p):
-        return p.expr0 + p.expr1
+    @_('LPAREN param RPAREN')
+    def params(self, p):
+        print(2, p.param)
+        return p.param
 
-    @_('expr MINUS expr')
-    def expr(self, p):
-        return p.expr0 - p.expr1
-
-    @_('expr TIMES expr')
-    def expr(self, p):
-        return p.expr0 * p.expr1
-
-    @_('expr DIVIDE expr')
-    def expr(self, p):
-        return p.expr0 / p.expr1
-
-    @_('MINUS expr %prec UMINUS')
-    def expr(self, p):
-        return -p.expr
-
-    @_('LPAREN expr RPAREN')
-    def expr(self, p):
-        return p.expr
-
+    @_('param COMMA param')
+    def param(self, p):
+        print(3, p.param0, p.param1)
+        return p.param0 + p.param1
+    
     @_('NUMBER')
-    def expr(self, p):
-        return int(p.NUMBER)
-
-    @_('NAME')
-    def expr(self, p):
-        try:
-            return self.names[p.NAME]
-        except LookupError:
-            print(f'Undefined name {p.NAME!r}')
-            return 0
+    def param(self, p):
+        print(4, p.NUMBER)
+        return [int(p.NUMBER)]
 
 
 
-lexer = CalcLexer()
-tokens = lexer.tokenize(
+
+
+def main(code: str):
+    lexer = NDSLexer()
+    tokens = lexer.tokenize(code)
+
+    parser = NDSParser()
+    exe_line= []
+    for i in tokens:
+        if i.type != 'LINEEND':
+            exe_line.append(i)
+        else:
+            exe_line.append(i)
+            parser.parse(iter(exe_line))
+            exe_line= []
+    print(parser.elements)
+
+
+main(
     '''
-    t2= 20
+    nation a(2, 3, 5);
+    nation b(3);
+    province c(4);
+    nation d(5);
+    nation e(6);
+    neutral f(7);
     '''
 )
-# print([a for a in tokens])
-parser = CalcParser()
-pars= parser.parse(tokens)
