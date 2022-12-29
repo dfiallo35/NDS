@@ -4,13 +4,13 @@ class NDSLexer(Lexer):
     tokens = {'NATION', 'PROVINCE', 'SEA', 'NEUTRAL', 'TRAIT', 'EVENT', 'DISTRIBUTION',
             'NAME',
             'NUMBER', 'STRING',
-            'ASSIGN', 'ARROW',
+            'ASSIGN', 'ARROW', 'PARAMASSIGN',
             'FOR', 'WHILE', 'IF', 'ELSE',
             'NOT', 'AND', 'OR', 'XOR',
             'GREATER', 'EGREATER', 'LESS', 'ELESS', 'XPLUS', 'XMINUS', 'EQUALS', 'NOTEQUALS', 
             'PLUS', 'MINUS', 'MULTIPLY', 'DIVIDE'}
     
-    literals = { '(', ')', '{', '}', '[', ']', ';', ',' }
+    literals = { '(', ')', '{', '}', '[', ']', ';', ','}
 
     ignore = "\t "
 
@@ -122,6 +122,7 @@ class NDSLexer(Lexer):
 
     # Special symbols
     ASSIGN = r'='
+    PARAMASSIGN= r':'
     ARROW = r'->'
 
     XPLUS= r'\+\+'
@@ -141,13 +142,15 @@ class NDSLexer(Lexer):
 
 
 
-#bug: end with ; or not works. Must be only with ;.
+#fix: end with ; or not works. Must be only with ;.
 class NDSParser(Parser):
     tokens = NDSLexer.tokens
     debugfile = 'parser.out'
 
     precedence = (
-
+        ('left', 'PLUS', 'MINUS'),
+        ('left', 'MULTIPLY', 'DIVIDE'),
+        #todo: precedences
         )
 
     def __init__(self):
@@ -160,8 +163,8 @@ class NDSParser(Parser):
     
     @_('')
     def script(self, p):
-        return []   
-    
+        return []
+
 
     #CODE    
     @_('element')
@@ -181,7 +184,7 @@ class NDSParser(Parser):
     @_('NATION NAME params', 'PROVINCE NAME params', 'SEA NAME params', 'NEUTRAL NAME params', 'TRAIT NAME params')
     def element(self, p):
         #{'name': <element name>, 'params': <element params>, 'type': <element type>}
-        return {'name': p.NAME, 'params': p.params, 'type': p[0]}
+        return {'name': p.NAME, 'params': p.params, 'type': 'element', 'subtype': p[0]}
     
 
     #VARS
@@ -192,21 +195,25 @@ class NDSParser(Parser):
     
 
     #PARAMETERS
-    @_('"(" param ")"')
+    @_('"(" params ")"')
+    def params(self, p):
+        return {**p.params}
+    
+    @_('param "," params')
+    def params(self, p):
+        return {**p.param, **p.params}
+    
+    @_('param')
     def params(self, p):
         return p.param
+    
+    @_('')
+    def params(self, p):
+        return {}
 
-    @_('param "," param')
+    @_('NAME PARAMASSIGN expr')
     def param(self, p):
-        return p.param0 + p.param1
-        
-    @_('NUMBER')
-    def param(self, p):
-        return [int(p.NUMBER)]
-
-    @_('expr')
-    def param(self, p):
-        return [p.expr]
+        return {str(p.NAME): p.expr}
     
 
     #CONDITIONS
@@ -260,9 +267,13 @@ class NDSParser(Parser):
     
 
     #LIST
-    @_('list_expr "," list_expr')
+    @_('expr "," list_expr')
     def list_expr(self, p):
-        return p.list_expr0 + p.list_expr1
+        return p.expr + p.list_expr1
+    
+    @_('')
+    def list_expr(self, p):
+        return []
     
     @_('expr')
     def list_expr(self, p):
@@ -293,13 +304,11 @@ class NDSParser(Parser):
 def compile(code: str):
     lexer = NDSLexer()
     parser = NDSParser()
-
     tokens = lexer.tokenize(code)
-    
-    print(parser.parse(tokens))
+    return parser.parse(tokens)
 
-compile(
-    '''
-    a= 2*4 +3;
-    '''
-)
+# print(compile(
+#     '''
+#     nation a(b:3,c:[]);
+#     '''
+# ))
