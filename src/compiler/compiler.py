@@ -151,14 +151,7 @@ class NDSParser(Parser):
         )
 
     def __init__(self):
-        self.elements = {
-            'nations': {},
-            'provinces': {},
-            'seas': {},
-            'neutrals': {},
-            'traits': {},
-        }
-        self.vars = {}
+        self.queue= []
     
     #SCRIPT
     @_('script ";" script')
@@ -175,26 +168,26 @@ class NDSParser(Parser):
     
     @_('NAME ASSIGN expr')
     def script(self, p):
-        self.vars[p.NAME] = p.expr
+        self.queue.append({'name': p.NAME, 'value': p.expr, 'type':'var'})
         return p.NAME
 
     #ELEMENTS
     @_('NATION NAME params', 'PROVINCE NAME params', 'SEA NAME params', 'NEUTRAL NAME params', 'TRAIT NAME params')
     def element(self, p):
         if p[0] == 'nation':
-            self.elements['nations'][p.NAME] = p.params
+            self.queue.append({'name': p.NAME, 'params': p.params, 'type':'nation'})
             return p.NAME
         elif p[0] == 'province':
-            self.elements['provinces'][p.NAME] = p.params
+            self.queue.append({'name': p.NAME, 'params': p.params, 'type':'province'})
             return p.NAME
         elif p[0] == 'sea':
-            self.elements['seas'][p.NAME] = p.params
+            self.queue.append({'name': p.NAME, 'params': p.params, 'type':'sea'})
             return p.NAME
         elif p[0] == 'neutral':
-            self.elements['neutrals'][p.NAME] = p.params
+            self.queue.append({'name': p.NAME, 'params': p.params, 'type':'neutral'})
             return p.NAME
         elif p[0] == 'trait':
-            self.elements['traits'][p.NAME] = p.params
+            self.queue.append({'name': p.NAME, 'params': p.params, 'type':'trait'})
             return p.NAME
     
 
@@ -246,24 +239,11 @@ def compile(code: str):
 
     tokens = lexer.tokenize(code)
     parser.parse(tokens)
-    print(parser.elements)
-    print(parser.vars)
+    print(parser.queue)
 
 compile(
     '''
     #comment
     z: 2;
-    y: 'Pez';
-    nation a(2, 3,
-    5);
-
-            nation b(3, 'pollo');
-    province c(4);
-
-        nation d(5); #commnet2
-    nation e(6);
-    neutral f(7);
-
-    trait g(5, [2,5,3]);
     '''
 )
