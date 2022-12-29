@@ -154,41 +154,50 @@ class NDSParser(Parser):
         self.queue= []
     
     #SCRIPT
-    @_('script ";" script')
+    @_('code ";" script')
     def script(self, p):
-        return p.script0 + p.script1
+        return p.code + p.script
     
-    @_('script ";"')
+    @_('')
     def script(self, p):
-        return p.script
+        return []   
     
+
+    #CODE    
     @_('element')
-    def script(self, p):
-        return p.element
+    def code(self, p):
+        return [p.element]
     
-    @_('NAME ASSIGN expr')
-    def script(self, p):
-        self.queue.append({'name': p.NAME, 'value': p.expr, 'type':'var'})
-        return p.NAME
+    @_('function')
+    def code(self, p):
+        return [p.function]
+    
+    @_('var')
+    def code(self, p):
+        return [p.var]
+    
 
     #ELEMENTS
     @_('NATION NAME params', 'PROVINCE NAME params', 'SEA NAME params', 'NEUTRAL NAME params', 'TRAIT NAME params')
     def element(self, p):
+        #{'name': <element name>, 'params': <element params>, 'type': <element type>}
         if p[0] == 'nation':
-            self.queue.append({'name': p.NAME, 'params': p.params, 'type':'nation'})
-            return p.NAME
+            return {'name': p.NAME, 'params': p.params, 'type':'nation'}
         elif p[0] == 'province':
-            self.queue.append({'name': p.NAME, 'params': p.params, 'type':'province'})
-            return p.NAME
+            return {'name': p.NAME, 'params': p.params, 'type':'province'}
         elif p[0] == 'sea':
-            self.queue.append({'name': p.NAME, 'params': p.params, 'type':'sea'})
-            return p.NAME
+            return {'name': p.NAME, 'params': p.params, 'type':'sea'}
         elif p[0] == 'neutral':
-            self.queue.append({'name': p.NAME, 'params': p.params, 'type':'neutral'})
-            return p.NAME
+            return {'name': p.NAME, 'params': p.params, 'type':'neutral'}
         elif p[0] == 'trait':
-            self.queue.append({'name': p.NAME, 'params': p.params, 'type':'trait'})
-            return p.NAME
+            return {'name': p.NAME, 'params': p.params, 'type':'trait'}
+    
+
+    #VARS
+    @_('NAME ASSIGN expr')
+    def var(self, p):
+        #{'name': <var name>, 'value': <var value>, 'type':'var'}
+        return {'name': p.NAME, 'value': p.expr, 'type':'var'}
     
 
     #PARAMETERS
@@ -208,6 +217,7 @@ class NDSParser(Parser):
     def param(self, p):
         return [p.expr]
 
+
     #EXPRESSIONS
     @_('NUMBER')
     def expr(self, p):
@@ -221,6 +231,7 @@ class NDSParser(Parser):
     def expr(self, p):
         return p.list_expr
     
+
     #LIST
     @_('list_expr "," list_expr')
     def list_expr(self, p):
@@ -229,6 +240,13 @@ class NDSParser(Parser):
     @_('expr')
     def list_expr(self, p):
         return [p.expr]
+    
+
+    #FUNCTIONS
+    @_('EVENT NAME params "{" script "}"', 'DISTRIBUTION NAME params "{" script "}"')
+    def function(self, p):
+        if p[0] == 'event':
+            return {'name': p.NAME, 'params': p.params, 'type': 'event', 'execution': p.script}
 
 
 
@@ -238,12 +256,17 @@ def compile(code: str):
     parser = NDSParser()
 
     tokens = lexer.tokenize(code)
-    parser.parse(tokens)
-    print(parser.queue)
+    
+    print(parser.parse(tokens))
 
 compile(
     '''
     #comment
     z: 2;
+    event a(3){
+        b:3;
+        c:5;
+        d:'p';
+    };
     '''
 )
