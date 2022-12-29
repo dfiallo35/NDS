@@ -102,7 +102,7 @@ class NDSLexer(Lexer):
         return t
     
     #OPERATORS
-    EQUALS= r'='
+    EQUALS= r'=='
     NOTEQUALS= r'!='
     GREATER= r'>'
     LESS= r'<'
@@ -121,7 +121,7 @@ class NDSLexer(Lexer):
         return t
 
     # Special symbols
-    ASSIGN = r':'
+    ASSIGN = r'='
     ARROW = r'->'
 
     XPLUS= r'\+\+'
@@ -151,51 +151,44 @@ class NDSParser(Parser):
         )
 
     def __init__(self):
-        self.elements = {
-            'nations': {},
-            'provinces': {},
-            'seas': {},
-            'neutrals': {},
-            'traits': {},
-        }
-        self.vars = {}
+        self.queue= []
     
     #SCRIPT
-    @_('script ";" script')
+    @_('code ";" script')
     def script(self, p):
-        return p.script0 + p.script1
+        return p.code + p.script
     
-    @_('script ";"')
+    @_('')
     def script(self, p):
-        return p.script
+        return []   
     
+
+    #CODE    
     @_('element')
-    def script(self, p):
-        return p.element
+    def code(self, p):
+        return [p.element]
     
-    @_('NAME ASSIGN expr')
-    def script(self, p):
-        self.vars[p.NAME] = p.expr
-        return p.NAME
+    @_('function')
+    def code(self, p):
+        return [p.function]
+    
+    @_('var')
+    def code(self, p):
+        return [p.var]
+    
 
     #ELEMENTS
     @_('NATION NAME params', 'PROVINCE NAME params', 'SEA NAME params', 'NEUTRAL NAME params', 'TRAIT NAME params')
     def element(self, p):
-        if p[0] == 'nation':
-            self.elements['nations'][p.NAME] = p.params
-            return p.NAME
-        elif p[0] == 'province':
-            self.elements['provinces'][p.NAME] = p.params
-            return p.NAME
-        elif p[0] == 'sea':
-            self.elements['seas'][p.NAME] = p.params
-            return p.NAME
-        elif p[0] == 'neutral':
-            self.elements['neutrals'][p.NAME] = p.params
-            return p.NAME
-        elif p[0] == 'trait':
-            self.elements['traits'][p.NAME] = p.params
-            return p.NAME
+        #{'name': <element name>, 'params': <element params>, 'type': <element type>}
+        return {'name': p.NAME, 'params': p.params, 'type': p[0]}
+    
+
+    #VARS
+    @_('NAME ASSIGN expr')
+    def var(self, p):
+        #{'name': <var name>, 'value': <var value>, 'type':'var'}
+        return {'name': p.NAME, 'value': p.expr, 'type':'var'}
     
 
     #PARAMETERS
@@ -214,6 +207,19 @@ class NDSParser(Parser):
     @_('expr')
     def param(self, p):
         return [p.expr]
+    
+
+    #CONDITIONS
+    @_('expr AND expr', 'expr OR expr', 'expr XOR expr', 'expr EQUALS expr', 'expr NOTEQUALS expr', 'expr GREATER expr', 'expr LESS expr', 'expr EGREATER expr', 'expr ELESS expr')
+    def condition(self, p):
+        #{'type': <condition type>, 'left': <left side>, 'right': <right side>}
+        return {'type': p[1], 'left': p.expr0, 'right': p.expr1}
+    
+    @_('NOT expr')
+    def condition(self, p):
+        #{'type': <condition type>, 'expr': <expr>}
+        return {'type': p[0], 'value': p.expr}
+
 
     #EXPRESSIONS
     @_('NUMBER')
@@ -228,6 +234,31 @@ class NDSParser(Parser):
     def expr(self, p):
         return p.list_expr
     
+    @_('condition')
+    def expr(self, p):
+        return p.condition
+    
+    @_('"(" expr ")"')
+    def expr(self, p):
+        return p.expr
+    
+    #ARIHTMETIC
+    @_('expr PLUS expr', 'expr MINUS expr', 'expr MULTIPLY expr', 'expr DIVIDE expr')
+    def expr(self, p):
+        #{'type': <operation type>, 'left': <left side>, 'right': <right side>}
+        return {'type': p[1], 'left': p.expr0, 'right': p.expr1}
+    
+    @_('XPLUS expr', 'XMINUS expr')
+    def expr(self, p):
+        #{'type': <operation type>, 'value': <value>}
+        return {'type': p[0], 'value': p.expr}
+    
+    @_('expr ARROW expr')
+    def expr(self, p):
+        #{'type': <operation type>, 'left': <left side>, 'right': <right side>}
+        return {'type': p[1], 'left': p.expr0, 'right': p.expr1}
+    
+
     #LIST
     @_('list_expr "," list_expr')
     def list_expr(self, p):
@@ -236,8 +267,27 @@ class NDSParser(Parser):
     @_('expr')
     def list_expr(self, p):
         return [p.expr]
+    
 
+    #FUNCTIONS
+    @_('EVENT NAME params "{" script "}"', 'DISTRIBUTION NAME params "{" script "}"')
+    def function(self, p):
+        #{'name': <function name>, 'params': <function params>, 'type': <function type>, 'script': <function script>}
+        if p[0] == 'event':
+            return {'name': p.NAME, 'params': p.params, 'type': 'event', 'execution': p.script}
+    
+    @_('ELSE "{" script "}"')
+    def function(self, p):
+        #{'type': <function type>, 'script': <function script>}
+        return {'type': 'else', 'execution': p.script}
 
+    @_('IF "(" condition ")" "{" script "}"', 'WHILE "(" condition ")" "{" script "}"')
+    def function(self, p):
+            return {'type': p[0], 'condition': p.condition, 'execution': p.script}
+
+    
+    
+    
 
 
 def compile(code: str):
@@ -245,25 +295,11 @@ def compile(code: str):
     parser = NDSParser()
 
     tokens = lexer.tokenize(code)
-    parser.parse(tokens)
-    print(parser.elements)
-    print(parser.vars)
+    
+    print(parser.parse(tokens))
 
 compile(
     '''
-    #comment
-    z: 2;
-    y: 'Pez';
-    nation a(2, 3,
-    5);
-
-            nation b(3, 'pollo');
-    province c(4);
-
-        nation d(5); #commnet2
-    nation e(6);
-    neutral f(7);
-
-    trait g(5, [2,5,3]);
+    a= 2*4 +3;
     '''
 )
