@@ -1,9 +1,10 @@
 from planning import *
 
 class PlanningDecisions(PlanningProblem):
+    """Planning problem for decisions."""
 
-    def __init__(self, initial, actions):
-        super().__init__(initial,actions)
+    def __init__(self, initial, actions,goal_state):
+        super().__init__(initial,actions,goal_state)
 
     def decisions_heuristic(domain, state):
         """Heuristic for the decisions problem."""
@@ -30,3 +31,4 @@ class Decision(Action):
     
     def make_action(self,state):
         ...
+
