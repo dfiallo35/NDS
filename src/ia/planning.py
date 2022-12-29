@@ -16,7 +16,6 @@ class PlanningProblem:#(Problem):
         self.goal_state = goal_state
         self.states=StateNode(initial_state)
         self.actual_state=self.states
-
     
     def is_goal_state(self,state):
         """Check if this state superate the objetive"""
@@ -43,10 +42,10 @@ class PlanningProblem:#(Problem):
 
 class Action:
     """General Action, express the action, preconditions and effects to make the planning problem"""
-    def __init__(self, action, precond, effect ):
+    def __init__(self, action, preconds, effects ):
        self.action=action
-       self.precond=precond
-       self.effect=effect
+       self.preconds=preconds
+       self.effects=effects
 
     def check_preconds(self,state):  
         """Check if the preconditions are true"""      
@@ -65,6 +64,7 @@ class StateNode:
 
     def add_son(self,son):
         self.sons.append(son)
+        son.parent=self
     
     def get_sons(self):
         return self.sons
@@ -96,13 +96,13 @@ def bfsearch(problem:PlanningProblem):
     queue = Queue()
     visited = set()    
     state:StateNode
-    action:StateNode
+    actions:StateNode
     # path=[]
     queue.push( problem.initial_state)
     while not queue.empty():
         state = queue.pop()
         if(problem.is_goal_state(state)):
-                return state,action
+                return state,actions
         
         if state not in visited:
             visited.add(state)          
@@ -110,39 +110,20 @@ def bfsearch(problem:PlanningProblem):
                 #h_values= problem.heuristic(state) 
                 if action.check_preconds(state) and problem.select_action(action):
                     next_state=action.apply_action(state)
-                    if problem.select_state(next_state):
-                        queue.push(next_state)
+                    state.add_son(next_state)
+                    state=next_state
+                    actions.add_son(action)
+                    actions=action
+                    queue.push(next_state)
+                    # if problem.select_state(next_state):
+                    #     queue.push(next_state)
                         # path.append(next_state)
             # for next_state in problem.next(state, h_values):      
             #     if problem.select_state(next_state):        
             #         queue.push(next_state)
                     # path.append(next_state)
-    return state, action#,path
+    return state, actions#,path
 
-def bfsearch_actions(problem:PlanningProblem):
-    """Breadth-first search algorithm."""
-    queue = Queue()
-    visited = set()
-    # path=[]
-    queue.push((0, problem.initial_state))
-    while not queue.empty():
-        state = queue.pop()
-        if(problem.is_goal_state(state)):
-                return state
-        if state not in visited:
-            visited.add(state)           
-            h_values= problem.heuristic(state) 
-            for action in problem.actions:
-                if action.check_preconds(state):
-                    next_state=action.apply_action(state)
-                    if problem.select_state(next_state):
-                        queue.push(next_state)
-                        # path.append(next_state)
-            # for next_state in problem.next(state, h_values):      
-            #     if problem.select_state(next_state):        
-            #         queue.push(next_state)
-                    # path.append(next_state)
-    return state#,path
 
 
 def get_path(state):
