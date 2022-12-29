@@ -1,4 +1,4 @@
-from search_algorithm import *
+#from search_algorithm import *
 
 # class Problem:
 #     def __init__(self,initial_state, actions,goal_state) -> None:
@@ -27,18 +27,18 @@ class PlanningProblem:#(Problem):
     def heuristic_function(self):
         """An heuristic function definited for the concret problem"""
         raise NotImplementedError
-    def apply_action_to_state(self,action,state):
-        """return the new state after apply it an action"""
-        raise NotImplementedError
-    def next_states(self,state):
-        """return the next states from the state"""
-        raise NotImplementedError
-    def select_state(self,state):
-        """Check if this state is valid or is a good state"""
-        raise NotImplementedError
-    def select_action(self,action):
-        """Check if this action is valid or is a good action"""
-        raise NotImplementedError
+    # def apply_action_to_state(self,action,state):
+    #     """return the new state after apply it an action"""
+    #     raise NotImplementedError
+    # def next_states(self,state):
+    #     """return the next states from the state"""
+    #     raise NotImplementedError
+    # def select_state(self,state):
+    #     """Check if this state is valid or is a good state"""
+    #     raise NotImplementedError
+    # def select_action(self,action):
+    #     """Check if this action is valid or is a good action"""
+    #     raise NotImplementedError
 
 class Action:
     """General Action, express the action, preconditions and effects to make the planning problem"""
@@ -102,19 +102,29 @@ def bfsearch(problem:PlanningProblem):
     while not queue.empty():
         state = queue.pop()
         if(problem.is_goal_state(state)):
-                return state,actions
-        
+                return state,actions        
         if state not in visited:
             visited.add(state)          
-            for action in problem.actions:
-                #h_values= problem.heuristic(state) 
-                if action.check_preconds(state) and problem.select_action(action):
-                    next_state=action.apply_action(state)
-                    state.add_son(next_state)
-                    state=next_state
-                    actions.add_son(action)
-                    actions=action
-                    queue.push(next_state)
+            # for action in problem.actions:
+            h_values = problem.heuristic(state,problem.actions)#dict with every action and the valued calculated by the heuristic function
+            action=better_action(state,h_values)
+            if not action:
+                continue
+            next_state=action.apply_action(state)
+            state.add_son(next_state)
+            state=next_state
+            actions.add_son(action)
+            actions=action
+            queue.push(next_state)
+            # if action.check_preconds(state): #and problem.select_action(action):
+            #     next_state=action.apply_action(state)
+            #     state.add_son(next_state)
+            #     state=next_state
+            #     actions.add_son(action)
+            #     actions=action
+            #     queue.push(next_state)
+
+            # else: h_values.pop(action)
                     # if problem.select_state(next_state):
                     #     queue.push(next_state)
                         # path.append(next_state)
@@ -124,6 +134,16 @@ def bfsearch(problem:PlanningProblem):
                     # path.append(next_state)
     return state, actions#,path
 
+def better_action(state,h_values):
+    """receive a dict of actions and it's values and select the better action, and comprobate that the state accomplish the precondition"""
+    if not h_values:
+        return None
+    action = max(h_values, key=h_values.get)
+    if action.check_preconds(state):
+        return action
+    else:
+        h_values.pop(action)
+        return better_action(state,h_values)
 
 
 def get_path(state):

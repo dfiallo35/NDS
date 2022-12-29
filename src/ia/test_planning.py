@@ -9,7 +9,7 @@ actions=[Decision(action="increase_industrialization",preconds={"economical_reso
         #  Decision(action="",preconds={"economical_resources":(">",1000)},effects={"economical_resources":("-",1000),"industrialization":("+",1)}),
         #  Decision(action="",preconds={"economical_resources":(">",1000)},effects={"economical_resources":("-",1000),"industrialization":("+",1)}),]
 
-decisions=PlanningDecisions(initial_state,actions, goal_state={"industrialization":4})
+decisions=PlanningDecisions(initial_state,actions, goal_state={"industrialization":(">",4)})
 
 print(get_path(decisions.states()))
 print(get_path(decisions.actions()))

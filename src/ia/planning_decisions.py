@@ -10,20 +10,25 @@ class PlanningDecisions(PlanningProblem):
         """Heuristic for the decisions problem."""
         return 1
 
-    def next(domain, state, h_values):
-        """Get the next action to do in order of priority"""
-        ...
+    # def next(self,domain, state, h_values):
+    #     """Get the next action to do in order of priority"""
+    #     ...
 
-    def is_goal_state(state):
+    def is_goal_state(self,state):
         """Check if the state is a goal state."""
-        ...
+        for goal in self.goal_state:
+            #preconds={"economical_resources":(">",1000)}  example
+            if not self.apply_operator(goal.value()[0],state.traits[goal.key()],goal.value()[1]):
+                return False
+            return True 
 
-    def select_state(state):
-        """Check if this state is valid oris a good state"""
-        ...
+    # def select_state(self,state):
+    #     """Check if this state is valid oris a good state"""
+    #     ...
+
 
 class Decision(Action):
-    def __init__(self, action, preconds, effects ):
+    def __init__(self, action, preconds, effects):
        super().__init__(action, preconds, effects)
 
     def check_preconds(self,state):
