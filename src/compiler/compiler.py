@@ -1,16 +1,22 @@
 from sly import Lexer, Parser
 
 class NDSLexer(Lexer):
-    tokens = {'NATION', 'PROVINCE', 'SEA', 'NEUTRAL', 'EVENT', 'DISTRIBUTION',
+    tokens = {'NATION', 'PROVINCE', 'SEA', 'NEUTRAL', 'TRAIT', 'EVENT', 'DISTRIBUTION',
             'NAME',
-            'NUMBER',
-            'ASSIGN', 'LINEEND', 'COMMA',
-            'LPAREN', 'RPAREN', 'LBRAKET', 'RBRAKET', 'LKEY', 'RKEY',
+            'NUMBER', 'STRING',
+            'ASSIGN', 'ARROW',
             'FOR', 'WHILE', 'IF', 'ELSE',
-            'GREATER', 'LESS', 'XPLUS', 'XMINUS',
-            'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'EQUALS'}
-    ignore = "\t \n"
+            'NOT', 'AND', 'OR', 'XOR',
+            'GREATER', 'EGREATER', 'LESS', 'ELESS', 'XPLUS', 'XMINUS', 'EQUALS', 'NOTEQUALS', 
+            'PLUS', 'MINUS', 'MULTIPLY', 'DIVIDE'}
+    
+    literals = { '(', ')', '{', '}', '[', ']', ';', ',' }
 
+    ignore = "\t "
+
+    newline = r'\n+'
+    def newline(self, t):
+        self.lineno += t.value.count('\n')
 
     #ELEMENTS
     NATION= r'nation\s+'
@@ -43,6 +49,12 @@ class NDSLexer(Lexer):
         t.value = str(t.value).strip()
         return t
     
+    TRAIT= r'trait\s+'
+    def TRAIT(self, t):
+        t.value = str(t.value).strip()
+        return t
+    
+    
     #PARAMETERS
     #todo: add parameters if needed
 
@@ -69,42 +81,59 @@ class NDSLexer(Lexer):
         t.value = str(t.value).strip()
         return t
     
+    NOT= r'not\s+'
+    def NOT(self, t):
+        t.value = str(t.value).strip()
+        return t
+    
+    AND= r'and\s+'
+    def AND(self, t):
+        t.value = str(t.value).strip()
+        return t
+    
+    OR= r'or\s+'
+    def OR(self, t):
+        t.value = str(t.value).strip()
+        return t
+    
+    XOR= r'xor\s+'
+    def XOR(self, t):
+        t.value = str(t.value).strip()
+        return t
+    
+    #OPERATORS
+    EQUALS= r'='
+    NOTEQUALS= r'!='
+    GREATER= r'>'
+    LESS= r'<'
+    EGREATER= r'>='
+    ELESS= r'<='
+
+    
     #VARIABLES
     NAME= r'[a-zA-Z][a-zA-Z0-9_]*[a-zA-Z0-9]*'
+
     #CONSTANTS
     NUMBER = r'\d+'
+    STRING = r'\'.*?\''
+    def STRING(self, t):
+        t.value = str(t.value).strip('\'')
+        return t
 
     # Special symbols
     ASSIGN = r':'
-    LINEEND= r';'
-    COMMA= r','
-
-    LPAREN = r'\('
-    RPAREN = r'\)'
-    LBRAKET= r'\['
-    RBRAKET= r'\]'
-    LKEY= r'\{'
-    RKEY= r'\}'
+    ARROW = r'->'
 
     XPLUS= r'\+\+'
     XMINUS= r'--'
 
     PLUS = r'\+'
     MINUS = r'-'
-    TIMES = r'\*'
+    MULTIPLY = r'\*'
     DIVIDE = r'/'
 
-    EQUALS= r'='
-    GREATER= r'>'
-    LESS= r'<'
-
     # Ignored pattern
-    ignore_newline = r'\n+'
     ignore_comment = r'\#.*'
-
-    # Extra action for newlines
-    def ignore_newline(self, t):
-        self.lineno += t.value.count('\n')
 
     def error(self, t):
         print("Illegal character '%s'" % t.value[0])
@@ -112,15 +141,13 @@ class NDSLexer(Lexer):
 
 
 
-
+#bug: end with ; or not works. Must be only with ;.
 class NDSParser(Parser):
     tokens = NDSLexer.tokens
     debugfile = 'parser.out'
 
     precedence = (
-        # ('left', 'PLUS', 'MINUS'),
-        # ('left', 'TIMES', 'DIVIDE'),
-        # ('right', 'UMINUS'),
+
         )
 
     def __init__(self):
@@ -129,12 +156,31 @@ class NDSParser(Parser):
             'provinces': {},
             'seas': {},
             'neutrals': {},
-        } 
+            'traits': {},
+        }
+        self.vars = {}
+    
+    #SCRIPT
+    @_('script ";" script')
+    def script(self, p):
+        return p.script0 + p.script1
+    
+    @_('script ";"')
+    def script(self, p):
+        return p.script
+    
+    @_('element')
+    def script(self, p):
+        return p.element
+    
+    @_('NAME ASSIGN expr')
+    def script(self, p):
+        self.vars[p.NAME] = p.expr
+        return p.NAME
 
-
-    @_('NATION NAME params LINEEND', 'PROVINCE NAME params LINEEND', 'SEA NAME params LINEEND', 'NEUTRAL NAME params LINEEND', 'element')
+    #ELEMENTS
+    @_('NATION NAME params', 'PROVINCE NAME params', 'SEA NAME params', 'NEUTRAL NAME params', 'TRAIT NAME params')
     def element(self, p):
-        print(1, p.NAME, p.params)
         if p[0] == 'nation':
             self.elements['nations'][p.NAME] = p.params
             return p.NAME
@@ -147,50 +193,77 @@ class NDSParser(Parser):
         elif p[0] == 'neutral':
             self.elements['neutrals'][p.NAME] = p.params
             return p.NAME
+        elif p[0] == 'trait':
+            self.elements['traits'][p.NAME] = p.params
+            return p.NAME
     
 
-    @_('LPAREN param RPAREN')
+    #PARAMETERS
+    @_('"(" param ")"')
     def params(self, p):
-        print(2, p.param)
         return p.param
 
-    @_('param COMMA param')
+    @_('param "," param')
     def param(self, p):
-        print(3, p.param0, p.param1)
         return p.param0 + p.param1
-    
+        
     @_('NUMBER')
     def param(self, p):
-        print(4, p.NUMBER)
         return [int(p.NUMBER)]
 
+    @_('expr')
+    def param(self, p):
+        return [p.expr]
+
+    #EXPRESSIONS
+    @_('NUMBER')
+    def expr(self, p):
+        return int(p.NUMBER)
+    
+    @_('STRING')
+    def expr(self, p):
+        return str(p.STRING)
+    
+    @_('"[" list_expr "]"')
+    def expr(self, p):
+        return p.list_expr
+    
+    #LIST
+    @_('list_expr "," list_expr')
+    def list_expr(self, p):
+        return p.list_expr0 + p.list_expr1
+    
+    @_('expr')
+    def list_expr(self, p):
+        return [p.expr]
 
 
 
 
-def main(code: str):
+def compile(code: str):
     lexer = NDSLexer()
-    tokens = lexer.tokenize(code)
-
     parser = NDSParser()
-    exe_line= []
-    for i in tokens:
-        if i.type != 'LINEEND':
-            exe_line.append(i)
-        else:
-            exe_line.append(i)
-            parser.parse(iter(exe_line))
-            exe_line= []
+
+    tokens = lexer.tokenize(code)
+    parser.parse(tokens)
     print(parser.elements)
+    print(parser.vars)
 
-
-main(
+compile(
     '''
-    nation a(2, 3, 5);
-    nation b(3);
+    #comment
+    z: 2;
+    y: 'Pez';
+    nation a(2, 3,
+    5);
+
+            nation b(3, 'pollo');
     province c(4);
-    nation d(5);
+
+        nation d(5); #commnet2
     nation e(6);
     neutral f(7);
+
+    trait g(5, [2,5,3]);
     '''
 )

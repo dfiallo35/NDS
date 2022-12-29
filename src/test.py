@@ -15,36 +15,24 @@ m.add_province('Madrid', 10, 10, 120)
 m.update('Habana', development= 20)
 
 m.add_category('Social')
+m.add_trait('Comunist', [('Socia', 5)])
 
 
-# class population_growth(Event):
-#     def __init__(self):
-#         super().__init__(name='population_growth' ,distribution= Uniform(1), category= 'Social', enabled= True)
-    
-#     def execute(self, map: Map, **kwargs):
-#         for province in map.provincedict.values():
-#             province.population= province.population * 1.03
-
-# class mortality(Event):
-#     def __init__(self):
-#         super().__init__(name='mortality' ,distribution= Uniform(1), category= 'Social', enabled= True)
-    
-#     def execute(self, map: Map, **kwargs):
-#         for province in map.provincedict.values():
-#             province.population= province.population * 0.99
-
+# def declare_war(map, **kwargs):
+#     map.nations['Cuba'].declare_war('USA')
+#     return {'enable': ['war']}
 
 def population_growth(map, **kwargs):
     for province in map.provincedict.values():
         province.population= province.population * 1.03
-    return {}
-m.add_event(name='population_growth' ,distribution= Uniform(1), category= 'Social', enabled= True, execute= population_growth)
+    return {'enable': ['mortality']}
+m.add_event(name='population_growth' ,distribution= Uniform(1), category= 'Social', enabled= True, execution= population_growth, type= 'unique')
 
 def mortality(map, **kwargs):
     for province in map.provincedict.values():
         province.population= province.population * 0.99
-    return {}
-m.add_event(name='mortality' ,distribution= Uniform(1), category= 'Social', enabled= True, execute= mortality)
+    return {'disable:': ['population_growth']}
+m.add_event(name='mortality' ,distribution= Uniform(1), category= 'Social', enabled= False, execution= mortality, type= 'unique')
 
 
 

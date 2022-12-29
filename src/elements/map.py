@@ -16,6 +16,8 @@ from networkx import Graph
 #todo: delete from map
 #todo: delete updates
 
+#todo: __exist_element for every element
+
 
 class Map:
     def __init__(self) -> None:
@@ -55,6 +57,14 @@ class Map:
         :return: the events list
         '''
         return self.events.values()
+    
+    @property
+    def event_enabled_list(self):
+        '''
+        Get the enabled events list
+        :return: the enabled events list
+        '''
+        return [event for event in self.event_list if event.enabled]
 
     def add_nation(self, name: str, provinces: list, traits: list= []):
         '''
@@ -130,6 +140,17 @@ class Map:
         self.__add_edges(name, neighbours)
         return neutral
     
+    def add_trait(self, name: str, affinity: list[tuple[str, int]]):
+        '''
+        Add a trait to the map
+        :param name: the trait name
+        :param affinity: the affinity of the trait with the categories
+        '''
+        self.__exist_element(name)
+        trait= Trait(name= name, affinity= {str(category): int(value) for category, value in affinity})
+        self.traitdict[name]= trait
+        return trait
+    
     def add_category(self, name: str):
         '''
         Add a category to the map
@@ -152,7 +173,7 @@ class Map:
             self.categories[category]= Category(category)
             self.categories[category].add_decision(decision)
     
-    def add_event(self, name: str, distribution: Distribution, category: str, enabled: bool, execute, decisions: list= []):
+    def add_event(self, name: str, distribution: Distribution, category: str, enabled: bool, execution, type: str= None, decisions: list= []):
         '''
         Add an event to the map. If the event already exists, it will be updated
         :param event: the event
@@ -160,8 +181,7 @@ class Map:
         if not self.categories.get(category):
             raise Exception(f'The category {category} doesn\'t exist')
         
-        event= Event(name, distribution, category, enabled)
-        event.execute= execute
+        event= Event(name=name, distribution=distribution, category=category, execution=execution, enabled=enabled, type=type)
         self.events[event.name]= event
         self.decisions[event.name]= decisions
         return event
