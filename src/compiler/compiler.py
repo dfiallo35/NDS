@@ -102,7 +102,7 @@ class NDSLexer(Lexer):
         return t
     
     #OPERATORS
-    EQUALS= r'='
+    EQUALS= r'=='
     NOTEQUALS= r'!='
     GREATER= r'>'
     LESS= r'<'
@@ -121,7 +121,7 @@ class NDSLexer(Lexer):
         return t
 
     # Special symbols
-    ASSIGN = r':'
+    ASSIGN = r'='
     ARROW = r'->'
 
     XPLUS= r'\+\+'
@@ -181,16 +181,7 @@ class NDSParser(Parser):
     @_('NATION NAME params', 'PROVINCE NAME params', 'SEA NAME params', 'NEUTRAL NAME params', 'TRAIT NAME params')
     def element(self, p):
         #{'name': <element name>, 'params': <element params>, 'type': <element type>}
-        if p[0] == 'nation':
-            return {'name': p.NAME, 'params': p.params, 'type':'nation'}
-        elif p[0] == 'province':
-            return {'name': p.NAME, 'params': p.params, 'type':'province'}
-        elif p[0] == 'sea':
-            return {'name': p.NAME, 'params': p.params, 'type':'sea'}
-        elif p[0] == 'neutral':
-            return {'name': p.NAME, 'params': p.params, 'type':'neutral'}
-        elif p[0] == 'trait':
-            return {'name': p.NAME, 'params': p.params, 'type':'trait'}
+        return {'name': p.NAME, 'params': p.params, 'type': p[0]}
     
 
     #VARS
@@ -216,6 +207,18 @@ class NDSParser(Parser):
     @_('expr')
     def param(self, p):
         return [p.expr]
+    
+
+    #CONDITIONS
+    @_('expr AND expr', 'expr OR expr', 'expr XOR expr', 'expr EQUALS expr', 'expr NOTEQUALS expr', 'expr GREATER expr', 'expr LESS expr', 'expr EGREATER expr', 'expr ELESS expr')
+    def condition(self, p):
+        #{'type': <condition type>, 'left': <left side>, 'right': <right side>}
+        return {'type': p[1], 'left': p.expr0, 'right': p.expr1}
+    
+    @_('NOT expr')
+    def condition(self, p):
+        #{'type': <condition type>, 'expr': <expr>}
+        return {'type': p[0], 'value': p.expr}
 
 
     #EXPRESSIONS
@@ -231,6 +234,30 @@ class NDSParser(Parser):
     def expr(self, p):
         return p.list_expr
     
+    @_('condition')
+    def expr(self, p):
+        return p.condition
+    
+    @_('"(" expr ")"')
+    def expr(self, p):
+        return p.expr
+    
+    #ARIHTMETIC
+    @_('expr PLUS expr', 'expr MINUS expr', 'expr MULTIPLY expr', 'expr DIVIDE expr')
+    def expr(self, p):
+        #{'type': <operation type>, 'left': <left side>, 'right': <right side>}
+        return {'type': p[1], 'left': p.expr0, 'right': p.expr1}
+    
+    @_('XPLUS expr', 'XMINUS expr')
+    def expr(self, p):
+        #{'type': <operation type>, 'value': <value>}
+        return {'type': p[0], 'value': p.expr}
+    
+    @_('expr ARROW expr')
+    def expr(self, p):
+        #{'type': <operation type>, 'left': <left side>, 'right': <right side>}
+        return {'type': p[1], 'left': p.expr0, 'right': p.expr1}
+    
 
     #LIST
     @_('list_expr "," list_expr')
@@ -245,10 +272,22 @@ class NDSParser(Parser):
     #FUNCTIONS
     @_('EVENT NAME params "{" script "}"', 'DISTRIBUTION NAME params "{" script "}"')
     def function(self, p):
+        #{'name': <function name>, 'params': <function params>, 'type': <function type>, 'script': <function script>}
         if p[0] == 'event':
             return {'name': p.NAME, 'params': p.params, 'type': 'event', 'execution': p.script}
+    
+    @_('ELSE "{" script "}"')
+    def function(self, p):
+        #{'type': <function type>, 'script': <function script>}
+        return {'type': 'else', 'execution': p.script}
 
+    @_('IF "(" condition ")" "{" script "}"', 'WHILE "(" condition ")" "{" script "}"')
+    def function(self, p):
+            return {'type': p[0], 'condition': p.condition, 'execution': p.script}
 
+    
+    
+    
 
 
 def compile(code: str):
@@ -261,12 +300,6 @@ def compile(code: str):
 
 compile(
     '''
-    #comment
-    z: 2;
-    event a(3){
-        b:3;
-        c:5;
-        d:'p';
-    };
+    a= 2*4 +3;
     '''
 )
