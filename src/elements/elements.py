@@ -221,3 +221,62 @@ class Year(Time):
         :return: the time converted to years
         '''
         return Year(self.name, self.time)
+
+
+class object:
+    def __init__(self, val) -> None:
+        self.val= val
+    
+    @property
+    def value(self):
+        return self.val
+    
+    @property
+    def type(self):
+        return self.__class__.__name__
+
+    def __str__(self) -> str:
+        return str(self.val)
+
+class number(object):
+    def __init__(self, val) -> None:
+        super().__init__(val)
+    
+    def __add__(self, other):
+        return number(self.val + other.val)
+    
+    def __sub__(self, other):
+        return number(self.val - other.val)
+    
+    def __mul__(self, other):
+        return number(self.val * other.val)
+    
+    def __truediv__(self, other):
+        return number(self.val / other.val)
+    
+    def __floordiv__(self, other):
+        return number(self.val // other.val)
+    
+    def __mod__(self, other):
+        return number(self.val % other.val)
+
+
+class string(object):
+    def __init__(self, val) -> None:
+        super().__init__(val)
+    
+    def __add__(self, other):
+        return string(self.val + other.val)
+    
+
+class boolean(object):
+    def __init__(self, val) -> None:
+        super().__init__(val)
+
+class array(object):
+    def __init__(self, val) -> None:
+        super().__init__(val)
+    
+    def __add__(self, other):
+        return array(self.val + other.val)
+    
