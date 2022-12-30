@@ -202,6 +202,8 @@ class NDSParser(Parser):
         ('left', 'MULTIPLY', 'DIVIDE'),
         ('left', 'AND', 'OR', 'XOR'),
         ('left', 'EQUALS', 'NOTEQUALS', 'GREATER', 'LESS', 'EGREATER', 'ELESS'),
+        ('left', 'NAME'),
+        ('left', 'BOOL'),
         #todo: precedences
         )
 
@@ -298,6 +300,10 @@ class NDSParser(Parser):
     def expr(self, p):
         return obj(type='expr', subtype='string', value=str(p.STRING))
     
+    @_('BOOL')
+    def expr(self, p):
+        return obj(type='expr', subtype='bool', value=str(p.BOOL))
+    
     @_('"[" list_expr "]"')
     def expr(self, p):
         return obj(type='expr', subtype='list', value=p.list_expr)
@@ -343,6 +349,10 @@ class NDSParser(Parser):
     
 
     #FUNCTIONS
+    @_('SHOW "(" expr ")"')
+    def function(self, p):
+        return obj(type='function', subtype=p[0], value=p.expr)
+
     @_('EVENT NAME params "{" script "}"', 'DISTRIBUTION NAME params "{" script "}"')
     def function(self, p):
         if p[0] == 'event':
