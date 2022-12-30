@@ -154,6 +154,10 @@ class obj:
 
 
 #fix: end with ; or not works. Must be only with ;.
+#fix: las lineas de codigo no comienzan a machear desde script, buscan machear con todo los elementos de ela gramatica.
+#todo: precedences
+#todo: mejorar la deteccion de errores
+#todo: agregar for al parser
 class NDSParser(Parser):
     tokens = NDSLexer.tokens
     debugfile = 'parser.out'
@@ -240,6 +244,10 @@ class NDSParser(Parser):
 
 
     #EXPRESSIONS
+    @_('NAME')
+    def expr(self, p):
+        return obj(type='expr', subtype='name', value=str(p.NAME))
+
     @_('NUMBER')
     def expr(self, p):
         return obj(type='expr', subtype='number', value=int(p.NUMBER))
@@ -250,7 +258,7 @@ class NDSParser(Parser):
     
     @_('"[" list_expr "]"')
     def expr(self, p):
-        return obj(type='expr', subtype='list', value=p.list_expr)
+        return obj(type='list', subtype='list', value=p.list_expr)
     
     @_('condition')
     def expr(self, p):
@@ -302,6 +310,12 @@ class NDSParser(Parser):
     def function(self, p):
         return obj(type='function', subtype=p[0], condition=p.condition, script=p.script)
 
+    #ERRORS
+    def error(self, p):
+        if p:
+            raise Exception("Syntax error at token", p.type)
+        else:
+            raise Exception("Syntax error at EOF")
 
 
 def compile(code: str):
