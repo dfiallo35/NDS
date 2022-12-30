@@ -26,10 +26,6 @@ decisions=PlanningDecisions(initial_state,actions, goal_state={"industrializatio
 states=decisions.make_planning()
 
 print([[i["state"].traits, "-------------------->",i["action"].action if i["action"] else None,"!!!!!!!!!!!!!!!!!!!!!!!!!!!"] for i in get_path(states)])
-#print([i["action"] for i in get_path(states)])
-# for i in(get_path(states)):
-#     print(i.traits)
-# for i in (get_path(actions)):
-#     print(i.action)
+
 
 
