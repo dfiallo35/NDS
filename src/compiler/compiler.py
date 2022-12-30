@@ -1,5 +1,7 @@
 from sly import Lexer, Parser
 
+
+#todo: add bool
 class NDSLexer(Lexer):
     tokens = {'NATION', 'PROVINCE', 'SEA', 'NEUTRAL', 'TRAIT', 'EVENT', 'DISTRIBUTION',
             'NAME',
@@ -137,7 +139,7 @@ class NDSLexer(Lexer):
     ignore_comment = r'\#.*'
 
     def error(self, t):
-        print("Illegal character '%s'" % t.value[0])
+        raise Exception("Illegal character '%s'" % t.value)
         self.index += 1
 
 
@@ -158,6 +160,9 @@ class obj:
 #todo: precedences
 #todo: mejorar la deteccion de errores
 #todo: agregar for al parser
+
+#todo: agregar funciones especiales(print, simulate, len....)
+
 class NDSParser(Parser):
     tokens = NDSLexer.tokens
     debugfile = 'parser.out'
@@ -165,6 +170,8 @@ class NDSParser(Parser):
     precedence = (
         ('left', 'PLUS', 'MINUS'),
         ('left', 'MULTIPLY', 'DIVIDE'),
+        ('left', 'AND', 'OR', 'XOR'),
+        ('left', 'EQUALS', 'NOTEQUALS', 'GREATER', 'LESS', 'EGREATER', 'ELESS'),
         #todo: precedences
         )
 
@@ -172,7 +179,7 @@ class NDSParser(Parser):
         self.queue= []
     
     #SCRIPT
-    @_('code ";" script')
+    @_('code script')
     def script(self, p):
         return p.code + p.script
     
@@ -234,14 +241,19 @@ class NDSParser(Parser):
     
 
     #CONDITIONS
-    @_('expr AND expr', 'expr OR expr', 'expr XOR expr', 'expr EQUALS expr', 'expr NOTEQUALS expr', 'expr GREATER expr', 'expr LESS expr', 'expr EGREATER expr', 'expr ELESS expr')
+    @_('expr AND expr', 'expr OR expr', 'expr XOR expr')
     def condition(self, p):
         return obj(type='condition', subtype=p[1], left=p.expr0, right=p.expr1)
     
     @_('NOT expr')
     def condition(self, p):
-        return obj(type='condition', subtype=p[0], left=p.expr)
+        return obj(type='scondition', subtype=p[0], value=p.expr)
+    
 
+    #COMPARATIONS
+    @_('expr EQUALS expr', 'expr NOTEQUALS expr', 'expr GREATER expr', 'expr LESS expr', 'expr EGREATER expr', 'expr ELESS expr')
+    def condition(self, p):
+        return obj(type='comparation', subtype=p[1], left=p.expr0, right=p.expr1)
 
     #EXPRESSIONS
     @_('NAME')
@@ -258,7 +270,7 @@ class NDSParser(Parser):
     
     @_('"[" list_expr "]"')
     def expr(self, p):
-        return obj(type='list', subtype='list', value=p.list_expr)
+        return obj(type='expr', subtype='list', value=p.list_expr)
     
     @_('condition')
     def expr(self, p):
@@ -275,7 +287,11 @@ class NDSParser(Parser):
     
     @_('XPLUS expr', 'XMINUS expr')
     def expr(self, p):
-        return obj(type='arithmetic', subtype=p[0], left=p.expr)
+        return obj(type='xarithmetic', subtype=p[0], left=p.expr)
+    
+    @_('PLUS expr', 'MINUS expr')
+    def expr(self, p):
+        return obj(type='sarithmetic', subtype=p[0], value=p.expr)
     
     @_('expr ARROW expr')
     def expr(self, p):
@@ -326,7 +342,7 @@ def compile(code: str):
 
 # for i in compile(
 #     '''
-#     2+2;
+#     2+2
 #     '''
 # ):
 #     print(i)
