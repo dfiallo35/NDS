@@ -23,11 +23,13 @@ actions=[Decision(action="increase_industrialization",preconds={"economical_reso
 initial_state=Nation(name="Brazil",provinces={},traits=traits)
 
 decisions=PlanningDecisions(initial_state,actions, goal_state={"industrialization":(">=",4),"average_living_standard":(">=",3)})
-states,actions=decisions.make_planning()
+states=decisions.make_planning()
 
-for i in(get_path(states)):
-    print(i.traits)
-for i in (get_path(actions)):
-    print(i.action)
+print([[i["state"].traits, "-------------------->",i["action"].action if i["action"] else None,"!!!!!!!!!!!!!!!!!!!!!!!!!!!"] for i in get_path(states)])
+#print([i["action"] for i in get_path(states)])
+# for i in(get_path(states)):
+#     print(i.traits)
+# for i in (get_path(actions)):
+#     print(i.action)
 
 

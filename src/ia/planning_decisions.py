@@ -1,5 +1,4 @@
 from planning import *
-from copy import copy
 
 class PlanningDecisions(PlanningProblem):
     """Planning problem for decisions."""
@@ -47,7 +46,7 @@ class Decision(Action):
     
     def apply_action(self, state):     
         """return the new state after apply it an action"""   
-        new_state=copy(state)
+        new_state=deepcopy(state)
         self.make_action(new_state)
         return new_state
     

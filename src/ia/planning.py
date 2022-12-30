@@ -7,6 +7,9 @@
 #         self.goal_state=goal_state
 
 
+from copy import deepcopy
+
+
 class PlanningProblem:#(Problem):
     """General Planning Problem"""
     def __init__(self, initial_state:dict, actions:list, goal_state:dict()) -> None:
@@ -25,8 +28,8 @@ class PlanningProblem:#(Problem):
         return True
 
     def make_planning(self):
-        state, actions=search(self)
-        return state,actions
+        state=search(self)
+        return state
 
 
     def heuristic_function(self,state,actions):
@@ -106,18 +109,18 @@ def bfsearch(problem:PlanningProblem):
     queue.push(StateNode(value={"state":problem.initial_state,"action":None}))
     while not queue.empty():
         state = queue.pop()
-        if(problem.is_goal_state(state.value[state])):
+        if(problem.is_goal_state(state.value["state"])):
                 return state      
-        if state.value[state] not in visited:
-            visited.add(state.value[state])          
-            h_values = problem.heuristic_function(state.value[state],problem.actions)#dict with every action and the valued calculated by the heuristic function
-            actions_to_do_ordered=ordered_actions_priority(state.value[state],h_values)
+        if state.value["state"] not in visited:
+            visited.add(state.value["state"])          
+            h_values = problem.heuristic_function(state.value["state"],problem.actions)#dict with every action and the valued calculated by the heuristic function
+            actions_to_do_ordered=ordered_actions_priority(state.value["state"],h_values)
             for action in actions_to_do_ordered:
-                next_state=action.value.apply_action(state.value[state])
+                next_state=action.apply_action(deepcopy(state.value["state"]))
                 next_state=StateNode(value={"action":action,"state":next_state})
                 state.add_son(next_state)
                 # stat=next_state
-            queue.push(next_state)
+                queue.push(next_state)
     return state
 
 
@@ -125,10 +128,10 @@ def ordered_actions_priority(state,h_values):
     """receive a dict of actions and it's values and return a list of actions ordered by priority
      and comprobate that the state accomplish the precondition for each one"""
     ordered_actions=[]
-    ordered_actions_priority(state,h_values,ordered_actions)
+    ordered_actions_priority_rec(state,h_values,ordered_actions)
     return ordered_actions
 
-def ordered_actions_priority(state,h_values,ordered_actions:list):
+def ordered_actions_priority_rec(state,h_values,ordered_actions:list):
     """receive a dict of actions and it's values and return a list of actions ordered by priority
      and comprobate that the state accomplish the precondition for each one"""
     if not h_values:
@@ -137,7 +140,7 @@ def ordered_actions_priority(state,h_values,ordered_actions:list):
     h_values.pop(action)
     if action.check_preconds(state):
         ordered_actions.append(action)
-    ordered_actions_priority(state,h_values)
+    ordered_actions_priority_rec(state,h_values,ordered_actions)
 
 
 
