@@ -35,7 +35,6 @@ class Social(Category):
 #note: un evento siempre define un cambio en el estado del mapa
 
 
-#todo: unique events(works only one time)
 #todo: instant events (works when the event is created)
 class Event:
     def __init__(self, name: str, distribution: Distribution, category: Category, execution, enabled: bool= True, type: str= None):
