@@ -12,11 +12,12 @@ except:
 import networkx as nx
 from networkx import Graph
 
-#todo: traits and traits of nations
-#todo: delete from map
-#todo: delete updates
+#todo: definir correctamente los traits
+#todo: borrar elementos del mapa
+#fix: update method
 
 #todo: __exist_element for every element
+#todo: revisar los casos en que se sobreescriben los elementos o se da exepcion de que ya existen
 
 
 class Map:

@@ -3,6 +3,8 @@ import scipy.stats as ss
 import matplotlib.pyplot as plt
 from scipy.stats._distn_infrastructure import rv_sample
 
+#todo: definir bien el uso de las distribuciones.
+#todo: hacer EDA para generar distribuciones de datos.
 class Distribution:
     def __init__(self, distribution, scale:int=1):
         self.distribution:rv_sample = distribution

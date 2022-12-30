@@ -3,6 +3,8 @@ from elements.elements import *
 
 
 #todo: get the execution list
+#todo: generar codigo de funciones
+#todo: terminar value method
 class Code:
     def __init__(self) -> None:
         self.elements= dict()
