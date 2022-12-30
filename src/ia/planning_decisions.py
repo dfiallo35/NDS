@@ -23,9 +23,11 @@ class PlanningDecisions(PlanningProblem):
         """Check if the state is a goal state."""
         for goal in self.goal_state:
             #preconds={"economical_resources":(">",1000)}  example
+            # print(state.traits)
+            # print(goal)
             if not apply_operator(self.goal_state[goal][0],state.traits[goal],self.goal_state[goal][1]):
                 return False
-            return True 
+        return True 
 
     # def select_state(self,state):
     #     """Check if this state is valid oris a good state"""
@@ -41,7 +43,7 @@ class Decision(Action):
             #preconds={"economical_resources":(">",1000)}  example
             if not apply_operator(self.preconds[precond][0],state.traits[precond],self.preconds[precond][1]):
                 return False
-            return True
+        return True
     
     def apply_action(self, state):     
         """return the new state after apply it an action"""   
