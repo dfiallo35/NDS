@@ -29,7 +29,7 @@ class PlanningProblem:#(Problem):
         return state,actions
 
 
-    def heuristic_function(self):
+    def heuristic_function(self,state,actions):
         """An heuristic function definited for the concret problem"""
         raise NotImplementedError
     # def apply_action_to_state(self,action,state):
@@ -62,8 +62,8 @@ class Action:
 
 class StateNode:
     """node of the tree to define the states space"""
-    def __init__(self, state, parent=None) -> None:
-        self.state = state
+    def __init__(self, value, parent=None) -> None:
+        self.value = value
         self.parent = parent
         self.sons=[]
 
@@ -100,44 +100,30 @@ def bfsearch(problem:PlanningProblem):
     """Breadth-first search algorithm for a Planning Problem"""
     queue = Queue()
     visited = set()    
-    state:StateNode
-    actions:StateNode
+    states:StateNode=None
+    actions:StateNode=None
     # path=[]
     queue.push( problem.initial_state)
     while not queue.empty():
         state = queue.pop()
         if(problem.is_goal_state(state)):
-                return state,actions        
+                return states, actions        
         if state not in visited:
             visited.add(state)          
             # for action in problem.actions:
-            h_values = problem.heuristic(state,problem.actions)#dict with every action and the valued calculated by the heuristic function
-            action=better_action(state,h_values)
+            h_values = problem.heuristic_function(state,problem.actions)#dict with every action and the valued calculated by the heuristic function
+            action=StateNode(better_action(state,h_values))           
             if not action:
                 continue
-            next_state=action.apply_action(state)
-            state.add_son(next_state)
-            state=next_state
-            actions.add_son(action)
+            next_state=StateNode(action.value.apply_action(state))
+            if states:
+                states.add_son(next_state)
+            states=next_state
+            if actions: 
+                actions.add_son(action)
             actions=action
-            queue.push(next_state)
-            # if action.check_preconds(state): #and problem.select_action(action):
-            #     next_state=action.apply_action(state)
-            #     state.add_son(next_state)
-            #     state=next_state
-            #     actions.add_son(action)
-            #     actions=action
-            #     queue.push(next_state)
-
-            # else: h_values.pop(action)
-                    # if problem.select_state(next_state):
-                    #     queue.push(next_state)
-                        # path.append(next_state)
-            # for next_state in problem.next(state, h_values):      
-            #     if problem.select_state(next_state):        
-            #         queue.push(next_state)
-                    # path.append(next_state)
-    return state, actions#,path
+            queue.push(next_state.value)
+    return states, actions
 
 def better_action(state,h_values):
     """receive a dict of actions and it's values and select the better action, and comprobate that the state accomplish the precondition"""
@@ -155,10 +141,10 @@ def get_path(state):
     """Get the path from the initial state to the state"""
     path=[]
     while state.parent:
-        path.append(state)
+        path.append(state.value)
         state=state.parent
-    path.append(state)
-    return path.reverse()
+    path.append(state.value)
+    return path#.reverse()
 
 # def apply_heuristic(problem,state):
 #     """aplicate the heuristic h for the search problem."""
