@@ -16,8 +16,8 @@ traits = {"weather":2,"economical_resources":123434,"water":2,"iron":2,"petroleu
                 "PIB":1074000000000,"international_relations":{"Spain":3,"EEUU":-5,"Russia":4,"China":3}}
 
 actions=[Decision(action="increase_industrialization",preconds={"economical_resources":(">",1000)},effects={"economical_resources":("-",1000),"industrialization":("+",1)}),
-         Decision(action="increase_average_living_standard",preconds={"economical_resources":(">",20000)},effects={"economical_resources":("-",20000),"average_living_standard":("+",1)})]
-        #  Decision(action="",preconds={"economical_resources":(">",1000)},effects={"economical_resources":("-",1000),"industrialization":("+",1)}),
+         Decision(action="increase_average_living_standard",preconds={"economical_resources":(">",20000)},effects={"economical_resources":("-",20000),"average_living_standard":("+",1)}),
+         Decision(action="increase_tourism",preconds={"economical_resources":(">",5000)},effects={"economical_resources":("-",5000),"tourism":("+",1)})]
         #  Decision(action="",preconds={"economical_resources":(">",1000)},effects={"economical_resources":("-",1000),"industrialization":("+",1)}),]
 
 initial_state=Nation(name="Brazil",provinces={},traits=traits)

@@ -195,7 +195,8 @@ def get_path(state):
         path.append(state.value)
         state=state.parent
     path.append(state.value)
-    return path#.reverse()
+    return path[::-1]
+    #return path.reverse()
 
 # def apply_heuristic(problem,state):
 #     """aplicate the heuristic h for the search problem."""
