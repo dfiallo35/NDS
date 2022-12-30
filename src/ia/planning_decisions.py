@@ -1,4 +1,5 @@
 from planning import *
+from copy import copy
 
 class PlanningDecisions(PlanningProblem):
     """Planning problem for decisions."""
@@ -6,11 +7,12 @@ class PlanningDecisions(PlanningProblem):
     def __init__(self, initial, actions,goal_state):
         super().__init__(initial,actions,goal_state)
 
-    def heuristic(state, actions):
+    def heuristic_function(self,state, actions):
         """Heuristic for the decisions problem."""
         h_values={}
         for action in actions:
             h_values[action]=1
+        return h_values
 
 
     # def next(self,domain, state, h_values):
@@ -37,10 +39,15 @@ class Decision(Action):
     def check_preconds(self,state):
         for precond in self.preconds:
             #preconds={"economical_resources":(">",1000)}  example
-            if not apply_operator(precond.value()[0],state.traits[precond.key()],precond.value()[1]):
+            if not apply_operator(self.preconds[precond][0],state.traits[precond],self.preconds[precond][1]):
                 return False
             return True
-
+    
+    def apply_action(self, state):     
+        """return the new state after apply it an action"""   
+        new_state=copy(state)
+        self.make_action(new_state)
+        return new_state
     
     def make_action(self,state):
         #effects={"economical_resources":("-",1000),"industrialization":("+",1)}    example
@@ -48,12 +55,17 @@ class Decision(Action):
             state.traits[effect]=apply_operator(self.effects[effect][0], state.traits[effect],self.effects[effect][1])
 
 def apply_operator(operator, val1,val2):
-    if operator==">":
+    if operator=="<":
         return val1 < val2
     if operator==">":
         return val1 > val2
+    if operator=="<=":
+        return val1 <= val2
+    if operator==">=":
+        return val1 >= val2
     if operator=="+":
         return val1 + val2
     if operator=="-":
         return val1 - val2
+    return False
 
