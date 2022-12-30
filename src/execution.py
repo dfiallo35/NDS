@@ -5,6 +5,8 @@ from compiler.compiler import *
 #todo: get the execution list
 #todo: generar codigo de funciones
 #todo: terminar value method
+
+#fix: var and elements names cant be de same
 class Code:
     def __init__(self) -> None:
         self.elements= dict()
@@ -20,7 +22,6 @@ class Code:
         for compiled in self.compiled_list:
 
             #ELEMENTS
-            #todo: params with vars. ex: nation a(provinces: [b])
             if compiled.type == 'element':
                 self.add_element(compiled.subtype, **self.params(compiled))
             
@@ -35,8 +36,13 @@ class Code:
             else:
                 print(self.value(compiled))
 
+
+    #todo: add conditions
     def value(self, object: obj):
         if type(object) == obj:
+
+            #todo: add all arithmetics
+            #todo: restrict arithmetics to numbers
             if object.type == 'arithmetic':
                 left= self.value(object.left)
                 right= self.value(object.right)
@@ -49,12 +55,53 @@ class Code:
                     return left / right
                 if object.subtype == '-':
                     return left - right
+            
+            if object.type == 'sarithmetic':
+                if object.subtype == '+':
+                    return + self.value(object.value)
+                if object.subtype == '-':
+                    return - self.value(object.value)
+            
+            elif object.type == 'xarithmetic':
+                ...
+            
+            elif object.type == 'condition':
+                left= self.conditions(self.value(object.left))
+                right= self.conditions(self.value(object.right))
 
-            elif object.type == 'list':
-                return [self.value(value) for value in object.value]
+                if object.subtype == 'and':
+                    return left and right
+                if object.subtype == 'or':
+                    return left or right
+            
+            elif object.type == 'comparation':
+                left= self.value(object.left)
+                right= self.value(object.right)
+
+                if object.subtype == '==':
+                    return left == right
+                if object.subtype == '!=':
+                    return left != right
+                if object.subtype == '>':
+                    print(left, right)
+                    return left > right
+                if object.subtype == '<':
+                    return left < right
+                if object.subtype == '>=':
+                    return left >= right
+                if object.subtype == '<=':
+                    return left <= right
+
+            
+            elif object.type == 'scondition':
+                if object.subtype == 'not':
+                    return not self.conditions(self.value(object.value))
             
             elif object.type == 'expr':
-                return self.value(object.value)
+                if object.subtype == 'list':
+                    return [self.value(value) for value in object.value]
+                else:
+                    return self.value(object.value)
             
             elif object.get('name') and object.name in self.vars:
                 return self.vars[object.name]
@@ -72,9 +119,21 @@ class Code:
         params= dict()
         params['name']= object.name
         for param in object.params:
-            params[param.name]= self.value(param.value)
+            val= self.value(param.value)
+            if type(val) == str:
+                if self.vars.get(val):
+                    val= self.vars[val]
+                elif self.elements.get(val):
+                    val= self.elements[val]
+            params[param.name]= val
         return params
     
+    def conditions(self, object):
+        print(object)
+        if type(object) == None or object == int(0) or object == str('') or object == list() or object == dict():
+            return False
+        else:
+            return True
     
     def add_element(self, element: str, **kwargs):
         '''
@@ -111,13 +170,13 @@ class Code:
 a= Code()
 a.compile(
     '''
-    province a(extension: 10, development: 20, population: 30);
-    a= 1;
-    a= 'pollo';
-    nation b(provinces: [a]);
-
+    m= 2+2*4
+    j= 4
+    province a(extension: j, development: 20, population: 30)
+    nation b(provinces: [a])
+    a= 2 and 1
     '''
 )
-print(a.map.mapelementsdict['b'].provinces['a'].extension)
+print(a.map.mapelementsdict)
 print(a.vars)
 
