@@ -6,9 +6,12 @@ class PlanningDecisions(PlanningProblem):
     def __init__(self, initial, actions,goal_state):
         super().__init__(initial,actions,goal_state)
 
-    def heuristic(domain, state):
+    def heuristic(state, actions):
         """Heuristic for the decisions problem."""
-        return 1
+        h_values={}
+        for action in actions:
+            h_values[action]=1
+
 
     # def next(self,domain, state, h_values):
     #     """Get the next action to do in order of priority"""
@@ -18,7 +21,7 @@ class PlanningDecisions(PlanningProblem):
         """Check if the state is a goal state."""
         for goal in self.goal_state:
             #preconds={"economical_resources":(">",1000)}  example
-            if not self.apply_operator(goal.value()[0],state.traits[goal.key()],goal.value()[1]):
+            if not apply_operator(self.goal_state[goal][0],state.traits[goal],self.goal_state[goal][1]):
                 return False
             return True 
 
@@ -34,7 +37,7 @@ class Decision(Action):
     def check_preconds(self,state):
         for precond in self.preconds:
             #preconds={"economical_resources":(">",1000)}  example
-            if not self.apply_operator(precond.value()[0],state.traits[precond.key()],precond.value()[1]):
+            if not apply_operator(precond.value()[0],state.traits[precond.key()],precond.value()[1]):
                 return False
             return True
 
@@ -42,15 +45,15 @@ class Decision(Action):
     def make_action(self,state):
         #effects={"economical_resources":("-",1000),"industrialization":("+",1)}    example
         for effect in self.effects:
-            state.traits[effect.key()]=self.apply_operator(effect.value()[0], state.traits[effect.key()],effect.value()[1])
+            state.traits[effect]=apply_operator(self.effects[effect][0], state.traits[effect],self.effects[effect][1])
 
-    def apply_operator(operator, val1,val2):
-        if operator==">":
-            return val1 < val2
-        if operator==">":
-            return val1 > val2
-        if operator=="+":
-            return val1 + val2
-        if operator=="-":
-            return val1 - val2
+def apply_operator(operator, val1,val2):
+    if operator==">":
+        return val1 < val2
+    if operator==">":
+        return val1 > val2
+    if operator=="+":
+        return val1 + val2
+    if operator=="-":
+        return val1 - val2
 

@@ -1,6 +1,13 @@
 from planning_decisions import *
 
-initial_state = {"weather":2,"economical_resources":123434,"mineral_resources":{"water":2,"iron":2,"petroleum":2},"economic_spheres":{"industrialization":3,"tourism":4},
+class Nation():
+    def __init__(self, name: str, provinces: dict, traits: list):
+        #super().__init__(name)
+        self.provinces = provinces
+        self.traits = traits
+        self.name=name
+
+traits = {"weather":2,"economical_resources":123434,"mineral_resources":{"water":2,"iron":2,"petroleum":2},"economic_spheres":{"industrialization":3,"tourism":4},
                 "inhabitants_number":15443,"IDH":3,"average_living_standard ":2,"population_immigration-migration":(1,4),"territory_km2":2312,
                 "PIB":1074000000000,"international_relations":{"Spain":3,"EEUU":-5,"Russia":4,"China":3}}
 
@@ -9,7 +16,12 @@ actions=[Decision(action="increase_industrialization",preconds={"economical_reso
         #  Decision(action="",preconds={"economical_resources":(">",1000)},effects={"economical_resources":("-",1000),"industrialization":("+",1)}),
         #  Decision(action="",preconds={"economical_resources":(">",1000)},effects={"economical_resources":("-",1000),"industrialization":("+",1)}),]
 
-decisions=PlanningDecisions(initial_state,actions, goal_state={"industrialization":(">",4)})
+initial_state=Nation(name="Brazil",provinces={},traits=traits)
 
-print(get_path(decisions.states()))
-print(get_path(decisions.actions()))
+decisions=PlanningDecisions(initial_state,actions, goal_state={"industrialization":(">",4)})
+states,actions=decisions.make_planning()
+
+print(get_path(states))
+print(get_path(actions))
+
+

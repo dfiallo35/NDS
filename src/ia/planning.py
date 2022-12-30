@@ -10,12 +10,12 @@
 class PlanningProblem:#(Problem):
     """General Planning Problem"""
     def __init__(self, initial_state:dict, actions:dict(),goal_state:dict()) -> None:
-        super().__init__(actions)
+        #super().__init__(actions)
         self.initial_state = initial_state
         self.actions = actions
         self.goal_state = goal_state
-        self.states=StateNode(initial_state)
-        self.actual_state=self.states
+        self.states = StateNode(initial_state)
+        self.actual_state = self.states
     
     def is_goal_state(self,state):
         """Check if this state superate the objetive"""
@@ -23,6 +23,11 @@ class PlanningProblem:#(Problem):
             if state[key] < self.goal_state[key]:
                 return False
         return True
+
+    def make_planning(self):
+        state, actions=search(self)
+        return state,actions
+
 
     def heuristic_function(self):
         """An heuristic function definited for the concret problem"""
@@ -92,7 +97,7 @@ def search(problem):
     return bfsearch(problem)       
 
 def bfsearch(problem:PlanningProblem):
-    """Breadth-first search algorithm."""
+    """Breadth-first search algorithm for a Planning Problem"""
     queue = Queue()
     visited = set()    
     state:StateNode
