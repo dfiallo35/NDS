@@ -79,11 +79,15 @@ def search(problem):
     return bfsearch(problem)       
 
 def bfsearch(problem:PlanningProblem):
-    """Breadth-first search algorithm for a Planning Problem"""
+    """Breadth-first search algorithm for a Planning Problem"""    
     queue = Queue()
     visited = set()   
+    iterations=0
     queue.push(StateNode(value={"state":problem.initial_state,"action":None}))
     while not queue.empty():
+        iterations+=1
+        if iterations>10000:
+            return None
         state = queue.pop()
         if(problem.is_goal_state(state.value["state"])):
                 return state      
@@ -96,8 +100,6 @@ def bfsearch(problem:PlanningProblem):
                 next_state=StateNode(value={"action":action,"state":next_state})
                 state.add_son(next_state)
                 queue.push(next_state)
-    return state
-
 
 def ordered_actions_priority(state,h_values):
     """receive a dict of actions and it's values and return a list of actions ordered by priority
