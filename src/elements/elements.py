@@ -50,15 +50,29 @@ class Nation(MapElement):
     @property
     def contains(self):
         return list(self.provinces.keys())
+    
+    def get_nation_data(self, name: str):
+        data= 0
+        for i in self.provinces.values():
+            if i.data.get(name):
+                data+= i.data[name]
+        return data
+
+    def __str__(self):
+        return f'{self.name} with extension: {self.extension}, development: {self.development}, population: {self.population}'
 
 
 class Province(MapElement):
-    def __init__(self, name: str, extension:float, development: int, population: int):
+    def __init__(self, name: str, extension:float, development: int, population: int, **kwargs):
         super().__init__(name)
         self.extension = extension
         self.development = development
         self.population = population
+        self.__dict__.update(kwargs)
+        self.data = {**kwargs, 'extension': extension, 'development': development, 'population': population}
 
+    def __str__(self):
+        return f'{self.name} with extension: {self.extension}, development: {self.development}, population: {self.population}'
 
 class Sea(MapElement):
     def __init__(self, name: str, extension:float):
@@ -74,12 +88,8 @@ class Neutral(MapElement):
 
 #todo: add affinity values limits
 class Trait(Element):
-    def __init__(self, name: str, affinity: dict[str: int]):
+    def __init__(self, name: str):
         super().__init__(name)
-        self.affinity = affinity
-    
-    def __str__(self):
-        return self.name + ' ' + str(self.afinity)
 
 
 

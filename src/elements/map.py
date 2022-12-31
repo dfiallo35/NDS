@@ -141,14 +141,13 @@ class Map:
         self.__add_edges(name, neighbours)
         return neutral
     
-    def add_trait(self, name: str, affinity: list[tuple[str, int]]):
+    def add_trait(self, name: str):
         '''
         Add a trait to the map
         :param name: the trait name
-        :param affinity: the affinity of the trait with the categories
         '''
         self.__exist_element(name)
-        trait= Trait(name= name, affinity= {str(category): int(value) for category, value in affinity})
+        trait= Trait(name= name)
         self.traitdict[name]= trait
         return trait
     
