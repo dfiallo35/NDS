@@ -2,10 +2,10 @@ from sly import Lexer, Parser
 
 
 #todo: add time
-#todo: add floordiv, mod and pow
-#todo: add, sub, mul, div, floordiv, mod and pow to arrays
+#todo: add floordiv
+#todo: add, sub, mul, div to arrays
 class NDSLexer(Lexer):
-    tokens = {'NATION', 'PROVINCE', 'SEA', 'NEUTRAL', 'TRAIT', 'EVENT', 'DISTRIBUTION',
+    tokens = {'NATION', 'PROVINCE', 'SEA', 'NEUTRAL', 'TRAIT', 'EVENT', 'DISTRIBUTION', 'TIME',
             'SHOW',
             'NAME',
             'NUMBER', 'STRING', 'BOOL',
@@ -13,7 +13,7 @@ class NDSLexer(Lexer):
             'FOR', 'WHILE', 'IF', 'ELSE',
             'NOT', 'AND', 'OR', 'XOR',
             'GREATER', 'EGREATER', 'LESS', 'ELESS', 'XPLUS', 'XMINUS', 'EQUALS', 'NOTEQUALS', 
-            'PLUS', 'MINUS', 'MULTIPLY', 'DIVIDE'}
+            'PLUS', 'MINUS', 'MULTIPLY', 'DIVIDE', 'POW', 'MOD'}
     
     literals = { '(', ')', '{', '}', '[', ']', ';', ','}
 
@@ -25,10 +25,16 @@ class NDSLexer(Lexer):
     
 
     #VARIABLES
-    NAME= r'[a-zA-Z][a-zA-Z0-9_]*[a-zA-Z0-9]*'
+    NAME= r'[_]*[a-zA-Z][a-zA-Z0-9_]*'
 
+    #TIME
+    NAME['2d']= 'TIME'
+
+    #BOOLEANS
     NAME['true'] = 'BOOL'
     NAME['false'] = 'BOOL'
+
+    #ELEMENTS
     NAME['nation'] = 'NATION'
     NAME['province'] = 'PROVINCE'
     NAME['sea'] = 'SEA'
@@ -36,102 +42,19 @@ class NDSLexer(Lexer):
     NAME['trait'] = 'TRAIT'
     NAME['event'] = 'EVENT'
     NAME['distribution'] = 'DISTRIBUTION'
+
+    #FUNCTIONS
     NAME['show'] = 'SHOW'
     NAME['for'] = 'FOR'
     NAME['while'] = 'WHILE'
     NAME['if'] = 'IF'
     NAME['else'] = 'ELSE'
+
+    #LOGIC
     NAME['not'] = 'NOT'
     NAME['and'] = 'AND'
     NAME['or'] = 'OR'
     NAME['xor'] = 'XOR'
-    
-
-    #ELEMENTS
-    # NATION= r'nation\s+'
-    # def NATION(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
-    
-    # PROVINCE= r'province\s+'
-    # def PROVINCE(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
-    
-    # SEA= r'sea\s+'
-    # def SEA(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
-    
-    # NEUTRAL= r'neutral\s+'
-    # def NEUTRAL(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
-    
-    # EVENT= r'event\s+'
-    # def EVENT(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
-    
-    # DISTRIBUTION= r'distribution\s+'
-    # def DISTRIBUTION(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
-    
-    # TRAIT= r'trait\s+'
-    # def TRAIT(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
-    
-    
-    # #FUNCTIONS
-    # SHOW= r'show\s*'
-    # def SHOW(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
-
-
-    #LOOPS
-    # FOR= r'for\s+'
-    # def FOR(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
-    
-    # WHILE= r'while\s+'
-    # def WHILE(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
-    
-    # #CONDITIONS
-    # IF= r'if\s+'
-    # def IF(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
-    
-    # ELSE= r'else\s+'
-    # def ELSE(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
-    
-    # NOT= r'not\s+'
-    # def NOT(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
-    
-    # AND= r'and\s+'
-    # def AND(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
-    
-    # OR= r'or\s+'
-    # def OR(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
-    
-    # XOR= r'xor\s+'
-    # def XOR(self, t):
-    #     t.value = str(t.value).strip()
-    #     return t
     
     #OPERATORS
     EQUALS= r'=='
@@ -141,16 +64,12 @@ class NDSLexer(Lexer):
     EGREATER= r'>='
     ELESS= r'<='
 
-    
-    
-
     #CONSTANTS
     NUMBER = r'\d+'
     STRING = r'\'.*?\''
     def STRING(self, t):
         t.value = str(t.value).strip('\'')
         return t
-    
 
     # Special symbols
     ASSIGN = r'='
@@ -162,7 +81,9 @@ class NDSLexer(Lexer):
 
     PLUS = r'\+'
     MINUS = r'-'
+    POW = r'\*\*'
     MULTIPLY = r'\*'
+    MOD= r'\%'
     DIVIDE = r'/'
 
     # Ignored pattern
@@ -173,7 +94,7 @@ class NDSLexer(Lexer):
         self.index += 1
 
 
-class obj:
+class pobj:
     def __init__(self, type:str, **kwargs):
         self.type= type
         self.__dict__.update(kwargs)
@@ -198,12 +119,22 @@ class NDSParser(Parser):
     debugfile = 'parser.out'
 
     precedence = (
+        ('left', 'NATION', 'PROVINCE', 'SEA', 'NEUTRAL', 'TRAIT', 'EVENT', 'DISTRIBUTION'),
+        ('left', 'NAME', 'NUMBER', 'STRING', 'BOOL'),
+        ('left', 'TIME'),
+        ('left', 'SHOW'),
+        ('left', 'FOR', 'WHILE', 'IF', 'ELSE'),
+
         ('left', 'PLUS', 'MINUS'),
-        ('left', 'MULTIPLY', 'DIVIDE'),
+        ('left', 'MULTIPLY', 'DIVIDE', 'MOD', 'POW'),
         ('left', 'AND', 'OR', 'XOR'),
         ('left', 'EQUALS', 'NOTEQUALS', 'GREATER', 'LESS', 'EGREATER', 'ELESS'),
-        ('left', 'NAME'),
-        ('left', 'BOOL'),
+        ('left', 'XPLUS', 'XMINUS'),
+        ('left', 'UMINUS', 'UPLUS'),
+
+        ('left', 'NOT'),
+        
+
         #todo: precedences
         )
 
@@ -241,13 +172,13 @@ class NDSParser(Parser):
     #ELEMENTS
     @_('NATION NAME params', 'PROVINCE NAME params', 'SEA NAME params', 'NEUTRAL NAME params', 'TRAIT NAME params')
     def element(self, p):
-        return obj(type='element', subtype=p[0], name=p.NAME, params=p[2])
+        return pobj(type='element', subtype=p[0], name=p.NAME, params=p[2])
     
 
     #VARS
     @_('NAME ASSIGN expr')
     def var(self, p):
-        return obj(type='var', name=p.NAME, value=p.expr)
+        return pobj(type='var', name=p.NAME, value=p.expr)
     
 
     #PARAMETERS
@@ -269,44 +200,48 @@ class NDSParser(Parser):
 
     @_('NAME PARAMASSIGN expr')
     def param(self, p):
-        return obj(type='param', name=p.NAME, value=p.expr)
+        return pobj(type='param', name=p.NAME, value=p.expr)
     
 
     #CONDITIONS
     @_('expr AND expr', 'expr OR expr', 'expr XOR expr')
     def condition(self, p):
-        return obj(type='condition', subtype=p[1], left=p.expr0, right=p.expr1)
+        return pobj(type='condition', subtype=p[1], left=p.expr0, right=p.expr1)
     
     @_('NOT expr')
     def condition(self, p):
-        return obj(type='scondition', subtype=p[0], value=p.expr)
+        return pobj(type='scondition', subtype=p[0], value=p.expr)
     
 
     #COMPARATIONS
     @_('expr EQUALS expr', 'expr NOTEQUALS expr', 'expr GREATER expr', 'expr LESS expr', 'expr EGREATER expr', 'expr ELESS expr')
     def condition(self, p):
-        return obj(type='comparation', subtype=p[1], left=p.expr0, right=p.expr1)
+        return pobj(type='comparation', subtype=p[1], left=p.expr0, right=p.expr1)
 
     #EXPRESSIONS
     @_('NAME')
     def expr(self, p):
-        return obj(type='expr', subtype='name', value=str(p.NAME))
+        return pobj(type='expr', subtype='name', value=str(p.NAME))
 
     @_('NUMBER')
     def expr(self, p):
-        return obj(type='expr', subtype='number', value=int(p.NUMBER))
+        return pobj(type='expr', subtype='number', value=int(p.NUMBER))
     
     @_('STRING')
     def expr(self, p):
-        return obj(type='expr', subtype='string', value=str(p.STRING))
+        return pobj(type='expr', subtype='string', value=str(p.STRING))
     
     @_('BOOL')
     def expr(self, p):
-        return obj(type='expr', subtype='bool', value=str(p.BOOL))
+        return pobj(type='expr', subtype='bool', value=str(p.BOOL))
+    
+    @_('TIME')
+    def expr(self, p):
+        return pobj(type='expr', subtype='time', value=str(p.TIME))
     
     @_('"[" list_expr "]"')
     def expr(self, p):
-        return obj(type='expr', subtype='list', value=p.list_expr)
+        return pobj(type='expr', subtype='list', value=p.list_expr)
     
     @_('condition')
     def expr(self, p):
@@ -317,21 +252,21 @@ class NDSParser(Parser):
         return p.expr
     
     #ARITHMETIC
-    @_('expr PLUS expr', 'expr MINUS expr', 'expr MULTIPLY expr', 'expr DIVIDE expr')
+    @_('expr PLUS expr', 'expr MINUS expr', 'expr MULTIPLY expr', 'expr DIVIDE expr', 'expr POW expr', 'expr MOD expr')
     def expr(self, p):
-        return obj(type='arithmetic', subtype=p[1], left=p.expr0, right=p.expr1)
+        return pobj(type='arithmetic', subtype=p[1], left=p.expr0, right=p.expr1)
     
     @_('XPLUS expr', 'XMINUS expr')
     def expr(self, p):
-        return obj(type='xarithmetic', subtype=p[0], left=p.expr)
+        return pobj(type='xarithmetic', subtype=p[0], left=p.expr)
     
-    @_('PLUS expr', 'MINUS expr')
+    @_('PLUS expr %prec UPLUS', 'MINUS expr %prec UMINUS')
     def expr(self, p):
-        return obj(type='sarithmetic', subtype=p[0], value=p.expr)
+        return pobj(type='uarithmetic', subtype=p[0], value=p.expr)
     
     @_('expr ARROW expr')
     def expr(self, p):
-        return obj(type='expr', subtype='arrow', left=p.expr0, right=p.expr1)
+        return pobj(type='expr', subtype='arrow', left=p.expr0, right=p.expr1)
     
 
     #LIST
@@ -351,20 +286,20 @@ class NDSParser(Parser):
     #FUNCTIONS
     @_('SHOW "(" expr ")"')
     def function(self, p):
-        return obj(type='function', subtype=p[0], value=p.expr)
+        return pobj(type='function', subtype=p[0], value=p.expr)
 
     @_('EVENT NAME params "{" script "}"', 'DISTRIBUTION NAME params "{" script "}"')
     def function(self, p):
         if p[0] == 'event':
-            return obj(type='function', subtype=p[0], name=p.NAME, params=p.params, script=p.script)
+            return pobj(type='function', subtype=p[0], name=p.NAME, params=p.params, script=p.script)
     
     @_('ELSE "{" script "}"')
     def function(self, p):
-        return obj(type='function', subtype=p[0], script=p.script)
+        return pobj(type='function', subtype=p[0], script=p.script)
 
     @_('IF "(" condition ")" "{" script "}"', 'WHILE "(" condition ")" "{" script "}"')
     def function(self, p):
-        return obj(type='function', subtype=p[0], condition=p.condition, script=p.script)
+        return pobj(type='function', subtype=p[0], condition=p.condition, script=p.script)
 
     #ERRORS
     def error(self, p):
@@ -382,7 +317,19 @@ def compile(code: str):
 
 # for i in compile(
 #     '''
-#     2+2
+#     2
 #     '''
 # ):
 #     print(i)
+
+
+
+
+
+
+
+
+
+
+
+
