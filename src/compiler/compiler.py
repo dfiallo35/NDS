@@ -1,6 +1,6 @@
 from sly import Lexer, Parser
 
-
+#todo: recordar strips
 #todo: add time
 #todo: add floordiv
 #todo: add, sub, mul, div to arrays
@@ -28,7 +28,10 @@ class NDSLexer(Lexer):
     NAME= r'[_]*[a-zA-Z][a-zA-Z0-9_]*'
 
     #TIME
-    NAME['2d']= 'TIME'
+    TIME = r'\d+[dmy]'
+    def TIME(self, t):
+        t.value = str(t.value).strip('dmy')
+        return t
 
     #BOOLEANS
     NAME['true'] = 'BOOL'
@@ -131,10 +134,7 @@ class NDSParser(Parser):
         ('left', 'EQUALS', 'NOTEQUALS', 'GREATER', 'LESS', 'EGREATER', 'ELESS'),
         ('left', 'XPLUS', 'XMINUS'),
         ('left', 'UMINUS', 'UPLUS'),
-
         ('left', 'NOT'),
-        
-
         #todo: precedences
         )
 
@@ -317,7 +317,7 @@ def compile(code: str):
 
 # for i in compile(
 #     '''
-#     2
+#     2y
 #     '''
 # ):
 #     print(i)
