@@ -7,13 +7,14 @@ from compiler.compiler import *
 #todo: terminar value method
 
 #fix: var and elements names cant be de same
+
 class Code:
     def __init__(self) -> None:
         self.elements= dict()
         self.vars= dict()
 
         self.execution_list = list()
-        self.compiled_list= list[obj]
+        self.compiled_list= list[pobj]
 
         self.map= Map()
 
@@ -31,94 +32,130 @@ class Code:
             
             #FUNCTIONS
             elif compiled.type == 'function':
-                ...
+                if compiled.subtype == 'show':
+                    print('>>',self.value(compiled.value))
+                self.add_function(compiled)
             
             else:
-                print(self.value(compiled))
+                raise Exception('Error: unknown type')
 
 
     #todo: add conditions
-    def value(self, object: obj):
-        if type(object) == obj:
-
-            #todo: add all arithmetics
-            #todo: restrict arithmetics to numbers
-            if object.type == 'arithmetic':
-                left= self.value(object.left)
-                right= self.value(object.right)
-
-                if object.subtype == '+':
-                    return left + right
-                if object.subtype == '*':
-                    return left * right
-                if object.subtype == '/':
-                    return left / right
-                if object.subtype == '-':
-                    return left - right
+    def value(self, obj: pobj):
+        if type(obj) == pobj:
             
-            if object.type == 'sarithmetic':
-                if object.subtype == '+':
-                    return + self.value(object.value)
-                if object.subtype == '-':
-                    return - self.value(object.value)
+            if obj.type == 'expr':
+
+                if obj.subtype == 'number':
+                    return number(obj.value)
+
+                elif obj.subtype == 'string':
+                    return string(obj.value)
+
+                elif obj.subtype == 'bool':
+                    if obj.value == 'true':
+                        return boolean(True)
+                    return boolean(False)
+
+                elif obj.subtype == 'list':
+                    return array([self.value(value) for value in obj.value])
+
+                elif obj.subtype == 'name':
+                    if obj.value in self.vars:
+                        return self.vars[obj.value]
+                    elif obj.value in self.map.mapelementsdict:
+                        return self.map.mapelementsdict[obj.value]
+                    else:
+                        raise Exception(f'Name {obj.value} not found')
             
-            elif object.type == 'xarithmetic':
+            elif obj.type == 'arithmetic':
+                left= self.value(obj.left)
+                right= self.value(obj.right)
+                
+                if self.same_type(left, right):
+                    try:
+                        if obj.subtype == '+':
+                            return left + right
+                        if obj.subtype == '*':
+                            return left * right
+                        if obj.subtype == '/':
+                            return left / right
+                        if obj.subtype == '-':
+                            return left - right
+                        if obj.subtype == '%':
+                            return left % right
+                        if obj.subtype == '**':
+                            return left**right
+                    except:
+                        raise Exception(f'Error: {left.type} does not support "{obj.subtype}" operation')
+                else:
+                    raise Exception('Error: Cant do arithmetic with different types')
+            
+            if obj.type == 'uarithmetic':
+                try:
+                    if obj.subtype == '+':
+                        return + self.value(obj.value)
+                    if obj.subtype == '-':
+                        return - self.value(obj.value)
+                except:
+                    raise Exception(f'Error: {self.value(obj.value).type} does not support "{obj.subtype}" unary operation')
+            
+            #todo
+            elif obj.type == 'xarithmetic':
                 ...
             
-            elif object.type == 'condition':
-                left= self.conditions(self.value(object.left))
-                right= self.conditions(self.value(object.right))
-
-                if object.subtype == 'and':
-                    return left and right
-                if object.subtype == 'or':
-                    return left or right
+            elif obj.type == 'condition':
+                left= self.conditions(self.value(obj.left))
+                right= self.conditions(self.value(obj.right))
+                
+                try:
+                    if obj.subtype == 'and':
+                        return left & right
+                    if obj.subtype == 'or':
+                        return left | right
+                    if obj.subtype == 'xor':
+                        return left ^ right
+                except:
+                    raise Exception(f'Error: {left.type} does not support "{obj.subtype}" operation')
             
-            elif object.type == 'comparation':
-                left= self.value(object.left)
-                right= self.value(object.right)
+            elif obj.type == 'comparation':
+                left= self.value(obj.left)
+                right= self.value(obj.right)
 
-                if object.subtype == '==':
-                    return left == right
-                if object.subtype == '!=':
-                    return left != right
-                if object.subtype == '>':
-                    print(left, right)
-                    return left > right
-                if object.subtype == '<':
-                    return left < right
-                if object.subtype == '>=':
-                    return left >= right
-                if object.subtype == '<=':
-                    return left <= right
-
-            
-            elif object.type == 'scondition':
-                if object.subtype == 'not':
-                    return not self.conditions(self.value(object.value))
-            
-            elif object.type == 'expr':
-                if object.subtype == 'list':
-                    return [self.value(value) for value in object.value]
+                if self.same_type(left, right):
+                    try:
+                        if obj.subtype == '==':
+                            return left == right
+                        if obj.subtype == '!=':
+                            return left != right
+                        if obj.subtype == '>':
+                            return left > right
+                        if obj.subtype == '<':
+                            return left < right
+                        if obj.subtype == '>=':
+                            return left >= right
+                        if obj.subtype == '<=':
+                            return left <= right
+                    except:
+                        raise Exception(f'Error: "{left.type}" does not support "{obj.subtype}" operation')
                 else:
-                    return self.value(object.value)
+                    raise Exception(f'Error: "{obj.subtype}" not supported between instances of "{left.type}" and "{right.type}"')
             
-            elif object.get('name') and object.name in self.vars:
-                return self.vars[object.name]
-            
-            elif object.get('name') and  object.name in self.map.mapelementsdict:
-                return self.map.mapelementsdict[object.name]
+            elif obj.type == 'scondition':
+                if obj.subtype == 'not':
+                    return ~self.value(obj.value)
             
             else:
-                return object.value
-        
+                #check: an error can be raised here
+                raise Exception(f'Error: ------------------')
+                return obj.value
         else:
-            return object
+            raise Exception('The object is not recognized')
     
-    def params(self, object: obj):
+    def params(self, obj: pobj):
         params= dict()
-        params['name']= object.name
-        for param in object.params:
+        params['name']= obj.name
+        for param in obj.params:
             val= self.value(param.value)
             if type(val) == str:
                 if self.vars.get(val):
@@ -128,12 +165,11 @@ class Code:
             params[param.name]= val
         return params
     
-    def conditions(self, object):
-        print(object)
-        if type(object) == None or object == int(0) or object == str('') or object == list() or object == dict():
-            return False
+    def conditions(self, obj):
+        if (obj == number(0)).value or (obj == string('')).value or (obj == array([])).value or (obj == boolean(False)).value:
+            return boolean(False)
         else:
-            return True
+            return boolean(True)
     
     def add_element(self, element: str, **kwargs):
         '''
@@ -161,20 +197,18 @@ class Code:
         '''
         self.vars[name]= value
     
-    def add_function(self):
+    def add_function(self, obj: pobj):
         ...
-        
-
     
+    def same_type(self, a, b):
+        return type(a) == type(b)
+        
     
 a= Code()
 a.compile(
     '''
-    m= 2+2*4
-    j= 4
-    province a(extension: j, development: 20, population: 30)
-    nation b(provinces: [a])
-    a= 2 and 1
+    province a(extension: 10, development: 20, population: 30)
+    show(a)
     '''
 )
 print(a.map.mapelementsdict)

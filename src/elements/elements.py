@@ -234,14 +234,50 @@ class object:
     @property
     def type(self):
         return self.__class__.__name__
-
-    def __str__(self) -> str:
+    
+    def __str__(self):
         return str(self.val)
+
+
+    #Comparison
+    def __eq__(self, other):
+        return boolean(self.val == other.val)
+    
+    def __ne__(self, other):
+        return boolean(self.val != other.val)
+    
+    def __lt__(self, other):
+        return boolean(self.val < other.val)
+    
+    def __le__(self, other):
+        return boolean(self.val <= other.val)
+    
+    def __gt__(self, other):
+        return boolean(self.val > other.val)
+    
+    def __ge__(self, other):
+        return boolean(self.val >= other.val)
+    
+    def __and__(self, other):
+        return boolean(self.val and other.val)
+    
+    def __or__(self, other):
+        return boolean(self.val or other.val)
+    
+    def __xor__(self, other):
+        return boolean(self.val ^ other.val)
+    
+    def __invert__(self):
+        return boolean(not self.val)
+    
+
 
 class number(object):
     def __init__(self, val) -> None:
         super().__init__(val)
     
+    
+    #Arithmetic
     def __add__(self, other):
         return number(self.val + other.val)
     
@@ -259,6 +295,20 @@ class number(object):
     
     def __mod__(self, other):
         return number(self.val % other.val)
+    
+    def __pow__(self, other):
+        return number(self.val ** other.val)
+    
+    #Unary
+    def __neg__(self):
+        return number(-self.val)
+    
+    def __pos__(self):
+        return number(self.val)
+    
+    def __abs__(self):
+        return number(abs(self.val))
+
 
 
 class string(object):
@@ -272,6 +322,9 @@ class string(object):
 class boolean(object):
     def __init__(self, val) -> None:
         super().__init__(val)
+    
+    def __str__(self):
+        return str(self.val).lower()
 
 class array(object):
     def __init__(self, val) -> None:
@@ -280,3 +333,23 @@ class array(object):
     def __add__(self, other):
         return array(self.val + other.val)
     
+    def __getitem__(self, key):
+        return self.val[key]
+    
+    def __setitem__(self, key, value):
+        self.val[key] = value
+    
+    def __delitem__(self, key):
+        del self.val[key]
+    
+    def __len__(self):
+        return len(self.val)
+    
+    def __str__(self):
+        l= []
+        for i in self.val:
+            if type(i) == number:
+                l.append(i.value)
+            else:
+                l.append(str(i))
+        return str(l)
