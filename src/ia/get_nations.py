@@ -12,41 +12,28 @@ def get_all_countries():
 
     response = requests.get(url)
 
-    table_class = "wikitable sortable jquery-tablesorter"
-
     # parse data from the html into a beautifulsoup object
     soup = BeautifulSoup(response.text, 'html.parser')
-    # indiatable = soup.find('table',{'class':"wikitable"})
     
     dfs = pd.read_html(response.text)
 
-    # print(dfs)
-
-    # len(dfs)
-
-    # print(dfs[4].head())
-
     df = dfs[1] # table with nations idh
-    # print(df)
 
-    
-    list_of_countries = df[df.columns[2]].values.tolist() 
-    # print(list_of_countries)
+    # keep only country and hdi columns
+    df = df.drop(df.columns[[0, 1, 4]], axis=1) 
+    df = df.droplevel(1, axis=1)
+  
+    list_of_countries = df[df.columns[0]].values.tolist() 
 
-    list_countries_hdi = df[df.columns[3]].values.tolist()
-    # print(list_countries_hdi)
+    # list_countries_hdi = df[df.columns[1]].values.tolist()
 
-    # return list_of_countries, list_countries_hdi
-    
-    return list_of_countries    
+    rc = df.to_records(index=False)
+    rc_list = list(rc)
+    # print(result)
 
-    # convert list to dataframe
-    # df = pd.DataFrame(df[0])
-    # print(df.head())
+    country_hdi = dict()
 
-    # drop the unwanted columns
-    # data = df.drop(["Rank", "Land in km2 (mi2)", "Water in km2 (mi2)", "% water", "Notes"], axis=1)
-    # rename columns for ease
-    # data = data.rename(columns={"State or union territory": "State","Population(2011)[3]": "Population"})
-    # print(data.head())
+    for item in rc_list:
+        country_hdi[item[0]] = item[1]
 
+    return list_of_countries, country_hdi 
