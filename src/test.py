@@ -15,7 +15,7 @@ m.add_province('Madrid', 10, 10, 120)
 m.update('Habana', development= 20)
 
 m.add_category('Social')
-m.add_trait('Comunist', [('Socia', 5)])
+m.add_trait('Comunist')
 
 
 # def declare_war(map, **kwargs):
@@ -37,10 +37,10 @@ m.add_event(name='mortality' ,distribution= Uniform(1), category= 'Social', enab
 
 
 def Simulation_test():
-    print(list(m.provincedict.values())[0].population)
+    print('init',[i.population for i in list(m.provincedict.values())])
     a= Simulate(m, Queue(m.event_list)).simulate(10)
 
-    print([i.population for i in list(m.provincedict.values())])
+    print('end', [i.population for i in list(m.provincedict.values())])
 
 
 Simulation_test()

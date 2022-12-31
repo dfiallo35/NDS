@@ -1,3 +1,8 @@
+#note: En las comparaciones no se tienen en cuenta lso cambios en los nombres de las provincias o naciones
+#note: Se asume que estos son invariables
+
+from copy import deepcopy as copy
+
 class Element:
     """
     Base class for all the simulation elements.
@@ -8,6 +13,18 @@ class Element:
 
     def __str__(self):
         return self.name
+    
+    
+    def compare(self, other):
+        if type(self) == type(other):
+            changes= {}
+            for key in self.__dict__.keys():
+                if self.__dict__[key] != other.__dict__[key]:
+                    changes[key]= (self.__dict__[key], other.__dict__[key])
+            return changes
+        else:
+            raise Exception(f'Error: "{self.name}" and "{other.name}" are not of the same type')
+
 
 
 class MapElement(Element):
@@ -21,7 +38,7 @@ class MapElement(Element):
 
 
 class Nation(MapElement):
-    def __init__(self, name: str, provinces: dict, traits: list):
+    def __init__(self, name: str, provinces: dict, traits: list=[]):
         super().__init__(name)
         self.provinces = provinces
         self.traits = traits
@@ -51,16 +68,45 @@ class Nation(MapElement):
     def contains(self):
         return list(self.provinces.keys())
     
-    def get_nation_data(self, name: str):
+    def get_nation_data(self, data_name: str):
         data= 0
         for i in self.provinces.values():
-            if i.data.get(name):
-                data+= i.data[name]
+            if i.data.get(data_name):
+                data+= i.data[data_name]
         return data
 
     def __str__(self):
         return f'{self.name} with extension: {self.extension}, development: {self.development}, population: {self.population}'
 
+    def compare(self, new):
+        if self.name == new.name:
+            if type(self) == type(new):
+
+                changes= {
+                    'new': [],
+                    'lost': [],
+                    'changed': {}
+                }
+                new_prov= copy(new.provinces)
+                for province in self.provinces:
+                    if new.provinces.get(province):
+                        new_prov.pop(province)
+                        comp= self.provinces[province].compare(new.provinces[province])
+                        if comp:
+                            changes['changed'][province]= comp
+                    else:
+                        changes['lost'].append(copy(province))
+                changes['new']= [copy(i) for i in new_prov]
+
+                if changes['changed'] or changes['new'] or changes['lost']:
+                    return changes
+                return None
+
+            else:
+                raise Exception(f'Error: "{self.name}" and "{new.name}" are not of the same type')
+        else:
+            raise Exception(f'Error: "{self.name}" and "{new.name}" are not the same nation')
+        
 
 class Province(MapElement):
     def __init__(self, name: str, extension:float, development: int, population: int, **kwargs):
@@ -69,10 +115,40 @@ class Province(MapElement):
         self.development = development
         self.population = population
         self.__dict__.update(kwargs)
-        self.data = {**kwargs, 'extension': extension, 'development': development, 'population': population}
+        # self.data = {**kwargs, 'extension': extension, 'development': development, 'population': population}
+
+    @property
+    def data(self):
+        return self.__dict__
 
     def __str__(self):
         return f'{self.name} with extension: {self.extension}, development: {self.development}, population: {self.population}'
+    
+    def compare(self, new):
+        if self.name == new.name:
+            if type(self) == type(new):
+                changes= {
+                    'changed': {},
+                    'new': [],
+                    'lost': []
+                }
+                new_data= copy(new.data)
+                for key in self.data.keys():
+                    if new.data.get(key):
+                        new_data.pop(key)
+                        if self.data[key] != new.data[key]:
+                            changes['changed'][key]= (self.data[key], new.data[key])
+                    else:
+                        changes['lost'].append(copy(key))
+                changes['new']= [copy(i) for i in new_data]
+
+                if changes['changed'] or changes['new'] or changes['lost']:
+                    return changes
+                return None
+            else:
+                raise Exception(f'Error: "{self.name}" and "{new.name}" are not of the same type')
+        else:
+            raise Exception(f'Error: "{self.name}" and "{new.name}" are not the same province')
 
 class Sea(MapElement):
     def __init__(self, name: str, extension:float):
@@ -363,3 +439,21 @@ class array(object):
             else:
                 l.append(str(i))
         return str(l)
+
+
+class Log:
+    '''
+    The log of the simulation. It is used to store the data of the simulation.
+    '''
+    def __init__(self) -> None:
+        self.log= {}
+    
+    def add(self, time: int, event, old_map, new_map):
+        '''
+        Add a new event to the log
+        :param time: the time of the event
+        :param event: the event
+        :param old_map: the map before the event
+        :param new_map: the map after the event
+        '''
+        ...

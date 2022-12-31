@@ -34,6 +34,33 @@ class Map:
 
         # Graph of the provinces, sea and neutral neighbours
         self.province_neighbours= Graph()
+    
+    #check: test for map, nations are ok
+    def compare(self, new):
+        '''
+        Compare the map with another map
+        :param other: the other map
+        :return: True if the maps are the same
+        '''
+        new_nations= copy(new.nationdict)
+        changes= {
+                    'changed': {},
+                    'new': [],
+                    'lost': []
+                }
+        for nation in self.nationdict.values():
+            if new.nationdict.get(nation.name):
+                new_nations.pop(nation.name)
+                comp= nation.compare(new.nationdict[nation.name])
+                if comp:
+                    changes['changed'][nation.name]= comp
+            else:
+                changes['lost'].append(nation.name)
+        changes['new'] = [copy(i) for i in new_nations.values()]
+
+        if changes['changed'] or changes['new'] or changes['lost']:
+            return changes
+        return None
 
     @property
     def mapelementsdict(self) -> dict:
