@@ -22,9 +22,12 @@ actions=[Decision(action="increase_industrialization",preconds={"economical_reso
 
 initial_state=Nation(name="Brazil",provinces={},traits=traits)
 
-decisions=PlanningDecisions(initial_state,actions, goal_state={"industrialization":(">=",4),"average_living_standard":(">=",3)})
+decisions=PlanningDecisions(initial_state,actions, goal_state={"industrialization":(">=",5),"average_living_standard":(">=",3)})
+decisions=PlanningDecisions(initial_state,actions, goal_state={"water":(">=",5),"average_living_standard":(">=",3)})
+
 states=decisions.make_planning()
 
+print(states)
 print([[i["state"].traits, "-------------------->",i["action"].action if i["action"] else None,"!!!!!!!!!!!!!!!!!!!!!!!!!!!"] for i in get_path(states)])
 
 
