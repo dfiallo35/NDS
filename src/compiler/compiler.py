@@ -1,11 +1,14 @@
 from sly import Lexer, Parser
 
 
-#todo: add bool
+#todo: add time
+#todo: add floordiv, mod and pow
+#todo: add, sub, mul, div, floordiv, mod and pow to arrays
 class NDSLexer(Lexer):
     tokens = {'NATION', 'PROVINCE', 'SEA', 'NEUTRAL', 'TRAIT', 'EVENT', 'DISTRIBUTION',
+            'SHOW',
             'NAME',
-            'NUMBER', 'STRING',
+            'NUMBER', 'STRING', 'BOOL',
             'ASSIGN', 'ARROW', 'PARAMASSIGN',
             'FOR', 'WHILE', 'IF', 'ELSE',
             'NOT', 'AND', 'OR', 'XOR',
@@ -19,89 +22,116 @@ class NDSLexer(Lexer):
     newline = r'\n+'
     def newline(self, t):
         self.lineno += t.value.count('\n')
+    
+
+    #VARIABLES
+    NAME= r'[a-zA-Z][a-zA-Z0-9_]*[a-zA-Z0-9]*'
+
+    NAME['true'] = 'BOOL'
+    NAME['false'] = 'BOOL'
+    NAME['nation'] = 'NATION'
+    NAME['province'] = 'PROVINCE'
+    NAME['sea'] = 'SEA'
+    NAME['neutral'] = 'NEUTRAL'
+    NAME['trait'] = 'TRAIT'
+    NAME['event'] = 'EVENT'
+    NAME['distribution'] = 'DISTRIBUTION'
+    NAME['show'] = 'SHOW'
+    NAME['for'] = 'FOR'
+    NAME['while'] = 'WHILE'
+    NAME['if'] = 'IF'
+    NAME['else'] = 'ELSE'
+    NAME['not'] = 'NOT'
+    NAME['and'] = 'AND'
+    NAME['or'] = 'OR'
+    NAME['xor'] = 'XOR'
+    
 
     #ELEMENTS
-    NATION= r'nation\s+'
-    def NATION(self, t):
-        t.value = str(t.value).strip()
-        return t
+    # NATION= r'nation\s+'
+    # def NATION(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
     
-    PROVINCE= r'province\s+'
-    def PROVINCE(self, t):
-        t.value = str(t.value).strip()
-        return t
+    # PROVINCE= r'province\s+'
+    # def PROVINCE(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
     
-    SEA= r'sea\s+'
-    def SEA(self, t):
-        t.value = str(t.value).strip()
-        return t
+    # SEA= r'sea\s+'
+    # def SEA(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
     
-    NEUTRAL= r'neutral\s+'
-    def NEUTRAL(self, t):
-        t.value = str(t.value).strip()
-        return t
+    # NEUTRAL= r'neutral\s+'
+    # def NEUTRAL(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
     
-    EVENT= r'event\s+'
-    def EVENT(self, t):
-        t.value = str(t.value).strip()
-        return t
+    # EVENT= r'event\s+'
+    # def EVENT(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
     
-    DISTRIBUTION= r'distribution\s+'
-    def DISTRIBUTION(self, t):
-        t.value = str(t.value).strip()
-        return t
+    # DISTRIBUTION= r'distribution\s+'
+    # def DISTRIBUTION(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
     
-    TRAIT= r'trait\s+'
-    def TRAIT(self, t):
-        t.value = str(t.value).strip()
-        return t
+    # TRAIT= r'trait\s+'
+    # def TRAIT(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
     
     
-    #PARAMETERS
-    #todo: add parameters if needed
+    # #FUNCTIONS
+    # SHOW= r'show\s*'
+    # def SHOW(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
 
 
     #LOOPS
-    FOR= r'for\s+'
-    def FOR(self, t):
-        t.value = str(t.value).strip()
-        return t
+    # FOR= r'for\s+'
+    # def FOR(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
     
-    WHILE= r'while\s+'
-    def WHILE(self, t):
-        t.value = str(t.value).strip()
-        return t
+    # WHILE= r'while\s+'
+    # def WHILE(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
     
-    #CONDITIONS
-    IF= r'if\s+'
-    def IF(self, t):
-        t.value = str(t.value).strip()
-        return t
+    # #CONDITIONS
+    # IF= r'if\s+'
+    # def IF(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
     
-    ELSE= r'else\s+'
-    def ELSE(self, t):
-        t.value = str(t.value).strip()
-        return t
+    # ELSE= r'else\s+'
+    # def ELSE(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
     
-    NOT= r'not\s+'
-    def NOT(self, t):
-        t.value = str(t.value).strip()
-        return t
+    # NOT= r'not\s+'
+    # def NOT(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
     
-    AND= r'and\s+'
-    def AND(self, t):
-        t.value = str(t.value).strip()
-        return t
+    # AND= r'and\s+'
+    # def AND(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
     
-    OR= r'or\s+'
-    def OR(self, t):
-        t.value = str(t.value).strip()
-        return t
+    # OR= r'or\s+'
+    # def OR(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
     
-    XOR= r'xor\s+'
-    def XOR(self, t):
-        t.value = str(t.value).strip()
-        return t
+    # XOR= r'xor\s+'
+    # def XOR(self, t):
+    #     t.value = str(t.value).strip()
+    #     return t
     
     #OPERATORS
     EQUALS= r'=='
@@ -112,8 +142,7 @@ class NDSLexer(Lexer):
     ELESS= r'<='
 
     
-    #VARIABLES
-    NAME= r'[a-zA-Z][a-zA-Z0-9_]*[a-zA-Z0-9]*'
+    
 
     #CONSTANTS
     NUMBER = r'\d+'
@@ -121,6 +150,7 @@ class NDSLexer(Lexer):
     def STRING(self, t):
         t.value = str(t.value).strip('\'')
         return t
+    
 
     # Special symbols
     ASSIGN = r'='
@@ -172,6 +202,8 @@ class NDSParser(Parser):
         ('left', 'MULTIPLY', 'DIVIDE'),
         ('left', 'AND', 'OR', 'XOR'),
         ('left', 'EQUALS', 'NOTEQUALS', 'GREATER', 'LESS', 'EGREATER', 'ELESS'),
+        ('left', 'NAME'),
+        ('left', 'BOOL'),
         #todo: precedences
         )
 
@@ -268,6 +300,10 @@ class NDSParser(Parser):
     def expr(self, p):
         return obj(type='expr', subtype='string', value=str(p.STRING))
     
+    @_('BOOL')
+    def expr(self, p):
+        return obj(type='expr', subtype='bool', value=str(p.BOOL))
+    
     @_('"[" list_expr "]"')
     def expr(self, p):
         return obj(type='expr', subtype='list', value=p.list_expr)
@@ -313,6 +349,10 @@ class NDSParser(Parser):
     
 
     #FUNCTIONS
+    @_('SHOW "(" expr ")"')
+    def function(self, p):
+        return obj(type='function', subtype=p[0], value=p.expr)
+
     @_('EVENT NAME params "{" script "}"', 'DISTRIBUTION NAME params "{" script "}"')
     def function(self, p):
         if p[0] == 'event':
