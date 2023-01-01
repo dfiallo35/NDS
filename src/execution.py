@@ -6,8 +6,6 @@ from compiler.compiler import *
 #todo: generar codigo de funciones
 #todo: terminar value method
 
-#fix: var and elements names cant be de same
-
 class Code:
     def __init__(self) -> None:
         self.vars= dict()
@@ -38,7 +36,15 @@ class Code:
                     self.add_var(compiled.name, self.value(compiled.value))
                 else:
                     raise Exception(f'Error: {compiled.name} is already a element name')
-                
+            
+            elif compiled.type == 'element var':
+                if compiled.name in self.elements:
+                    if self.elements[compiled.name].data.get(compiled.var):
+                        self.elements[compiled.name].data[compiled.var] = self.value(compiled.value)
+                    else:
+                        raise Exception(f'Error: var {compiled.var} does not exist in element {compiled.name}')
+                else:
+                    raise Exception(f'Error: {compiled.name} is not a element name')
             
             #FUNCTIONS
             elif compiled.type == 'function':
@@ -81,6 +87,15 @@ class Code:
                         return self.elements[obj.value]
                     else:
                         raise Exception(f'Name {obj.value} not found')
+
+                elif obj.subtype == 'arrow':
+                    if obj.name in self.elements:
+                        if self.elements[obj.name].data.get(obj.var):
+                            return self.elements[obj.name].data[obj.var]
+                        else:
+                            raise Exception(f'Error: var {obj.var} does not exist in element {obj.name}')
+                    else:
+                        raise Exception(f'Error: {obj.name} is not a element name')
             
             elif obj.type == 'arithmetic':
                 left= self.value(obj.left)
@@ -222,13 +237,11 @@ a= Code()
 a.compile(
     '''
     province Havana(extension: 10, development: 20, population: 30)
-    show(Havana)
-    a= 2y
-    b= 3
-    c= 3.6
-    show(a)
+    show(Havana->extension)
+    Havana->extension: 20
+    show(Havana->extension)
     '''
 )
-print(a.map.mapelementsdict)
+print(a.map.mapelementsdict['Havana'].extension)
 print(a.vars)
 

@@ -1,12 +1,11 @@
 from sly import Lexer, Parser
 
-#todo: recordar strips
-#todo: add time
+
 #todo: add floordiv
 #todo: add, sub, mul, div to arrays
 class NDSLexer(Lexer):
     tokens = {'NATION', 'PROVINCE', 'SEA', 'NEUTRAL', 'TRAIT', 'EVENT', 'DISTRIBUTION', 'TIME',
-            'SHOW',
+            'FUNC',
             'NAME',
             'NUMBER', 'STRING', 'BOOL',
             'ASSIGN', 'ARROW', 'PARAMASSIGN',
@@ -43,8 +42,12 @@ class NDSLexer(Lexer):
     NAME['event'] = 'EVENT'
     NAME['distribution'] = 'DISTRIBUTION'
 
+    #SPECIAL FUNCTIONS
+    NAME['show'] = 'FUNC'
+    NAME['simulate'] = 'FUNC'
+    # NAME[''] = 'FUNC'
+
     #FUNCTIONS
-    NAME['show'] = 'SHOW'
     NAME['for'] = 'FOR'
     NAME['while'] = 'WHILE'
     NAME['if'] = 'IF'
@@ -122,7 +125,7 @@ class NDSParser(Parser):
         ('left', 'NATION', 'PROVINCE', 'SEA', 'NEUTRAL', 'TRAIT', 'EVENT', 'DISTRIBUTION'),
         ('left', 'NAME', 'NUMBER', 'STRING', 'BOOL'),
         ('left', 'TIME'),
-        ('left', 'SHOW'),
+        ('left', 'FUNC'),
         ('left', 'FOR', 'WHILE', 'IF', 'ELSE'),
 
         ('left', 'PLUS', 'MINUS'),
@@ -176,6 +179,11 @@ class NDSParser(Parser):
     @_('NAME ASSIGN expr')
     def var(self, p):
         return pobj(type='var', name=p.NAME, value=p.expr)
+    
+    #ELEMENTS VARS
+    @_('NAME ARROW NAME PARAMASSIGN expr')
+    def var(self, p):
+        return pobj(type='element var', name=p.NAME0, var=p.NAME1, value=p.expr)
     
 
     #PARAMETERS
@@ -264,9 +272,9 @@ class NDSParser(Parser):
     def expr(self, p):
         return pobj(type='uarithmetic', subtype=p[0], value=p.expr)
     
-    @_('expr ARROW expr')
+    @_('NAME ARROW NAME')
     def expr(self, p):
-        return pobj(type='expr', subtype='arrow', left=p.expr0, right=p.expr1)
+        return pobj(type='expr', subtype='arrow', name=p.NAME0, var=p.NAME1)
     
 
     #LIST
@@ -284,9 +292,9 @@ class NDSParser(Parser):
     
 
     #FUNCTIONS
-    @_('SHOW "(" expr ")"')
+    @_('FUNC "(" expr ")"')
     def function(self, p):
-        return pobj(type='function', subtype=p[0], value=p.expr)
+        return pobj(type='special function', subtype=p[0], value=p.expr)
 
     @_('EVENT NAME params "{" script "}"', 'DISTRIBUTION NAME params "{" script "}"')
     def function(self, p):
@@ -317,7 +325,7 @@ def compile(code: str):
 
 # for i in compile(
 #     '''
-#     a= 2.53444
+#     a->b
 #     '''
 # ):
 #     print(i.value)
