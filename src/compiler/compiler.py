@@ -29,9 +29,6 @@ class NDSLexer(Lexer):
 
     #TIME
     TIME = r'\d+[dmy]'
-    def TIME(self, t):
-        t.value = str(t.value).strip('dmy')
-        return t
 
     #BOOLEANS
     NAME['true'] = 'BOOL'

@@ -48,6 +48,10 @@ class Code:
 
                 if obj.subtype == 'number':
                     return number(obj.value)
+                
+                #todo: add time
+                if obj.subtype == 'time':
+                    return time(int(obj.value[:-1]), obj.value[-1])
 
                 elif obj.subtype == 'string':
                     return string(obj.value)

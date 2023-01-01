@@ -169,148 +169,10 @@ class Trait(Element):
 
 
 
-# TIME
-class Time(Element):
-    def __init__(self, name: str, time: int):
-        super().__init__(name)
-        self.time= time
-    
-    @property
-    def get_time(self):
-        return self.time
-    
-    @property
-    def days(self):
-        return self.to_days().time
-    
-    @property
-    def months(self):
-        return self.to_months().time
-    
-    @property
-    def years(self):
-        return self.to_years().time
-    
-    def to_days(self):
-        '''
-        Convert the time to days
-        :param time: the time to be converted
-        :return: the time converted to days
-        '''
-        ...
-    
-    def to_months(self):
-        '''
-        Convert the time to months
-        :param time: the time to be converted
-        :return: the time converted to months
-        '''
-        ...
-    
-    def to_years(self):
-        '''
-        Convert the time to years
-        :param time: the time to be converted
-        :return: the time converted to years
-        '''
-        ...
-
-class Day(Time):
-    def __init__(self, name: str, time: int):
-        super().__init__(name, time)
-    
-    def __str__(self):
-        return str(self.time) + ' days'
-    
-    def to_days(self):
-        '''
-        Convert the time to days
-        :param time: the time to be converted
-        :return: the time converted to days
-        '''
-        return Day(self.name, self.time)
-    
-    def to_months(self):
-        '''
-        Convert the time to months
-        :param time: the time to be converted
-        :return: the time converted to months
-        '''
-        return Month(self.name, self.time / 30)
-    
-    def to_years(self):
-        '''
-        Convert the time to years
-        :param time: the time to be converted
-        :return: the time converted to years
-        '''
-        return Year(self.name, self.time / 365)
-
-class Month(Time):
-    def __init__(self, name: str, time: int):
-        super().__init__(name, time)
-    
-    def __str__(self):
-        return str(self.time) + ' months'
-    
-    def to_days(self):
-        '''
-        Convert the time to days
-        :param time: the time to be converted
-        :return: the time converted to days
-        '''
-        return Day(self.name, self.time * 30)
-    
-    def to_months(self):
-        '''
-        Convert the time to months
-        :param time: the time to be converted
-        :return: the time converted to months
-        '''
-        return Month(self.name, self.time)
-    
-    def to_years(self):
-        '''
-        Convert the time to years
-        :param time: the time to be converted
-        :return: the time converted to years
-        '''
-        return Year(self.name, self.time / 12)
-
-class Year(Time):
-    def __init__(self, name: str, time: int):
-        super().__init__(name, time)
-    
-    def __str__(self):
-        return str(self.time) + ' years'
-    
-    def to_days(self):
-        '''
-        Convert the time to days
-        :param time: the time to be converted
-        :return: the time converted to days
-        '''
-        return Day(self.name, self.time * 365)
-    
-    def to_months(self, time: int):
-        '''
-        Convert the time to months
-        :param time: the time to be converted
-        :return: the time converted to months
-        '''
-        return Month(self.name, time * 12)
-    
-    def to_years(self):
-        '''
-        Convert the time to years
-        :param time: the time to be converted
-        :return: the time converted to years
-        '''
-        return Year(self.name, self.time)
 
 
 class object:
-    def __init__(self, val) -> None:
+    def __init__(self, val):
         self.val= val
     
     @property
@@ -457,3 +319,75 @@ class Log:
         :param new_map: the map after the event
         '''
         ...
+
+
+# TIME
+class time(object):
+    '''
+    Time class to handle time. It can be converted to days, months and years.
+    Only handle integer values.
+    Always return the floor value.
+    :param name: the time name
+    :param time: the time value
+    :param type: the time type. Can be 'd' for days, 'm' for months or 'y' for years
+    '''
+    def __init__(self, val: int, time: str='d'):
+        if time not in ['d', 'm', 'y']:
+            raise ValueError('Invalid time type')
+        if val < 0:
+            raise ValueError('Time cannot be negative')
+        self.time= time
+
+        if time == 'd':
+            super().__init__(val)
+        elif time == 'm':
+            super().__init__(val * 30)
+        elif time == 'y':
+            super().__init__(val * 365)
+    
+
+    @property
+    def days(self):
+        return self.val
+    
+    @property
+    def months(self):
+        return self.val // 30
+
+    @property
+    def years(self):
+        return self.val // 365
+    
+    def __str__(self):
+        if self.time == 'd':
+            return str(self.days) + ' days'
+        elif self.time == 'm':
+            return str(self.months) + ' months'
+        elif self.time == 'y':
+            return str(self.years) + ' years'
+    
+    def to_days(self):
+        '''
+        Convert the time to days
+        :param time: the time to be converted
+        :return: the time converted to days
+        '''
+        self.time= 'd'
+    
+    def to_months(self):
+        '''
+        Convert the time to months
+        :param time: the time to be converted
+        :return: the time converted to months
+        '''
+        self.time= 'm'
+    
+    def to_years(self):
+        '''
+        Convert the time to years
+        :param time: the time to be converted
+        :return: the time converted to years
+        '''
+        self.time= 'y'
+
+
