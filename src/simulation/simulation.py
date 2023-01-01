@@ -2,6 +2,8 @@ try:
     from events.event import *
     from elements.elements import *
     from elements.map import Map
+    from ia.planning_reacts import reaction_for_an_event
+
 except:
     from pathlib import Path
     import sys
@@ -10,6 +12,7 @@ except:
     from events.event import *
     from elements.elements import *
     from elements.map import Map
+    from ia.planning_reacts import reaction_for_an_event
 
 from queue import PriorityQueue
 a = PriorityQueue()
@@ -164,7 +167,10 @@ class Simulate:
         :param event: the event that occurred
         :param time: the time the event occurred
         '''
-        ...
+        new_map=event.execute(copy(map))
+        changes=map.compare(new_map)        
+        decisions=reaction_for_an_event(event, map, new_map,changes,time)
+
     
 
 
