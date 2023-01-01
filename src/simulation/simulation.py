@@ -27,7 +27,7 @@ class Queue:
     def event_list(self):
         return list(self.events.values())
 
-    def push(self, element: tuple[Time,Event]) -> None:
+    def push(self, element: tuple[time,Event]) -> None:
         '''
         Push an event and its time in the queue
         :param time: the time the event should occur
