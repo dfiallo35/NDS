@@ -10,13 +10,16 @@ from compiler.compiler import *
 
 class Code:
     def __init__(self) -> None:
-        self.elements= dict()
         self.vars= dict()
 
         self.execution_list = list()
         self.compiled_list= list[pobj]
 
         self.map= Map()
+    
+    @property
+    def elements(self):
+        return self.map.mapelementsdict
 
     def compile(self, code: str):
         self.compiled_list= compile(code)
@@ -24,11 +27,18 @@ class Code:
 
             #ELEMENTS
             if compiled.type == 'element':
-                self.add_element(compiled.subtype, **self.params(compiled))
+                if compiled.name not in self.vars:
+                    self.add_element(compiled.subtype, **self.params(compiled))
+                else:
+                    raise Exception(f'Error: {compiled.name} is already a var name')
             
             #VARS
             elif compiled.type == 'var':
-                self.add_var(compiled.name, self.value(compiled.value))
+                if compiled.name not in self.elements:
+                    self.add_var(compiled.name, self.value(compiled.value))
+                else:
+                    raise Exception(f'Error: {compiled.name} is already a element name')
+                
             
             #FUNCTIONS
             elif compiled.type == 'function':
@@ -67,8 +77,8 @@ class Code:
                 elif obj.subtype == 'name':
                     if obj.value in self.vars:
                         return self.vars[obj.value]
-                    elif obj.value in self.map.mapelementsdict:
-                        return self.map.mapelementsdict[obj.value]
+                    elif obj.value in self.elements:
+                        return self.elements[obj.value]
                     else:
                         raise Exception(f'Name {obj.value} not found')
             
@@ -211,7 +221,11 @@ class Code:
 a= Code()
 a.compile(
     '''
-    province a(extension: 10, development: 20, population: 30)
+    province Havana(extension: 10, development: 20, population: 30)
+    show(Havana)
+    a= 2y
+    b= 3
+    c= 3.6
     show(a)
     '''
 )

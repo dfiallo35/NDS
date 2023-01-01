@@ -65,7 +65,7 @@ class NDSLexer(Lexer):
     ELESS= r'<='
 
     #CONSTANTS
-    NUMBER = r'\d+'
+    NUMBER = r'\d+(\.\d+)?'
     STRING = r'\'.*?\''
     def STRING(self, t):
         t.value = str(t.value).strip('\'')
@@ -161,9 +161,9 @@ class NDSParser(Parser):
     def code(self, p):
         return [p.var]
     
-    @_('expr')
-    def code(self, p):
-        return [p.expr]
+    # @_('expr')
+    # def code(self, p):
+    #     return [p.expr]
     
 
     #ELEMENTS
@@ -222,7 +222,10 @@ class NDSParser(Parser):
 
     @_('NUMBER')
     def expr(self, p):
-        return pobj(type='expr', subtype='number', value=int(p.NUMBER))
+        try:
+            return pobj(type='expr', subtype='number', value=int(p.NUMBER))
+        except:
+            return pobj(type='expr', subtype='number', value=float(p.NUMBER))
     
     @_('STRING')
     def expr(self, p):
@@ -314,10 +317,10 @@ def compile(code: str):
 
 # for i in compile(
 #     '''
-#     2y
+#     a= 2.53444
 #     '''
 # ):
-#     print(i)
+#     print(i.value)
 
 
 
