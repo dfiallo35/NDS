@@ -35,7 +35,8 @@ m.add_event(name='mortality' ,distribution= Uniform(1), category= 'Social', enab
 
 def decrease_industrialization(map, **kwargs):
     for province in map.provincedict.values():
-        province.data["industrialization"]-= 1
+        if(province.data.get("industrialization")):
+            province.data["industrialization"]-= 1
     return {'disable:': ['decrease_industrialization']}
 m.add_event(name='decrease_industrialization' ,distribution= Uniform(1), category= 'Economic', enabled= False, execution= decrease_industrialization, type= 'unique', decisions=[])
 
@@ -59,21 +60,22 @@ def decide_simulation_test(nation:Nation):
             Decision(action="increase_tourism",preconds=precond_tourism ,effects=effects_tourism)]
     
     m.decisions=actions
-    m.nationdict["Cuba"].data={}
+    # m.nationdict["Cuba"].__dict__={}
     m.nationdict["Cuba"].data["industrialization"]=0
     m.nationdict["Cuba"].data["average_living_standard"]=0
     m.nationdict["Cuba"].data["tourism"]=0
 
-    for province in m.nationdict["Cuba"]:
-        province.economic_resources=100000
-        province.industrialization=3
-        province.average_living_standard=3
-        province.tourism=3
-        m.nationdict["Cuba"].data["industrialization"]+=province.industrialization
-        m.nationdict["Cuba"].data["average_living_standard"]+=province.industrialization
-        m.nationdict["Cuba"].data["tourism"]+=province.industrialization
+    for province in m.nationdict["Cuba"].provinces.values():
+        province.data["economic_resources"]=100000
+        province.data["industrialization"] =3
+        province.data["average_living_standard"]=3
+        province.data["tourism"]=3
+        m.nationdict["Cuba"].data["industrialization"]+=province.data["industrialization"]
+        m.nationdict["Cuba"].data["average_living_standard"]+=province.data["industrialization"]
+        m.nationdict["Cuba"].data["tourism"]+=province.data["industrialization"]
 
-    a.decide(nation, decrease_industrialization, 0)
+    # a.decide(nation, Event("decrease_industrialization",Exponential(1),m.categorydict['Economic'],decrease_industrialization), 0)
+    a.decide(m, m.eventdict["decrease_industrialization"], 0)
 
     # print('init',[i.population for i in list(m.provincedict.values())])
     # a= Simulate(m, Queue(m.event_list)).simulate(10)

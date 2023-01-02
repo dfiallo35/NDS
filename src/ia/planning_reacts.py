@@ -6,7 +6,7 @@ from ia.planning_decisions import *
 
 def reaction_for_an_event(event,map,new_map,changes,time):
     """Get a list of actions to react this event"""
-    nations = get_affected_nations(changes)
+    nations = get_affected_nations(map,changes)
     decisions={}
     for nation in nations:
         decisions[nation]= PlanningDecisions(nation,map.decisions,get_target(nation,changes)).make_planning()
@@ -23,8 +23,8 @@ def reaction_for_an_event(event,map,new_map,changes,time):
 
 def get_affected_nations(map,changes):
     """From map changes, returns a list of nations that were affected"""
-    nations={}
-    for nation in map.nations:
+    nations=[]
+    for nation in map.nationdict.values():
         if nation.name in changes["changed"]:
             nations.append(nation)
     return nations
@@ -32,11 +32,13 @@ def get_affected_nations(map,changes):
 def get_target(nation,changes):
     """the goal state that you want to reach with the planning is obtained """
     goals={}
-    for province in changes["changed"][nation].keys():
-        for elem in changes["changed"][nation]["changed"][province]:
+    for province in changes["changed"][nation.name]["changed"].keys():
+        for elem in changes["changed"][nation.name]["changed"][province]["changed"]:
             if goals.__contains__(elem):
-                goals[elem]=goals[elem]+changes["changed"][nation]["changed"][province][elem][1]
+                goals[elem]=goals[elem]+changes["changed"][nation.name]["changed"][province]["changed"][elem][0]
             else:
-                goals[elem]=changes["changed"][nation]["changed"][province][elem][1]
+                goals[elem]=changes["changed"][nation.name]["changed"][province]["changed"][elem][0]
 
-
+    #convert the goals into a function than comprobate this goal
+    goals_function = lambda nation: all([nation.data[goal]>=goals[goal] for goal in goals])
+    return goals_function
