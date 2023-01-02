@@ -6,7 +6,7 @@ def reaction_for_an_event(event,map,new_map,changes,time):
     nations = get_affected_nations(changes)
     decisions={}
     for nation in nations:
-        decisions[nation]= PlanningDecisions(nation,map.actions,get_target(nation,changes))
+        decisions[nation]= PlanningDecisions(nation,map.decisions,get_target(nation,changes)).make_planning()
     return decisions
     
     

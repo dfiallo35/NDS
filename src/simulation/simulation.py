@@ -170,6 +170,7 @@ class Simulate:
         new_map=event.execute(copy(map))
         changes=map.compare(new_map)        
         decisions=reaction_for_an_event(event, map, new_map,changes,time)
+        return decisions
 
     
 
