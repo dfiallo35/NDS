@@ -165,7 +165,8 @@ class Simulate:
         :param event: the event that occurred
         :param time: the time the event occurred
         '''
-        new_map=event.execute(copy(map))
+        new_map=copy(map)
+        event.execute(new_map)
         changes=map.compare(new_map)        
         decisions=reaction_for_an_event(event, map, new_map,changes,time)
         return decisions
