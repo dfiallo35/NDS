@@ -413,7 +413,7 @@ class Category:
 
 from inspect import getfullargspec
 class Event:
-    def __init__(self, name: str, distribution: Distribution, category: Category, execution, code, enabled: bool= True, type: str= None):
+    def __init__(self, name: str, distribution: Distribution, category: Category, execution, code=None, enabled: bool= True, type: str= None, args: list=[]):
         self.name= name
         self.category= category
         self.distribution= distribution
@@ -421,6 +421,8 @@ class Event:
         self.type= type
         self.execution= execution
         self.code= code
+        
+        self.args= args
 
     
     @property
@@ -433,7 +435,7 @@ class Event:
     def __str__(self) -> str:
         return f'{self.name}'
 
-    def execute(self, *args):
+    def execute(self, *args, **kwargs):
         '''
         Execute the event
         '''
@@ -442,9 +444,9 @@ class Event:
             #fix: args input
         if self.code:
             if args:
-                return self.execution(compiled_list=self.code, inside=0, vars= args)
+                return self.execution(compiled_list=self.code, inside=1, vars= {k:v for k,v in zip(self.args, args)})
             else:
-                return self.execution(compiled_list=self.code, inside=0)
+                return self.execution(compiled_list=self.code, inside=1)
         else:
             if args:
                 return self.execution(*args)
