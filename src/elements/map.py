@@ -202,7 +202,7 @@ class Map:
             self.categorydict[category]= Category(category)
             self.categorydict[category].add_decision(decision)
     
-    def add_event(self, name: str, distribution: Distribution, category: str, enabled: bool, type: str, decisions: list, execution, code= None):
+    def add_event(self, name: str, distribution: Distribution, category: str, enabled: bool, type: str, decisions: list, execution, code= None, args: list=[]):
         '''
         Add an event to the map. If the event already exists, it will be updated
         :param event: the event
@@ -210,7 +210,7 @@ class Map:
         # if not self.categorydict.get(category):
         #     raise Exception(f'The category {category} doesn\'t exist')
         
-        event= Event(name=name, distribution=distribution, category=category, enabled=enabled, type=type, execution=execution, code=code)
+        event= Event(name=name, distribution=distribution, category=category, enabled=enabled, type=type, execution=execution, code=code, args= args)
         self.eventdict[event.name]= event
         self.decisions[event.name]= decisions
         return event
