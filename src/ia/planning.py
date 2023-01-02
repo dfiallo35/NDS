@@ -5,7 +5,7 @@ from copy import deepcopy
 
 class PlanningProblem:#(Problem):
     """General Planning Problem"""
-    def __init__(self, initial_state:dict, actions:list, goal_state:dict()) -> None:
+    def __init__(self, initial_state, actions, goal_state) -> None:
         self.initial_state = initial_state
         self.actions = actions
         self.goal_state = goal_state
