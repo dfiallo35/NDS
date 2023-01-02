@@ -5,23 +5,38 @@ from sly import Lexer, Parser
 #todo: add, sub, mul, div to arrays
 class NDSLexer(Lexer):
     tokens = {'ELEMENT', 'EVENT', 'DISTRIBUTION', 'TIME', 'TYPE',
-            'FUNC',
+            'FUNC', 'RETURN',
             'NAME',
             'NUMBER', 'STRING', 'BOOL',
             'ASSIGN', 'ARROW', 'PARAMASSIGN',
-            'FOR', 'WHILE', 'IF', 'ELSE',
+            'REPEAT', 'WHILE', 'IF', 'ELSE',
             'NOT', 'AND', 'OR', 'XOR',
             'GREATER', 'EGREATER', 'LESS', 'ELESS', 'XPLUS', 'XMINUS', 'EQUALS', 'NOTEQUALS', 
             'PLUS', 'MINUS', 'MULTIPLY', 'DIVIDE', 'POW', 'MOD'}
     
     literals = { '(', ')', '{', '}', '[', ']', ';', ','}
 
+    def __init__(self):
+        self.nesting_level = 0
+    
     ignore = "\t "
 
     newline = r'\n+'
     def newline(self, t):
         self.lineno += t.value.count('\n')
     
+
+    @_(r'\{')
+    def lbrace(self, t):
+        t.type = '{'
+        self.nesting_level += 1
+        return t
+
+    @_(r'\}')
+    def rbrace(self, t):
+        t.type = '}'
+        self.nesting_level -=1
+        return t
 
     #VARIABLES
     NAME= r'[_]*[a-zA-Z][a-zA-Z0-9_]*'
@@ -45,13 +60,15 @@ class NDSLexer(Lexer):
     #todo: change name
     NAME['distributio'] = 'DISTRIBUTION'
 
+    NAME['return'] = 'RETURN'
+
     #SPECIAL FUNCTIONS
     NAME['show'] = 'FUNC'
     NAME['simulate'] = 'FUNC'
     # NAME[''] = 'FUNC'
 
     #FUNCTIONS
-    NAME['for'] = 'FOR'
+    NAME['repeat'] = 'REPEAT'
     NAME['while'] = 'WHILE'
     NAME['if'] = 'IF'
     NAME['else'] = 'ELSE'
@@ -125,20 +142,20 @@ class pobj:
 #fix: las lineas de codigo no comienzan a machear desde script, buscan machear con todo los elementos de ela gramatica.
 #todo: precedences
 #todo: mejorar la deteccion de errores
-#todo: agregar for al parser
 
 #todo: agregar funciones especiales(print, simulate, len....)
 
 class NDSParser(Parser):
     tokens = NDSLexer.tokens
     debugfile = 'parser.out'
+    
 
     precedence = (
         ('left', 'ELEMENT', 'EVENT', 'DISTRIBUTION'),
         ('left', 'NAME', 'NUMBER', 'STRING', 'BOOL'),
         ('left', 'TIME'),
         ('left', 'FUNC'),
-        ('left', 'FOR', 'WHILE', 'IF', 'ELSE'),
+        ('left', 'REPEAT', 'WHILE', 'IF', 'ELSE'),
 
         ('left', 'PLUS', 'MINUS'),
         ('left', 'MULTIPLY', 'DIVIDE', 'MOD', 'POW'),
@@ -150,6 +167,9 @@ class NDSParser(Parser):
         #todo: precedences
         )
 
+    def __init__(self):
+        self.inside = 0
+
     #SCRIPT
     @_('code script')
     def script(self, p):
@@ -158,8 +178,9 @@ class NDSParser(Parser):
     @_('')
     def script(self, p):
         return []
-
-
+    
+    
+    
 
     #CODE    
     @_('element')
@@ -174,7 +195,26 @@ class NDSParser(Parser):
     def code(self, p):
         return [p.var]
     
+
+
+    @_('inside_code inside_script')
+    def inside_script(self, p):
+        return p.inside_code + p.inside_script
+
+    @_('')
+    def inside_script(self, p):
+        return []
     
+    @_('code')
+    def inside_code(self, p):
+        return p.code
+
+    @_('RETURN expr')
+    def inside_code(self, p):
+        return [pobj(type='return', value=p.expr)]
+
+    
+    #todo: add return
 
     #ELEMENTS
     @_('ELEMENT NAME exeparams')
@@ -355,21 +395,33 @@ class NDSParser(Parser):
 
 
     #FUNCTIONS
-    @_('EVENT NAME exeparams params "{" script "}"', 'DISTRIBUTION NAME params "{" script "}"')
+    @_('EVENT NAME exeparams params "{" inside_script "}"', 'DISTRIBUTION NAME params "{" inside_script "}"')
     def function(self, p):
-        return pobj(type='function', subtype=p[0], name=p.NAME, params=p.exeparams, args=p.params, script=p.script)
+        return pobj(type='function', subtype=p[0], name=p.NAME, params=p.exeparams, args=p.params, script=p.inside_script)
     
+
+    #EXECUTION
     @_('NAME exeparams')
     def function(self, p):
         return pobj(type= 'execution', name=p.NAME, params=p.exeparams)
 
-    @_('ELSE "{" script "}"')
-    def function(self, p):
-        return pobj(type='function', subtype=p[0], script=p.script)
 
-    @_('IF "(" condition ")" "{" script "}"', 'WHILE "(" condition ")" "{" script "}"')
+    #LOOPS
+    @_('IF "(" condition ")" "{" inside_script "}" ELSE "{" inside_script "}"')
     def function(self, p):
-        return pobj(type='function', subtype=p[0], condition=p.condition, script=p.script)
+        return pobj(type='loop', subtype='if else', condition=p.condition, script=p.inside_script0, else_script=p.inside_script1)
+    
+    @_('IF "(" condition ")" "{" inside_script "}"')
+    def function(self, p):
+        return pobj(type='loop', subtype=p[0], condition=p.condition, script=p.inside_script)
+
+    @_('WHILE "(" condition ")" "{" inside_script "}"')
+    def function(self, p):
+        return pobj(type='loop', subtype=p[0], condition=p.condition, script=p.inside_script)
+
+    @_('REPEAT "(" NAME "," expr "," expr ")" "{" inside_script "}"')
+    def function(self, p):
+        return pobj(type='loop', subtype=p[0], var=p.NAME, start=p.expr0, end=p.expr1, script=p.inside_script)
 
 
     
@@ -427,8 +479,19 @@ def compile(code: str):
 
 
 
+class a:
+    def __init__(self, x, y, z, a):
+        self.x=x
+    
+    def b(self):
+        self.y=2
+        print(self.x)
+        self.c()
+    
+    def c(self):
+        print(y)
 
-
-
-
-
+# aa=a(1)
+# aa.b()
+# import inspect
+# print(inspect.getfullargspec(a).args)

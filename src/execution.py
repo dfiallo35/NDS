@@ -28,32 +28,37 @@ class Code:
     def execute(self, compiled_list, vars: dict={}, inside: int=0):
         '''
         Execute the code
+        :param compiled_list: the compiled code
+        :param vars: internal variables
+        :param inside: the level of inside. To control the vars and recursion
         '''
-        #todo: and inside_vars to vars verification and 
-        inside_vars= {}
+        
+        #Convert variables to the types used in the code
+        inside_vars= {**self.to_value(vars)}
 
+        #Iterate over the compiled code
         for compiled in compiled_list:
             
             #ELEMENTS
             #Creates a new element
             if compiled.type == 'element':
                 if compiled.name not in self.vars and self.real_value(compiled.name) not in self.events:
-                    self.add_element(compiled.subtype, self.params(compiled))
+                    self.add_element(compiled.subtype, self.params(compiled, inside_vars, inside))
                 else:
                     raise Exception(f'Error: {compiled.name} is already used')
             
 
             #VARS
-            #Create a new var. For inside_vars, it is only created if it does not exist in vars
+            #Create a new var. For inside_vars, the vars are created in the moment of the execution
             elif compiled.type == 'var':
                 if self.real_value(compiled.name) not in self.elements and self.real_value(compiled.name) not in self.events:
                     if inside:
                         if self.vars.get(compiled.name):
-                            raise Exception(f'Error: {compiled.name} is already a var name')
+                            self.vars[compiled.name]= self.value(compiled.value, inside_vars, inside)
                         else:
-                            inside_vars[compiled.name]= self.value(compiled.value)
+                            inside_vars[compiled.name]= self.value(compiled.value, inside_vars, inside)
                     else:
-                        self.vars[compiled.name]= self.value(compiled.value)
+                        self.vars[compiled.name]= self.value(compiled.value, inside_vars, inside)
                 else:
                     raise Exception(f'Error: {compiled.name} is already used')
             
@@ -64,7 +69,7 @@ class Code:
                 if self.real_value(compiled.name) in self.elements:
 
                     if self.elements[self.real_value(compiled.name)].data.get(self.real_value(compiled.var)):
-                        self.elements[self.real_value(compiled.name)].data[self.real_value(compiled.var)] = self.real_value(self.value(compiled.value))
+                        self.elements[self.real_value(compiled.name)].data[self.real_value(compiled.var)] = self.real_value(self.value(compiled.value, inside_vars, inside))
                     
                     else:
                         raise Exception(f'Error: var {compiled.var} does not exist in element {compiled.name}')
@@ -78,33 +83,73 @@ class Code:
             elif compiled.type == 'func':
                 #todo: add functions
                 if compiled.subtype == 'show':
-                    print('>>',self.value(compiled.value))
-                self.add_function(compiled)
+                    print('>>',self.value(compiled.value, inside_vars, inside))
+                
             
+            #LOOPS
+            #Execute a loop
+            elif compiled.type == 'loop':
 
+                if compiled.subtype == 'while':
+                    while self.real_value(self.value(compiled.condition, inside_vars, inside)):
+                        self.execute(compiled.script, vars= inside_vars, inside=inside+1)
+                
+                elif compiled.subtype == 'repeat':
+                    for i in range(self.real_value(self.value(compiled.start, inside_vars, inside)), self.real_value(self.value(compiled.end, inside_vars, inside))):
+                        self.execute(compiled.script, vars= {compiled.var: i, **inside_vars}, inside=inside+1)
+                
+                elif compiled.subtype == 'if':
+                    if self.real_value(self.value(compiled.condition, inside_vars, inside)):
+                        self.execute(compiled.script, vars= inside_vars, inside=inside+1)
+                
+                elif compiled.subtype == 'if else':
+                    if self.real_value(self.value(compiled.condition, inside_vars, inside)):
+                        self.execute(compiled.script, vars= inside_vars, inside=inside+1)
+                    else:
+                        self.execute(compiled.else_script, vars= inside_vars, inside=inside+1)
+                
+                else:
+                    raise Exception('Error: unknown loop type')
+
+            
+            #todo: working here
             #FUNCTIONS
             #Creates a new function
             elif compiled.type == 'function':
+                # self.add_function(compiled)
                 if compiled.subtype == 'event':
                     if self.real_value(compiled.name) not in self.elements and compiled.name not in self.vars:
-                        self.map.add_event(*self.real_value_list(self.params(compiled)), execution= self.execute, code= compiled.script)
+                        self.map.add_event(*self.real_value_list(self.params(compiled, inside_vars, inside)), execution= self.execute, code= compiled.script, args=self.extra_params(compiled.args))
                     else:
                         raise Exception(f'Error: {compiled.name} is already used')
             
+            #todo: working here
             #EXECUTION
             #Execute a event
             elif compiled.type == 'execution':
                 if self.events.get(self.real_value(compiled.name)):
-                    self.events[self.real_value(compiled.name)].execute(*self.real_value_list(self.params(compiled)))
+                    self.events[self.real_value(compiled.name)].execute(*self.real_value_list(self.params(compiled, inside_vars, inside))[1:])
                 else:
                     raise Exception(f'Error: event {compiled.name} does not exist')
             
+            #todo: working here
+            elif compiled.type == 'return':
+                return self.value(compiled.value, inside_vars, inside)
+
+
             else:
                 raise Exception('Error: unknown type')
 
 
 
-    def value(self, obj: pobj):
+    def value(self, obj: pobj, inside_vars: dict={}, inside: int=0):
+        '''
+        Converts the parser object to a code object. Do arithmetics, comparisons, get vars, etc.
+        :param obj: the parser object
+        :param inside_vars: the vars inside the function
+        :param inside: the level of inside
+        :return: the code object
+        '''
         if type(obj) == pobj:
             
             if obj.type == 'expr':
@@ -123,13 +168,20 @@ class Code:
                     return boolean(False)
 
                 elif obj.subtype == 'list':
-                    return array([self.value(value) for value in obj.value])
+                    return array([self.value(value, inside_vars, inside) for value in obj.value])
 
                 elif obj.subtype == 'name':
-                    if obj.value in self.vars:
+
+                    if inside:
+                        if obj.value in inside_vars:
+                            return inside_vars[obj.value]
+                    
+                    elif obj.value in self.vars:
                         return self.vars[obj.value]
+
                     elif self.real_value(obj.value) in self.elements:
                         return self.elements[self.real_value(obj.value)]
+
                     else:
                         raise Exception(f'Name {obj.value} not found')
 
@@ -143,8 +195,8 @@ class Code:
                         raise Exception(f'Error: {obj.name} is not a element name')
             
             elif obj.type == 'arithmetic':
-                left= self.value(obj.left)
-                right= self.value(obj.right)
+                left= self.value(obj.left, inside_vars, inside)
+                right= self.value(obj.right, inside_vars, inside)
                 
                 if self.same_type(left, right):
                     try:
@@ -168,19 +220,19 @@ class Code:
             if obj.type == 'uarithmetic':
                 try:
                     if obj.subtype == '+':
-                        return + self.value(obj.value)
+                        return + self.value(obj.value, inside_vars, inside)
                     if obj.subtype == '-':
-                        return - self.value(obj.value)
+                        return - self.value(obj.value, inside_vars, inside)
                 except:
-                    raise Exception(f'Error: {self.value(obj.value).type} does not support "{obj.subtype}" unary operation')
+                    raise Exception(f'Error: {self.value(obj.value, inside_vars, inside).type} does not support "{obj.subtype}" unary operation')
             
             #todo
             elif obj.type == 'xarithmetic':
                 ...
             
             elif obj.type == 'condition':
-                left= self.conditions(self.value(obj.left))
-                right= self.conditions(self.value(obj.right))
+                left= self.conditions(self.value(obj.left, inside_vars, inside))
+                right= self.conditions(self.value(obj.right, inside_vars, inside))
                 
                 try:
                     if obj.subtype == 'and':
@@ -193,8 +245,8 @@ class Code:
                     raise Exception(f'Error: {left.type} does not support "{obj.subtype}" operation')
             
             elif obj.type == 'comparation':
-                left= self.value(obj.left)
-                right= self.value(obj.right)
+                left= self.value(obj.left, inside_vars, inside)
+                right= self.value(obj.right, inside_vars, inside)
 
                 if self.same_type(left, right):
                     try:
@@ -217,7 +269,7 @@ class Code:
             
             elif obj.type == 'scondition':
                 if obj.subtype == 'not':
-                    return ~self.value(obj.value)
+                    return ~self.value(obj.value, inside_vars, inside)
             
             else:
                 #check: an error can be raised here
@@ -226,7 +278,14 @@ class Code:
         else:
             raise Exception('The object is not recognized')
     
+
+
     def real_value(self, obj: Element):
+        '''
+        Returns the real value of an object(the values for functions outside the code)
+        :param obj: The object to get the real value
+        :return The real value of the object
+        '''
         if type(obj) == number:
             try:
                 return int(obj.val)
@@ -248,27 +307,71 @@ class Code:
         else:
             return obj
     
+
     def real_value_list(self, obj: list):
+        '''
+        Returns the real value of a list of objects
+        :param obj: The list of objects to get the real value
+        :return The real value of the list of objects
+        '''
         return [self.real_value(value) for value in obj]
+    
+    def to_value(self, vars: dict):
+        '''
+        Converts the real types to the code types
+        :param vars: The dict of variables
+        :return The dict of values
+        '''
+        new_dict= {}
+        for key in vars:
+            if type(vars[key]) == list:
+                new_dict[key] = array(vars[key])
+            elif type(vars[key]) == str:
+                new_dict[key] = string(vars[key])
+            elif type(vars[key]) == int or type(vars[key]) == float:
+                new_dict[key] = number(vars[key])
+            elif type(vars[key]) == bool:
+                new_dict[key] = boolean(vars[key])
+            else:
+                new_dict[key] = vars[key]
+        return new_dict
 
     
-    def params(self, obj: pobj):
-        #todo: params to list
+    def params(self, obj: pobj, inside_vars: dict={}, inside: int=0):
+        '''
+        Returns the params of a function
+        :param obj: The function
+        :param inside_vars: The variables inside the function
+        :param inside: The number of functions inside the function
+        :return The params of the function
+        '''
         params= []
         params.append(obj.name)
         
         for param in obj.params:
             if param.get('value'):
                 if param.subtype == 'exe param':
-                    val= self.value(param.value)
+                    val= self.value(param.value, inside_vars, inside)
                 if param.subtype == 'func param':
-                    val= self.value(param.value)
+                    val= self.value(param.value, inside_vars, inside)
             params.append(val)
         return params
 
+
+    def extra_params(self, extra: list):
+        '''
+        Returns the extra params of a function
+        :param extra: The extra params of the function
+        '''
+        return [self.real_value(i.value) for i in extra]
+        
     
-    
-    def conditions(self, obj):
+    def conditions(self, obj: Element):
+        '''
+        Do dynamic conditions
+        :param obj: The object to do the conditions
+        :return The object with the conditions
+        '''
         if (obj == number(0)).value or (obj == string('')).value or (obj == array([])).value or (obj == boolean(False)).value:
             return boolean(False)
         else:
@@ -294,22 +397,45 @@ class Code:
             raise Exception('The element is not recognized')
     
     
-    def add_function(self, obj: pobj):
-        ...
-    
     def same_type(self, a, b):
+        '''
+        Returns if the types of the objects are the same
+        :param a: The first object
+        :param b: The second object
+        :return True if the types are the same, False if not
+        '''
         return type(a) == type(b)
         
     
 a= Code()
 a.compile(
     '''
-    event a(1, 'w', true, 'y', [])(){
+    event a(1, 'w', true, 'y', [])(c){
         b=2
-        show(b)
+        show(c)
+        return 2
+        a(3)
     }
-    a()
+    a(3)
 
+
+    # if (2==1){
+    #     show(1)
+    # }
+    # else{
+    #     show(2)
+    # }
+
+    repeat(a, 0, 10){
+        show(a)
+    }
+
+    # a=1
+    
+    # while(a<10){
+    #     show(a)
+    #     a= a+1
+    # }
     
 
     # province Havana(extension: 10, development: 20, population: 30)
