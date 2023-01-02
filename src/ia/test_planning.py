@@ -41,7 +41,7 @@ def effects_tourism( state,**kargs):
     return new_state
 
 def goal_statep1(state,**kargs):
-    return state.data["industrialization"]>=5 and state.data["average_living_standard"]>=4
+    return state.data["industrialization"]>=5 and state.data["average_living_standard"]>=4 and state.data["tourism"]>=5
 
 
 
@@ -64,8 +64,9 @@ decisions=PlanningDecisions(initial_state,actions, goal_state=goal_statep1)
 
 states=decisions.make_planning()
 
-print(states)
-print([[i["state"].data, "-------------------->",i["action"].action if i["action"] else None,"!!!!!!!!!!!!!!!!!!!!!!!!!!!"] for i in get_path(states)])
+# print(states)
+# print([[i["state"].data, "-------------------->",i["action"].action if i["action"] else None,"!!!!!!!!!!!!!!!!!!!!!!!!!!!"] for i in get_path(states)])
+print( [i["action"].action if i["action"] else None for i in get_path(states)])
 
 
 
