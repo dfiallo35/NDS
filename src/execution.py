@@ -2,71 +2,113 @@ from elements.map import Map
 from elements.elements import *
 from compiler.compiler import *
 
-#todo: get the execution list
 #todo: generar codigo de funciones
-#todo: terminar value method
+#todo: elementos desconocidos no dan error
 
 class Code:
     def __init__(self) -> None:
-        self.vars= dict()
-
-        self.execution_list = list()
-        self.compiled_list= list[pobj]
-
         self.map= Map()
+        self.vars= dict()
     
     @property
     def elements(self):
         return self.map.mapelementsdict
+    
+    @property
+    def events(self):
+        return self.map.eventdict
 
     def compile(self, code: str):
-        self.compiled_list= compile(code)
-        for compiled in self.compiled_list:
+        '''
+        Compiles the code and then executes it
+        :param code: the code to compile
+        '''
+        self.execute(compile(code), inside=0)
+    
+    def execute(self, compiled_list, vars: dict={}, inside: int=0):
+        '''
+        Execute the code
+        '''
+        #todo: and inside_vars to vars verification and 
+        inside_vars= {}
 
+        for compiled in compiled_list:
+            
             #ELEMENTS
+            #Creates a new element
             if compiled.type == 'element':
                 if compiled.name not in self.vars:
-                    self.add_element(compiled.subtype, **self.params(compiled))
+                    self.add_element(compiled.subtype, self.params(compiled))
                 else:
                     raise Exception(f'Error: {compiled.name} is already a var name')
             
+
             #VARS
+            #Create a new var. For inside_vars, it is only created if it does not exist in vars
             elif compiled.type == 'var':
-                if compiled.name not in self.elements:
-                    self.add_var(compiled.name, self.value(compiled.value))
+                if self.real_value(compiled.name) not in self.elements:
+                    if inside:
+                        if self.vars.get(compiled.name):
+                            raise Exception(f'Error: {compiled.name} is already a var name')
+                        else:
+                            inside_vars[compiled.name]= self.value(compiled.value)
+                    else:
+                        self.vars[compiled.name]= self.value(compiled.value)
                 else:
                     raise Exception(f'Error: {compiled.name} is already a element name')
             
+
+            #ELEMENT VARS
+            #Updates a var of an element
             elif compiled.type == 'element var':
-                if compiled.name in self.elements:
-                    if self.elements[compiled.name].data.get(compiled.var):
-                        self.elements[compiled.name].data[compiled.var] = self.value(compiled.value)
+                if self.real_value(compiled.name) in self.elements:
+
+                    if self.elements[self.real_value(compiled.name)].data.get(self.real_value(compiled.var)):
+                        self.elements[self.real_value(compiled.name)].data[self.real_value(compiled.var)] = self.real_value(self.value(compiled.value))
+                    
                     else:
                         raise Exception(f'Error: var {compiled.var} does not exist in element {compiled.name}')
+                
                 else:
                     raise Exception(f'Error: {compiled.name} is not a element name')
             
+
             #FUNCTIONS
-            elif compiled.type == 'function':
+            #Execute a function
+            elif compiled.type == 'func':
+                #todo: add functions
                 if compiled.subtype == 'show':
                     print('>>',self.value(compiled.value))
                 self.add_function(compiled)
+            
+
+            #FUNCTIONS
+            #Creates a new function
+            elif compiled.type == 'function':
+                if compiled.subtype == 'event':
+                    self.map.add_event(*self.real_value_list(self.params(compiled)), execution= self.execute, code= compiled.script)
+            
+            #EXECUTION
+            #Execute a event
+            elif compiled.type == 'execution':
+                if self.events.get(self.real_value(compiled.name)):
+                    self.events[self.real_value(compiled.name)].execute(*self.real_value_list(self.params(compiled)))
+                else:
+                    raise Exception(f'Error: event {compiled.name} does not exist')
             
             else:
                 raise Exception('Error: unknown type')
 
 
-    #todo: add conditions
+
     def value(self, obj: pobj):
         if type(obj) == pobj:
             
             if obj.type == 'expr':
-
                 if obj.subtype == 'number':
                     return number(obj.value)
                 
-                #todo: add time
-                if obj.subtype == 'time':
+                elif obj.subtype == 'time':
                     return time(int(obj.value[:-1]), obj.value[-1])
 
                 elif obj.subtype == 'string':
@@ -83,14 +125,14 @@ class Code:
                 elif obj.subtype == 'name':
                     if obj.value in self.vars:
                         return self.vars[obj.value]
-                    elif obj.value in self.elements:
-                        return self.elements[obj.value]
+                    elif self.real_value(obj.value) in self.elements:
+                        return self.elements[self.real_value(obj.value)]
                     else:
                         raise Exception(f'Name {obj.value} not found')
 
                 elif obj.subtype == 'arrow':
-                    if obj.name in self.elements:
-                        if self.elements[obj.name].data.get(obj.var):
+                    if self.real_value(obj.name) in self.elements:
+                        if self.elements[self.real_value(obj.name)].data.get(self.real_value(obj.var)):
                             return self.elements[obj.name].data[obj.var]
                         else:
                             raise Exception(f'Error: var {obj.var} does not exist in element {obj.name}')
@@ -181,18 +223,47 @@ class Code:
         else:
             raise Exception('The object is not recognized')
     
+    def real_value(self, obj: Element):
+        if type(obj) == number:
+            try:
+                return int(obj.val)
+            except:
+                return float(obj.val)
+        
+        elif type(obj) == time:
+            return int(obj.days)
+
+        elif type(obj) == string:
+            return str(obj.val)
+
+        elif type(obj) == boolean:
+            return bool(obj.val)
+
+        elif type(obj) == array:
+            return list(obj.val)
+        
+        else:
+            return obj
+    
+    def real_value_list(self, obj: list):
+        return [self.real_value(value) for value in obj]
+
+    
     def params(self, obj: pobj):
-        params= dict()
-        params['name']= obj.name
+        #todo: params to list
+        params= []
+        params.append(obj.name)
+        
         for param in obj.params:
-            val= self.value(param.value)
-            if type(val) == str:
-                if self.vars.get(val):
-                    val= self.vars[val]
-                elif self.elements.get(val):
-                    val= self.elements[val]
-            params[param.name]= val
+            if param.get('value'):
+                if param.subtype == 'exe param':
+                    val= self.value(param.value)
+                if param.subtype == 'func param':
+                    val= self.value(param.value)
+            params.append(val)
         return params
+
+    
     
     def conditions(self, obj):
         if (obj == number(0)).value or (obj == string('')).value or (obj == array([])).value or (obj == boolean(False)).value:
@@ -200,7 +271,8 @@ class Code:
         else:
             return boolean(True)
     
-    def add_element(self, element: str, **kwargs):
+    #todo: verification of args
+    def add_element(self, element: str, args):
         '''
         Add an element to the map
         :param element: the element to add
@@ -211,20 +283,13 @@ class Code:
             'sea': self.map.add_sea,
             'neutral': self.map.add_neutral,
             'trait': self.map.add_trait,
+            'category': self.map.add_category,
         }
         if element in elements:
-            elements[element](**kwargs)
+            elements[element](*self.real_value_list(args))
         else:
             raise Exception('The element is not recognized')
     
-    #todo: dynamic var type
-    def add_var(self, name: str, value):
-        '''
-        Add a variable to the code
-        :param name: the name of the variable
-        :param value: the value of the variable
-        '''
-        self.vars[name]= value
     
     def add_function(self, obj: pobj):
         ...
@@ -236,12 +301,35 @@ class Code:
 a= Code()
 a.compile(
     '''
-    province Havana(extension: 10, development: 20, population: 30)
-    show(Havana->extension)
-    Havana->extension: 20
-    show(Havana->extension)
+    event a(1, 'w', true, 'y', [])(){
+        b=2
+        show(b)
+    }
+    a()
+    # province Havana(extension: 10, development: 20, population: 30)
+    # show(Havana->extension)
+    # Havana->extension: 20
+    # show(Havana->extension)
+
+    # a=1
+    # event c(distribution: 1, category: 'a', enabled: true)(){
+    #     b=2
+    #     d=2
+    #     show(a)
+    #     # c(c: 2)
+    # }
+
+    # c(c:2)
+    # a=2
+    # event d(c: number, d: number){
+    #     b=2
+    #     d=2
+    #     show(a)
+    # }
+    # d(c:2)
     '''
 )
-print(a.map.mapelementsdict['Havana'].extension)
-print(a.vars)
+print('map', a.map.mapelementsdict)
+print('vars', a.vars)
+print('events', a.events)
 

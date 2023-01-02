@@ -4,7 +4,7 @@ from sly import Lexer, Parser
 #todo: add floordiv
 #todo: add, sub, mul, div to arrays
 class NDSLexer(Lexer):
-    tokens = {'NATION', 'PROVINCE', 'SEA', 'NEUTRAL', 'TRAIT', 'EVENT', 'DISTRIBUTION', 'TIME',
+    tokens = {'ELEMENT', 'EVENT', 'DISTRIBUTION', 'TIME', 'TYPE',
             'FUNC',
             'NAME',
             'NUMBER', 'STRING', 'BOOL',
@@ -34,13 +34,16 @@ class NDSLexer(Lexer):
     NAME['false'] = 'BOOL'
 
     #ELEMENTS
-    NAME['nation'] = 'NATION'
-    NAME['province'] = 'PROVINCE'
-    NAME['sea'] = 'SEA'
-    NAME['neutral'] = 'NEUTRAL'
-    NAME['trait'] = 'TRAIT'
+    NAME['nation'] = 'ELEMENT'
+    NAME['province'] = 'ELEMENT'
+    NAME['neutral'] = 'ELEMENT'
+    NAME['sea'] = 'ELEMENT'
+    NAME['trait'] = 'ELEMENT'
+    NAME['category'] = 'ELEMENT'
+    
     NAME['event'] = 'EVENT'
-    NAME['distribution'] = 'DISTRIBUTION'
+    #todo: change name
+    NAME['distributio'] = 'DISTRIBUTION'
 
     #SPECIAL FUNCTIONS
     NAME['show'] = 'FUNC'
@@ -58,6 +61,15 @@ class NDSLexer(Lexer):
     NAME['and'] = 'AND'
     NAME['or'] = 'OR'
     NAME['xor'] = 'XOR'
+
+    #TYPES
+    NAME['number'] = 'TYPE'
+    NAME['string'] = 'TYPE'
+    NAME['bool'] = 'TYPE'
+    NAME['list'] = 'TYPE'
+    NAME['time'] = 'TYPE'
+    
+
     
     #OPERATORS
     EQUALS= r'=='
@@ -122,7 +134,7 @@ class NDSParser(Parser):
     debugfile = 'parser.out'
 
     precedence = (
-        ('left', 'NATION', 'PROVINCE', 'SEA', 'NEUTRAL', 'TRAIT', 'EVENT', 'DISTRIBUTION'),
+        ('left', 'ELEMENT', 'EVENT', 'DISTRIBUTION'),
         ('left', 'NAME', 'NUMBER', 'STRING', 'BOOL'),
         ('left', 'TIME'),
         ('left', 'FUNC'),
@@ -138,9 +150,6 @@ class NDSParser(Parser):
         #todo: precedences
         )
 
-    def __init__(self):
-        self.queue= []
-    
     #SCRIPT
     @_('code script')
     def script(self, p):
@@ -149,6 +158,7 @@ class NDSParser(Parser):
     @_('')
     def script(self, p):
         return []
+
 
 
     #CODE    
@@ -164,29 +174,30 @@ class NDSParser(Parser):
     def code(self, p):
         return [p.var]
     
-    # @_('expr')
-    # def code(self, p):
-    #     return [p.expr]
     
 
     #ELEMENTS
-    @_('NATION NAME params', 'PROVINCE NAME params', 'SEA NAME params', 'NEUTRAL NAME params', 'TRAIT NAME params')
+    @_('ELEMENT NAME exeparams')
     def element(self, p):
         return pobj(type='element', subtype=p[0], name=p.NAME, params=p[2])
     
+
 
     #VARS
     @_('NAME ASSIGN expr')
     def var(self, p):
         return pobj(type='var', name=p.NAME, value=p.expr)
     
+
+
     #ELEMENTS VARS
     @_('NAME ARROW NAME PARAMASSIGN expr')
     def var(self, p):
         return pobj(type='element var', name=p.NAME0, var=p.NAME1, value=p.expr)
     
 
-    #PARAMETERS
+
+    #FUNC PARAMETERS
     @_('"(" params ")"')
     def params(self, p):
         return p.params
@@ -203,9 +214,41 @@ class NDSParser(Parser):
     def params(self, p):
         return []
 
-    @_('NAME PARAMASSIGN expr')
+    # @_('NAME PARAMASSIGN TYPE')
+    # def param(self, p):
+    #     return pobj(type='param', subtype=p[2], name=p.NAME)
+    
+    @_('NAME')
     def param(self, p):
-        return pobj(type='param', name=p.NAME, value=p.expr)
+        return pobj(type='param', subtype='func param', value=p.NAME)
+    
+    
+
+    #EXECUTION PARAMETERS
+    @_('"(" exeparams ")"')
+    def exeparams(self, p):
+        return p.exeparams
+    
+    @_('exeparam "," exeparams')
+    def exeparams(self, p):
+        return [p.exeparam] + p.exeparams
+    
+    @_('exeparam')
+    def exeparams(self, p):
+        return [p.exeparam]
+    
+    @_('')
+    def exeparams(self, p):
+        return []
+    
+    # @_('NAME PARAMASSIGN expr')
+    # def exeparam(self, p):
+    #     return pobj(type='param', name=p.NAME, value=p.expr)
+    
+    @_('expr')
+    def exeparam(self, p):
+        return pobj(type='param', subtype='exe param', value=p.expr)
+    
     
 
     #CONDITIONS
@@ -218,10 +261,13 @@ class NDSParser(Parser):
         return pobj(type='scondition', subtype=p[0], value=p.expr)
     
 
+
     #COMPARATIONS
     @_('expr EQUALS expr', 'expr NOTEQUALS expr', 'expr GREATER expr', 'expr LESS expr', 'expr EGREATER expr', 'expr ELESS expr')
     def condition(self, p):
         return pobj(type='comparation', subtype=p[1], left=p.expr0, right=p.expr1)
+
+
 
     #EXPRESSIONS
     @_('NAME')
@@ -259,6 +305,8 @@ class NDSParser(Parser):
     def expr(self, p):
         return p.expr
     
+
+
     #ARITHMETIC
     @_('expr PLUS expr', 'expr MINUS expr', 'expr MULTIPLY expr', 'expr DIVIDE expr', 'expr POW expr', 'expr MOD expr')
     def expr(self, p):
@@ -277,6 +325,7 @@ class NDSParser(Parser):
         return pobj(type='expr', subtype='arrow', name=p.NAME0, var=p.NAME1)
     
 
+
     #LIST
     @_('expr "," list_expr')
     def list_expr(self, p):
@@ -291,16 +340,28 @@ class NDSParser(Parser):
         return [p.expr]
     
 
-    #FUNCTIONS
+
+    #EXECUTE FUNCTIONS
+    #fix: expr and params
     @_('FUNC "(" expr ")"')
     def function(self, p):
-        return pobj(type='special function', subtype=p[0], value=p.expr)
-
-    @_('EVENT NAME params "{" script "}"', 'DISTRIBUTION NAME params "{" script "}"')
-    def function(self, p):
-        if p[0] == 'event':
-            return pobj(type='function', subtype=p[0], name=p.NAME, params=p.params, script=p.script)
+        return pobj(type='func', subtype=p[0], value=p.expr)
     
+    @_('FUNC "(" exeparams ")"')
+    def function(self, p):
+        return pobj(type='func', subtype=p[0], params=p.exeparams)
+    
+
+
+    #FUNCTIONS
+    @_('EVENT NAME exeparams params "{" script "}"', 'DISTRIBUTION NAME params "{" script "}"')
+    def function(self, p):
+        return pobj(type='function', subtype=p[0], name=p.NAME, params=p.exeparams, args=p.params, script=p.script)
+    
+    @_('NAME exeparams')
+    def function(self, p):
+        return pobj(type= 'execution', name=p.NAME, params=p.exeparams)
+
     @_('ELSE "{" script "}"')
     def function(self, p):
         return pobj(type='function', subtype=p[0], script=p.script)
@@ -309,6 +370,8 @@ class NDSParser(Parser):
     def function(self, p):
         return pobj(type='function', subtype=p[0], condition=p.condition, script=p.script)
 
+
+    
     #ERRORS
     def error(self, p):
         if p:
@@ -325,13 +388,40 @@ def compile(code: str):
 
 # for i in compile(
 #     '''
-#     a->b
+#     province Havana(extension: 10, development: 20, population: 30)
+#     event c(d: 1)(){
+#         a=2
+#         d=2
+#     }
+#     c(c:2)
 #     '''
 # ):
-#     print(i.value)
+#     print(i)
 
 
 
+
+# def a(x,y,z):
+#     print(x,y,z)
+
+# b=[1,3]
+# a(*b, z=2)
+
+# class a:
+#     def __init__(self, x):
+#         self.x=x
+    
+#     # def __call__(self, *args, **kwds):
+#     #     return self.x
+
+#     def __repr__(self):
+#         return str(self.x)
+
+
+# aa=a(1)
+# d={}
+# d[aa]=1
+# print(d)
 
 
 

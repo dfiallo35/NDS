@@ -18,10 +18,6 @@ m.add_category('Social')
 m.add_trait('Comunist')
 
 
-# def declare_war(map, **kwargs):
-#     map.nations['Cuba'].declare_war('USA')
-#     return {'enable': ['war']}
-
 def population_growth(map, **kwargs):
     for province in map.provincedict.values():
         province.population= province.population * 1.03

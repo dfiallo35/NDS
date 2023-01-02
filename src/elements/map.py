@@ -26,8 +26,8 @@ class Map:
         self.seadict = dict()
         self.traitdict = dict()
 
-        self.categories= dict()
-        self.events= dict()
+        self.categorydict= dict()
+        self.eventdict= dict()
         self.decisions= dict()
 
         self.resources= set()
@@ -84,7 +84,7 @@ class Map:
         Get the events list
         :return: the events list
         '''
-        return self.events.values()
+        return self.eventdict.values()
     
     @property
     def event_enabled_list(self):
@@ -186,7 +186,7 @@ class Map:
         :param name: the category name
         '''
         cat= Category(name)
-        self.categories[name]= cat
+        self.categorydict[name]= cat
         return cat
     
     def add_decision_to_category(self, category: str, decision: Event):
@@ -195,23 +195,23 @@ class Map:
         :param category: the category
         :param decision: the decision
         '''
-        cat= self.categories.get(category)
+        cat= self.categorydict.get(category)
         if cat:
             cat.add_decision(decision)
         else:
-            self.categories[category]= Category(category)
-            self.categories[category].add_decision(decision)
+            self.categorydict[category]= Category(category)
+            self.categorydict[category].add_decision(decision)
     
-    def add_event(self, name: str, distribution: Distribution, category: str, enabled: bool, execution, type: str= None, decisions: list= []):
+    def add_event(self, name: str, distribution: Distribution, category: str, enabled: bool, type: str, decisions: list, execution, code):
         '''
         Add an event to the map. If the event already exists, it will be updated
         :param event: the event
         '''
-        if not self.categories.get(category):
-            raise Exception(f'The category {category} doesn\'t exist')
+        # if not self.categorydict.get(category):
+        #     raise Exception(f'The category {category} doesn\'t exist')
         
-        event= Event(name=name, distribution=distribution, category=category, execution=execution, enabled=enabled, type=type)
-        self.events[event.name]= event
+        event= Event(name=name, distribution=distribution, category=category, enabled=enabled, type=type, execution=execution, code=code)
+        self.eventdict[event.name]= event
         self.decisions[event.name]= decisions
         return event
     

@@ -413,13 +413,15 @@ class Category:
 
 
 class Event:
-    def __init__(self, name: str, distribution: Distribution, category: Category, execution, enabled: bool= True, type: str= None):
+    def __init__(self, name: str, distribution: Distribution, category: Category, execution, code, enabled: bool= True, type: str= None):
         self.name= name
         self.category= category
         self.distribution= distribution
         self.enabled= enabled
         self.type= type
         self.execution= execution
+        self.code= code
+
     
     @property
     def is_enabled(self) -> bool:
@@ -431,13 +433,14 @@ class Event:
     def __str__(self) -> str:
         return f'{self.name}'
 
-    def execute(self, map, **kwargs):
+    def execute(self, *args):
         '''
         Execute the event
         '''
         if self.type == 'unique':
             self.enabled= False
-        return self.execution(map, **kwargs)
+            #fix: args input
+        return self.execution(compiled_list=self.code, inside=0, vars= args)
 
     def next(self) -> float:
         '''
@@ -454,15 +457,17 @@ class Event:
 #     def __init__(self) -> None:
 #         self.aa={1:1}
     
-#     def b(self, n:int):
-#         print(self.aa[1], n)
-#         self.aa[n]=n
+#     def b(self, n:int, m):
+#         self.aa[n]=m
+#         print(self.aa[n], m)
 #         return self.b
 
 # b= a()
-# bb= b.b(10)
+# bb= b.b(1,1)
+# b.aa={}
+# bb(2,2)
+# bb(2,3)
 
-# bb(2)
 
 # print(b.aa)
 

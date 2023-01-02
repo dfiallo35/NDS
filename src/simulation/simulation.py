@@ -114,7 +114,7 @@ class Simulate:
                 break
 
             for time, event in self.event_queue.pop():
-                if event.is_enabled and self.map.events[event.name].is_enabled:
+                if event.is_enabled and self.map.eventdict[event.name].is_enabled:
                     print(time, event)
 
                     #execute the event and return a dictionary
@@ -149,7 +149,7 @@ class Simulate:
         :param events: the list of events to be added
         :param time: the current time of the simulation
         '''
-        for event in [self.map.events[ev] for ev in events]:
+        for event in [self.map.eventdict[ev] for ev in events]:
             event.enabled= True
             self.generate_event(event, time)
     
@@ -158,7 +158,7 @@ class Simulate:
         Disable an event
         :param event: the event to be disabled
         '''
-        for event in [self.map.events[ev] for ev in events]:
+        for event in [self.map.eventdict[ev] for ev in events]:
             event.enabled= False
     
     def decide(self, map: Map, event: Event, time: int):
