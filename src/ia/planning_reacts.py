@@ -1,4 +1,7 @@
-from planning_decisions import *
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+from ia.planning_decisions import *
 
 
 def reaction_for_an_event(event,map,new_map,changes,time):
