@@ -411,7 +411,7 @@ class Category:
     def __str__(self) -> str:
         return f'{self.name}'
 
-
+from inspect import getfullargspec
 class Event:
     def __init__(self, name: str, distribution: Distribution, category: Category, execution, code, enabled: bool= True, type: str= None):
         self.name= name
@@ -440,7 +440,17 @@ class Event:
         if self.type == 'unique':
             self.enabled= False
             #fix: args input
-        return self.execution(compiled_list=self.code, inside=0, vars= args)
+        if self.code:
+            if args:
+                return self.execution(compiled_list=self.code, inside=0, vars= args)
+            else:
+                return self.execution(compiled_list=self.code, inside=0)
+        else:
+            if args:
+                return self.execution(*args)
+            else:
+                return self.execution()
+
 
     def next(self) -> float:
         '''

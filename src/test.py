@@ -24,20 +24,20 @@ def population_growth(map, **kwargs):
     for province in map.provincedict.values():
         province.population= province.population * 1.03
     return {'enable': ['mortality']}
-m.add_event(name='population_growth' ,distribution= Uniform(1), category= 'Social', enabled= True, execution= population_growth, type= 'unique')
+m.add_event(name='population_growth' ,distribution= Uniform(1), category= 'Social', enabled= True, execution= population_growth, type= 'unique', decisions=[])
 
 def mortality(map, **kwargs):
     for province in map.provincedict.values():
         province.population= province.population * 0.99
     return {'disable:': ['population_growth']}
-m.add_event(name='mortality' ,distribution= Uniform(1), category= 'Social', enabled= False, execution= mortality, type= 'unique')
+m.add_event(name='mortality' ,distribution= Uniform(1), category= 'Social', enabled= False, execution= mortality, type= 'unique', decisions=[])
 
 
 def decrease_industrialization(map, **kwargs):
     for province in map.provincedict.values():
         province.data["industrialization"]-= 1
     return {'disable:': ['decrease_industrialization']}
-m.add_event(name='decrease_industrialization' ,distribution= Uniform(1), category= 'Economic', enabled= False, execution= decrease_industrialization, type= 'unique')
+m.add_event(name='decrease_industrialization' ,distribution= Uniform(1), category= 'Economic', enabled= False, execution= decrease_industrialization, type= 'unique', decisions=[])
 
 
 
