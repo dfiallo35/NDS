@@ -341,12 +341,13 @@ class NDSParser(Parser):
     
 
 
-    #EXECUTE FUNCTIONS
+    #FUNC
     #fix: expr and params
     @_('FUNC "(" expr ")"')
     def function(self, p):
         return pobj(type='func', subtype=p[0], value=p.expr)
     
+    #fix: () are needed?
     @_('FUNC "(" exeparams ")"')
     def function(self, p):
         return pobj(type='func', subtype=p[0], params=p.exeparams)

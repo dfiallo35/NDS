@@ -37,16 +37,16 @@ class Code:
             #ELEMENTS
             #Creates a new element
             if compiled.type == 'element':
-                if compiled.name not in self.vars:
+                if compiled.name not in self.vars and self.real_value(compiled.name) not in self.events:
                     self.add_element(compiled.subtype, self.params(compiled))
                 else:
-                    raise Exception(f'Error: {compiled.name} is already a var name')
+                    raise Exception(f'Error: {compiled.name} is already used')
             
 
             #VARS
             #Create a new var. For inside_vars, it is only created if it does not exist in vars
             elif compiled.type == 'var':
-                if self.real_value(compiled.name) not in self.elements:
+                if self.real_value(compiled.name) not in self.elements and self.real_value(compiled.name) not in self.events:
                     if inside:
                         if self.vars.get(compiled.name):
                             raise Exception(f'Error: {compiled.name} is already a var name')
@@ -55,7 +55,7 @@ class Code:
                     else:
                         self.vars[compiled.name]= self.value(compiled.value)
                 else:
-                    raise Exception(f'Error: {compiled.name} is already a element name')
+                    raise Exception(f'Error: {compiled.name} is already used')
             
 
             #ELEMENT VARS
@@ -86,7 +86,10 @@ class Code:
             #Creates a new function
             elif compiled.type == 'function':
                 if compiled.subtype == 'event':
-                    self.map.add_event(*self.real_value_list(self.params(compiled)), execution= self.execute, code= compiled.script)
+                    if self.real_value(compiled.name) not in self.elements and compiled.name not in self.vars:
+                        self.map.add_event(*self.real_value_list(self.params(compiled)), execution= self.execute, code= compiled.script)
+                    else:
+                        raise Exception(f'Error: {compiled.name} is already used')
             
             #EXECUTION
             #Execute a event
@@ -306,6 +309,9 @@ a.compile(
         show(b)
     }
     a()
+
+    
+
     # province Havana(extension: 10, development: 20, population: 30)
     # show(Havana->extension)
     # Havana->extension: 20
