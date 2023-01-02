@@ -161,7 +161,7 @@ class Neutral(MapElement):
         self.extension = extension
 
 
-#todo: add affinity values limits
+
 class Trait(Element):
     def __init__(self, name: str):
         super().__init__(name)
@@ -441,6 +441,7 @@ class Event:
         '''
         if self.type == 'unique':
             self.enabled= False
+            
             #fix: args input
         if self.code:
             if args:
