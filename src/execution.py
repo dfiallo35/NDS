@@ -3,7 +3,6 @@ from elements.elements import *
 from compiler.compiler import *
 
 #todo: generar codigo de funciones
-#todo: elementos desconocidos no dan error
 
 class Code:
     def __init__(self) -> None:
@@ -38,7 +37,6 @@ class Code:
 
         #Iterate over the compiled code
         for compiled in compiled_list:
-            
             #ELEMENTS
             #Creates a new element
             if compiled.type == 'element':
@@ -61,7 +59,7 @@ class Code:
                         self.vars[compiled.name]= self.value(compiled.value, inside_vars, inside)
                 else:
                     raise Exception(f'Error: {compiled.name} is already used')
-            
+
 
             #ELEMENT VARS
             #Updates a var of an element
@@ -92,27 +90,34 @@ class Code:
 
                 if compiled.subtype == 'while':
                     while self.real_value(self.value(compiled.condition, inside_vars, inside)):
-                        self.execute(compiled.script, vars= inside_vars, inside=inside+1)
+                        val= self.execute(compiled.script, vars= inside_vars, inside=inside+1)
+                        if self.real_value(val) != None:
+                            return val
                 
                 elif compiled.subtype == 'repeat':
                     for i in range(self.real_value(self.value(compiled.start, inside_vars, inside)), self.real_value(self.value(compiled.end, inside_vars, inside))):
-                        self.execute(compiled.script, vars= {compiled.var: i, **inside_vars}, inside=inside+1)
+                        val= self.execute(compiled.script, vars= {compiled.var: i, **inside_vars}, inside=inside+1)
+                        if self.real_value(val) != None:
+                            return val
                 
                 elif compiled.subtype == 'if':
                     if self.real_value(self.value(compiled.condition, inside_vars, inside)):
-                        self.execute(compiled.script, vars= inside_vars, inside=inside+1)
+                        val= self.execute(compiled.script, vars= inside_vars, inside=inside+1)
+                        if self.real_value(val) != None:
+                            return val
                 
                 elif compiled.subtype == 'if else':
                     if self.real_value(self.value(compiled.condition, inside_vars, inside)):
-                        self.execute(compiled.script, vars= inside_vars, inside=inside+1)
+                        val= self.execute(compiled.script, vars= inside_vars, inside=inside+1)   
                     else:
-                        self.execute(compiled.else_script, vars= inside_vars, inside=inside+1)
+                        val= self.execute(compiled.else_script, vars= inside_vars, inside=inside+1)
+                    if self.real_value(val) != None:
+                            return val
                 
                 else:
                     raise Exception('Error: unknown loop type')
 
             
-            #todo: working here
             #FUNCTIONS
             #Creates a new function
             elif compiled.type == 'function':
@@ -123,16 +128,14 @@ class Code:
                     else:
                         raise Exception(f'Error: {compiled.name} is already used')
             
-            #todo: working here
             #EXECUTION
             #Execute a event
             elif compiled.type == 'execution':
                 if self.events.get(self.real_value(compiled.name)):
-                    self.events[self.real_value(compiled.name)].execute(*self.real_value_list(self.params(compiled, inside_vars, inside))[1:])
+                    return self.events[self.real_value(compiled.name)].execute(*self.real_value_list(self.params(compiled, inside_vars, inside))[1:])
                 else:
                     raise Exception(f'Error: event {compiled.name} does not exist')
             
-            #todo: working here
             elif compiled.type == 'return':
                 return self.value(compiled.value, inside_vars, inside)
 
@@ -271,10 +274,12 @@ class Code:
                 if obj.subtype == 'not':
                     return ~self.value(obj.value, inside_vars, inside)
             
+            elif obj.type == 'func' or obj.type == 'execution':
+                return self.execute([obj], inside_vars, inside+1)
+
+            
             else:
-                #check: an error can be raised here
-                raise Exception(f'Error: ------------------')
-                return obj.value
+                raise Exception(f'Error: {obj.type} is not a valid type')
         else:
             raise Exception('The object is not recognized')
     
@@ -410,14 +415,24 @@ class Code:
 a= Code()
 a.compile(
     '''
-    event a(1, 'w', true, 'y', [])(c){
-        b=2
-        show(c)
-        return 2
-        a(3)
+    event fib(1, 'w', true, 'y', [])(n){
+        if(n == 0){
+            return 0
+        }
+        if(n ==1){
+            return 1
+        }
+        else{
+            return fib(n-1) + fib(n-2)
+        }
     }
-    a(3)
+    show(fib(5))
 
+    show([1,2,3])
+
+    # repeat(a, 0, 10){
+    #     show(a)
+    # }
 
     # if (2==1){
     #     show(1)
@@ -426,9 +441,9 @@ a.compile(
     #     show(2)
     # }
 
-    repeat(a, 0, 10){
-        show(a)
-    }
+    # repeat(a, 0, 10){
+    #     show(a)
+    # }
 
     # a=1
     
@@ -461,7 +476,7 @@ a.compile(
     # d(c:2)
     '''
 )
-print('map', a.map.mapelementsdict)
-print('vars', a.vars)
-print('events', a.events)
+# print('map', a.map.mapelementsdict)
+# print('vars', a.vars)
+# print('events', a.events)
 

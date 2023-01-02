@@ -4,10 +4,9 @@ from sly import Lexer, Parser
 #todo: add floordiv
 #todo: add, sub, mul, div to arrays
 class NDSLexer(Lexer):
-    tokens = {'ELEMENT', 'EVENT', 'DISTRIBUTION', 'TIME', 'TYPE',
+    tokens = {'ELEMENT', 'EVENT', 'DISTRIBUTION', 'TIME',
             'FUNC', 'RETURN',
-            'NAME',
-            'NUMBER', 'STRING', 'BOOL',
+            'NAME','NUMBER', 'STRING', 'BOOL',
             'ASSIGN', 'ARROW', 'PARAMASSIGN',
             'REPEAT', 'WHILE', 'IF', 'ELSE',
             'NOT', 'AND', 'OR', 'XOR',
@@ -35,6 +34,18 @@ class NDSLexer(Lexer):
     @_(r'\}')
     def rbrace(self, t):
         t.type = '}'
+        self.nesting_level -=1
+        return t
+    
+    @_(r'\(')
+    def lp(self, t):
+        t.type = '('
+        self.nesting_level += 1
+        return t
+
+    @_(r'\)')
+    def rp(self, t):
+        t.type = ')'
         self.nesting_level -=1
         return t
 
@@ -80,11 +91,11 @@ class NDSLexer(Lexer):
     NAME['xor'] = 'XOR'
 
     #TYPES
-    NAME['number'] = 'TYPE'
-    NAME['string'] = 'TYPE'
-    NAME['bool'] = 'TYPE'
-    NAME['list'] = 'TYPE'
-    NAME['time'] = 'TYPE'
+    # NAME['number'] = 'TYPE'
+    # NAME['string'] = 'TYPE'
+    # NAME['bool'] = 'TYPE'
+    # NAME['list'] = 'TYPE'
+    # NAME['time'] = 'TYPE'
     
 
     
@@ -154,6 +165,7 @@ class NDSParser(Parser):
         ('left', 'ELEMENT', 'EVENT', 'DISTRIBUTION'),
         ('left', 'NAME', 'NUMBER', 'STRING', 'BOOL'),
         ('left', 'TIME'),
+        ('left', 'ASSIGN'),
         ('left', 'FUNC'),
         ('left', 'REPEAT', 'WHILE', 'IF', 'ELSE'),
 
@@ -190,6 +202,11 @@ class NDSParser(Parser):
     def code(self, p):
         return [p.function]
     
+    #todo: here
+    @_('func')
+    def code(self, p):
+        return [p.func]
+    
     @_('var')
     def code(self, p):
         return [p.var]
@@ -225,7 +242,7 @@ class NDSParser(Parser):
     #VARS
     @_('NAME ASSIGN expr')
     def var(self, p):
-        return pobj(type='var', name=p.NAME, value=p.expr)
+        return pobj(type='var', subtype= 'expr', name=p.NAME, value=p.expr)
     
 
 
@@ -336,6 +353,11 @@ class NDSParser(Parser):
     def expr(self, p):
         return p.expr
     
+    
+    @_('func')
+    def expr(self, p):
+        return p.func
+    
 
 
     #ARITHMETIC
@@ -375,12 +397,12 @@ class NDSParser(Parser):
     #FUNC
     #fix: expr and params
     @_('FUNC "(" expr ")"')
-    def function(self, p):
+    def func(self, p):
         return pobj(type='func', subtype=p[0], value=p.expr)
     
     #fix: () are needed?
     @_('FUNC "(" exeparams ")"')
-    def function(self, p):
+    def func(self, p):
         return pobj(type='func', subtype=p[0], params=p.exeparams)
     
 
@@ -393,7 +415,7 @@ class NDSParser(Parser):
 
     #EXECUTION
     @_('NAME "(" exeparams ")"')
-    def function(self, p):
+    def func(self, p):
         return pobj(type= 'execution', name=p.NAME, params=p.exeparams)
 
 

@@ -464,22 +464,3 @@ class Event:
         return f'{self.name}'
     
 
-
-# class a:
-#     def __init__(self) -> None:
-#         self.aa={1:1}
-    
-#     def b(self, n:int, m):
-#         self.aa[n]=m
-#         print(self.aa[n], m)
-#         return self.b
-
-# b= a()
-# bb= b.b(1,1)
-# b.aa={}
-# bb(2,2)
-# bb(2,3)
-
-
-# print(b.aa)
-
