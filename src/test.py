@@ -1,6 +1,7 @@
 from elements.elements import *
 from elements.map import *
 from simulation.simulation import *
+from events.event import *
 from ia.planning_decisions import *
 from ia.test_planning import*
 
@@ -50,7 +51,8 @@ def Simulation_test():
 
 
 
-def decide_simulation_test(nation):
+def decide_simulation_test(nation:Nation):
+    
     a = Simulate(m, Queue(m.event_list))
 
     actions=[Decision(action="increase_industrialization",preconds=precond_industrialization ,effects=effects_industrialization),
@@ -58,7 +60,20 @@ def decide_simulation_test(nation):
             Decision(action="increase_tourism",preconds=precond_tourism ,effects=effects_tourism)]
     
     m.decisions=actions
-    
+    m.nationdict["Cuba"].data={}
+    m.nationdict["Cuba"].data["industrialization"]=0
+    m.nationdict["Cuba"].data["average_living_standard"]=0
+    m.nationdict["Cuba"].data["tourism"]=0
+
+    for province in m.nationdict["Cuba"]:
+        province.economic_resources=100000
+        province.industrialization=3
+        province.average_living_standard=3
+        province.tourism=3
+        m.nationdict["Cuba"].data["industrialization"]+=province.industrialization
+        m.nationdict["Cuba"].data["average_living_standard"]+=province.industrialization
+        m.nationdict["Cuba"].data["tourism"]+=province.industrialization
+
     a.decide(nation, decrease_industrialization, 0)
 
     # print('init',[i.population for i in list(m.provincedict.values())])
