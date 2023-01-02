@@ -15,7 +15,7 @@ except:
 from queue import PriorityQueue
 a = PriorityQueue()
 
-class Queue:
+class Pqueue:
     def __init__(self, events: list[Event]= []):
         self.queue = PriorityQueue()
         self.events= dict()
@@ -97,7 +97,7 @@ class Queue:
 
 #check: add and disable events
 class Simulate:
-    def __init__(self, map: Map, initial_events: Queue):
+    def __init__(self, map: Map, initial_events: Pqueue):
         self.event_queue = initial_events
         self.map = map
 

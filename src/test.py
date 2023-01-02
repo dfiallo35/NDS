@@ -43,7 +43,7 @@ m.add_event(name='decrease_industrialization' ,distribution= Uniform(1), categor
 
 def Simulation_test():
     print('init',[i.population for i in list(m.provincedict.values())])
-    a= Simulate(m, Queue(m.event_list)).simulate(10)
+    a= Simulate(m, Pqueue(m.event_list)).simulate(10)
 
     print('end', [i.population for i in list(m.provincedict.values())])
 
@@ -52,7 +52,7 @@ def Simulation_test():
 
 def decide_simulation_test(nation:Nation):
     
-    a = Simulate(m, Queue(m.event_list))
+    a = Simulate(m, Pqueue(m.event_list))
 
     actions=[Decision(action="increase_industrialization",preconds=precond_industrialization ,effects=effects_industrialization),
             Decision(action="increase_average_living_standard",preconds=precond_average_living_standard ,effects=effects_average_living_standard),
