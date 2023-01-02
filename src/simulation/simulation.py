@@ -1,5 +1,4 @@
 try:
-    from events.event import *
     from elements.elements import *
     from elements.map import Map
     from ia.planning_reacts import reaction_for_an_event
@@ -9,7 +8,6 @@ except:
     import sys
     sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-    from events.event import *
     from elements.elements import *
     from elements.map import Map
     from ia.planning_reacts import reaction_for_an_event

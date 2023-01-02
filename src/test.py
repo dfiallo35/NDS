@@ -1,7 +1,6 @@
 from elements.elements import *
 from elements.map import *
 from simulation.simulation import *
-from events.event import *
 from ia.planning_decisions import *
 from ia.test_planning import*
 
