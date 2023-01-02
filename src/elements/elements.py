@@ -35,6 +35,10 @@ class MapElement(Element):
     """
     def __init__(self, name: str):
         super().__init__(name)
+    
+    @property
+    def data(self):
+        return self.__dict__
 
 
 class Nation(MapElement):
@@ -70,9 +74,9 @@ class Nation(MapElement):
     
     def get_nation_data(self, data_name: str):
         data= 0
-        for i in self.provinces.values():
-            if i.data.get(data_name):
-                data+= i.data[data_name]
+        for prov in self.provinces.values():
+            if prov.data.get(data_name):
+                data+= prov.data[data_name]
         return data
 
     def __str__(self):
@@ -115,11 +119,6 @@ class Province(MapElement):
         self.development = development
         self.population = population
         self.__dict__.update(kwargs)
-        # self.data = {**kwargs, 'extension': extension, 'development': development, 'population': population}
-
-    @property
-    def data(self):
-        return self.__dict__
 
     def __str__(self):
         return f'{self.name} with extension: {self.extension}, development: {self.development}, population: {self.population}'

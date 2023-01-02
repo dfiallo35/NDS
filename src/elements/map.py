@@ -32,6 +32,8 @@ class Map:
         self.events= dict()
         self.decisions= dict()
 
+        self.resources= set()
+
         # Graph of the provinces, sea and neutral neighbours
         self.province_neighbours= Graph()
     
@@ -116,7 +118,7 @@ class Map:
         return nat
 
 
-    def add_province(self, name: str, extension: float, development: int, population: int, neighbours: list= []):
+    def add_province(self, name: str, extension: float, development: int, population: int, neighbours: list= [], **kwargs):
         '''
         Add a province to the map
         :param name: the province name
@@ -128,7 +130,9 @@ class Map:
         self.__exist_element(name)
         self.__not_exist_elements(neighbours)
 
-        prov= Province(name, extension, development, population)
+        for i in kwargs:
+            self.resources.add(i)
+        prov= Province(name, extension, development, population, **kwargs)
         self.provincedict[name]= prov
         self.province_neighbours.add_node(name)
         self.__add_edges(name, neighbours)
