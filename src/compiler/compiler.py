@@ -180,7 +180,6 @@ class NDSParser(Parser):
         return []
     
     
-    
 
     #CODE    
     @_('element')
@@ -217,7 +216,7 @@ class NDSParser(Parser):
     #todo: add return
 
     #ELEMENTS
-    @_('ELEMENT NAME exeparams')
+    @_('ELEMENT NAME "(" exeparams ")"')
     def element(self, p):
         return pobj(type='element', subtype=p[0], name=p.NAME, params=p[2])
     
@@ -238,10 +237,6 @@ class NDSParser(Parser):
 
 
     #FUNC PARAMETERS
-    @_('"(" params ")"')
-    def params(self, p):
-        return p.params
-    
     @_('param "," params')
     def params(self, p):
         return [p.param] + p.params
@@ -265,10 +260,6 @@ class NDSParser(Parser):
     
 
     #EXECUTION PARAMETERS
-    @_('"(" exeparams ")"')
-    def exeparams(self, p):
-        return p.exeparams
-    
     @_('exeparam "," exeparams')
     def exeparams(self, p):
         return [p.exeparam] + p.exeparams
@@ -395,13 +386,13 @@ class NDSParser(Parser):
 
 
     #FUNCTIONS
-    @_('EVENT NAME exeparams params "{" inside_script "}"', 'DISTRIBUTION NAME params "{" inside_script "}"')
+    @_('EVENT NAME "(" exeparams ")" "(" params ")" "{" inside_script "}"', 'DISTRIBUTION NAME "(" params ")" "{" inside_script "}"')
     def function(self, p):
         return pobj(type='function', subtype=p[0], name=p.NAME, params=p.exeparams, args=p.params, script=p.inside_script)
     
 
     #EXECUTION
-    @_('NAME exeparams')
+    @_('NAME "(" exeparams ")"')
     def function(self, p):
         return pobj(type= 'execution', name=p.NAME, params=p.exeparams)
 
