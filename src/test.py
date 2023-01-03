@@ -55,28 +55,29 @@ def decide_simulation_test(nation:Nation):
     
     a = Simulate(m, Pqueue(m.event_list))
 
-    actions=[Decision(action="increase_industrialization",preconds=precond_industrialization ,effects=effects_industrialization),
+    actions=[Decision(action="increase_industrialization",preconds=precond_industrialization , effects=effects_industrialization),
             Decision(action="increase_average_living_standard",preconds=precond_average_living_standard ,effects=effects_average_living_standard),
             Decision(action="increase_tourism",preconds=precond_tourism ,effects=effects_tourism)]
     
     m.decisions=actions
     # m.nationdict["Cuba"].__dict__={}
-    m.nationdict["Cuba"].data["industrialization"]=0
-    m.nationdict["Cuba"].data["average_living_standard"]=0
-    m.nationdict["Cuba"].data["tourism"]=0
+    # m.nationdict["Cuba"].data["industrialization"]=0
+    # m.nationdict["Cuba"].data["average_living_standard"]=0
+    # m.nationdict["Cuba"].data["tourism"]=0
 
     for province in m.nationdict["Cuba"].provinces.values():
         province.data["economic_resources"]=100000
         province.data["industrialization"] =3
         province.data["average_living_standard"]=3
         province.data["tourism"]=3
-        m.nationdict["Cuba"].data["industrialization"]+=province.data["industrialization"]
-        m.nationdict["Cuba"].data["average_living_standard"]+=province.data["industrialization"]
-        m.nationdict["Cuba"].data["tourism"]+=province.data["industrialization"]
+        # m.nationdict["Cuba"].data["industrialization"]+=province.data["industrialization"]
+        # m.nationdict["Cuba"].data["average_living_standard"]+=province.data["industrialization"]
+        # m.nationdict["Cuba"].data["tourism"]+=province.data["industrialization"]
 
     # a.decide(nation, Event("decrease_industrialization",Exponential(1),m.categorydict['Economic'],decrease_industrialization), 0)
-    a.decide(m, m.eventdict["decrease_industrialization"], 0)
-
+    b= a.decide(m, m.eventdict["decrease_industrialization"], 0)
+    d=2
+    return b
     # print('init',[i.population for i in list(m.provincedict.values())])
     # a= Simulate(m, Queue(m.event_list)).simulate(10)
 
@@ -85,3 +86,6 @@ def decide_simulation_test(nation:Nation):
 # Simulation_test()
 
 print(decide_simulation_test(m.nationdict["Cuba"]))
+
+# print( [i["action"].action if i["action"] else None for i in get_path(decide_simulation_test(m.nationdict["Cuba"]))])
+

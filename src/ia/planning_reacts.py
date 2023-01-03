@@ -6,7 +6,7 @@ from ia.planning_decisions import *
 
 def reaction_for_an_event(event,map,new_map,changes,time):
     """Get a list of actions to react this event"""
-    nations = get_affected_nations(map,changes)
+    nations = get_affected_nations(new_map,changes)
     decisions={}
     for nation in nations:
         decisions[nation]= PlanningDecisions(nation,map.decisions,get_target(nation,changes)).make_planning()
@@ -40,5 +40,5 @@ def get_target(nation,changes):
                 goals[elem]=changes["changed"][nation.name]["changed"][province]["changed"][elem][0]
 
     #convert the goals into a function than comprobate this goal
-    goals_function = lambda nation: all([nation.data[goal]>=goals[goal] for goal in goals])
+    goals_function = lambda nation: all([nation.get_nation_data(goal)>=goals[goal] for goal in goals])
     return goals_function
