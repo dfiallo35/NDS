@@ -1,6 +1,7 @@
 from elements.map import Map
 from elements.elements import *
 from compiler.compiler import *
+from simulation.simulation import *
 
 #todo: generar codigo de funciones
 
@@ -76,12 +77,13 @@ class Code:
                     raise Exception(f'Error: {compiled.name} is not a element name')
             
 
+            #todo: working here
             #FUNCTIONS
             #Execute a function
             elif compiled.type == 'func':
                 #todo: add functions
                 if compiled.subtype == 'show':
-                    print('>>',self.value(compiled.value, inside_vars, inside))
+                    print('>>', *self.func_params(compiled, inside_vars, inside))
                 
             
             #LOOPS
@@ -341,6 +343,12 @@ class Code:
                 new_dict[key] = vars[key]
         return new_dict
 
+    def func_params(self, obj: pobj, inside_vars: dict={}, inside: int=0):
+        params= []
+
+        for param in obj.params:
+            params.append(self.value(param.value, inside_vars, inside))
+        return params
     
     def params(self, obj: pobj, inside_vars: dict={}, inside: int=0):
         '''
@@ -428,7 +436,7 @@ a.compile(
     }
     show(fib(5))
 
-    show([1,2,3])
+    show([1,2,3], 3,4)
 
     # repeat(a, 0, 10){
     #     show(a)
