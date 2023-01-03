@@ -4,9 +4,9 @@ from sly import Lexer, Parser
 #todo: add floordiv
 #todo: add, sub, mul, div to arrays
 class NDSLexer(Lexer):
-    tokens = {'ELEMENT', 'EVENT', 'DISTRIBUTION', 'TIME',
+    tokens = {'ELEMENT', 'EVENT', 'DISTRIBUTION', 'DECISION',
             'FUNC', 'RETURN',
-            'NAME','NUMBER', 'STRING', 'BOOL',
+            'NAME','NUMBER', 'STRING', 'BOOL', 'TIME',
             'ASSIGN', 'ARROW', 'PARAMASSIGN',
             'REPEAT', 'WHILE', 'IF', 'ELSE',
             'NOT', 'AND', 'OR', 'XOR',
@@ -25,29 +25,29 @@ class NDSLexer(Lexer):
         self.lineno += t.value.count('\n')
     
 
-    @_(r'\{')
-    def lbrace(self, t):
-        t.type = '{'
-        self.nesting_level += 1
-        return t
+    # @_(r'\{')
+    # def lbrace(self, t):
+    #     t.type = '{'
+    #     self.nesting_level += 1
+    #     return t
 
-    @_(r'\}')
-    def rbrace(self, t):
-        t.type = '}'
-        self.nesting_level -=1
-        return t
+    # @_(r'\}')
+    # def rbrace(self, t):
+    #     t.type = '}'
+    #     self.nesting_level -=1
+    #     return t
     
-    @_(r'\(')
-    def lp(self, t):
-        t.type = '('
-        self.nesting_level += 1
-        return t
+    # @_(r'\(')
+    # def lp(self, t):
+    #     t.type = '('
+    #     self.nesting_level += 1
+    #     return t
 
-    @_(r'\)')
-    def rp(self, t):
-        t.type = ')'
-        self.nesting_level -=1
-        return t
+    # @_(r'\)')
+    # def rp(self, t):
+    #     t.type = ')'
+    #     self.nesting_level -=1
+    #     return t
 
     #VARIABLES
     NAME= r'[_]*[a-zA-Z][a-zA-Z0-9_]*'
@@ -69,13 +69,18 @@ class NDSLexer(Lexer):
     
     NAME['event'] = 'EVENT'
     #todo: change name
-    NAME['distributio'] = 'DISTRIBUTION'
+    NAME['distribution'] = 'DISTRIBUTION'
+    NAME['decision'] = 'DECISION'
 
     NAME['return'] = 'RETURN'
 
     #SPECIAL FUNCTIONS
     NAME['show'] = 'FUNC'
     NAME['simulate'] = 'FUNC'
+    NAME['size'] = 'FUNC'
+    NAME['random'] = 'FUNC'
+
+
     # NAME[''] = 'FUNC'
 
     #FUNCTIONS
@@ -395,12 +400,6 @@ class NDSParser(Parser):
 
 
     #FUNC
-    #fix: expr and params
-    @_('FUNC "(" expr ")"')
-    def func(self, p):
-        return pobj(type='func', subtype=p[0], value=p.expr)
-    
-    #fix: () are needed?
     @_('FUNC "(" exeparams ")"')
     def func(self, p):
         return pobj(type='func', subtype=p[0], params=p.exeparams)
