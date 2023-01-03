@@ -85,7 +85,19 @@ def decide_simulation_test(nation:Nation):
 
 # Simulation_test()
 
-print(decide_simulation_test(m.nationdict["Cuba"]))
+# print(decide_simulation_test(m.nationdict["Cuba"]))
+a=decide_simulation_test(m.nationdict["Cuba"])
+print(a)
+print("papas")
+for j in a.values():
+    print( [i["action"].action if i["action"] else None for i in get_path(j)])
+
+
+
+
+
+# for i in a:
+#     print( [i["action"].action if i["action"] else None for i in get_path(i)])
 
 # print( [i["action"].action if i["action"] else None for i in get_path(decide_simulation_test(m.nationdict["Cuba"]))])
 
