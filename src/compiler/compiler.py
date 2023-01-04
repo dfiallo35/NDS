@@ -6,7 +6,7 @@ from sly import Lexer, Parser
 class NDSLexer(Lexer):
     tokens = {'ELEMENT', 'EVENT', 'DISTRIBUTION', 'DECISION',
             'FUNC', 'RETURN',
-            'NAME','NUMBER', 'STRING', 'BOOL', 'TIME',
+            'NAME','NUMBER', 'STRING', 'BOOL', 'TIME', 'TYPE',
             'ASSIGN', 'ARROW', 'PARAMASSIGN',
             'REPEAT', 'WHILE', 'IF', 'ELSE',
             'NOT', 'AND', 'OR', 'XOR',
@@ -23,31 +23,6 @@ class NDSLexer(Lexer):
     newline = r'\n+'
     def newline(self, t):
         self.lineno += t.value.count('\n')
-    
-
-    # @_(r'\{')
-    # def lbrace(self, t):
-    #     t.type = '{'
-    #     self.nesting_level += 1
-    #     return t
-
-    # @_(r'\}')
-    # def rbrace(self, t):
-    #     t.type = '}'
-    #     self.nesting_level -=1
-    #     return t
-    
-    # @_(r'\(')
-    # def lp(self, t):
-    #     t.type = '('
-    #     self.nesting_level += 1
-    #     return t
-
-    # @_(r'\)')
-    # def rp(self, t):
-    #     t.type = ')'
-    #     self.nesting_level -=1
-    #     return t
 
     #VARIABLES
     NAME= r'[_]*[a-zA-Z][a-zA-Z0-9_]*'
@@ -68,7 +43,7 @@ class NDSLexer(Lexer):
     NAME['category'] = 'ELEMENT'
     
     NAME['event'] = 'EVENT'
-    #todo: change name
+    
     NAME['distribution'] = 'DISTRIBUTION'
     NAME['decision'] = 'DECISION'
 
@@ -96,11 +71,11 @@ class NDSLexer(Lexer):
     NAME['xor'] = 'XOR'
 
     #TYPES
-    # NAME['number'] = 'TYPE'
-    # NAME['string'] = 'TYPE'
-    # NAME['bool'] = 'TYPE'
-    # NAME['list'] = 'TYPE'
-    # NAME['time'] = 'TYPE'
+    NAME['number'] = 'TYPE'
+    NAME['string'] = 'TYPE'
+    NAME['bool'] = 'TYPE'
+    NAME['list'] = 'TYPE'
+    NAME['time'] = 'TYPE'
     
 
     
@@ -176,16 +151,16 @@ class NDSParser(Parser):
 
         ('left', 'PLUS', 'MINUS'),
         ('left', 'MULTIPLY', 'DIVIDE', 'MOD', 'POW'),
+
         ('left', 'AND', 'OR', 'XOR'),
         ('left', 'EQUALS', 'NOTEQUALS', 'GREATER', 'LESS', 'EGREATER', 'ELESS'),
+
         ('left', 'XPLUS', 'XMINUS'),
         ('left', 'UMINUS', 'UPLUS'),
         ('left', 'NOT'),
         #todo: precedences
         )
 
-    def __init__(self):
-        self.inside = 0
 
     #SCRIPT
     @_('code script')
@@ -240,7 +215,7 @@ class NDSParser(Parser):
     #ELEMENTS
     @_('ELEMENT NAME "(" exeparams ")"')
     def element(self, p):
-        return pobj(type='element', subtype=p[0], name=p.NAME, params=p[2])
+        return pobj(type='element', subtype=p[0], name=p.NAME, params=p.exeparams)
     
 
 
@@ -255,6 +230,10 @@ class NDSParser(Parser):
     @_('NAME ARROW NAME PARAMASSIGN expr')
     def var(self, p):
         return pobj(type='element var', name=p.NAME0, var=p.NAME1, value=p.expr)
+    
+    @_('NAME ARROW NAME PARAMASSIGN XPLUS expr', 'NAME ARROW NAME PARAMASSIGN XMINUS expr')
+    def var(self, p):
+        return pobj(type='element var', name=p.NAME0, var=p.NAME1, value=p.expr, op=p[4])
     
 
 
@@ -271,9 +250,9 @@ class NDSParser(Parser):
     def params(self, p):
         return []
 
-    # @_('NAME PARAMASSIGN TYPE')
-    # def param(self, p):
-    #     return pobj(type='param', subtype=p[2], name=p.NAME)
+    @_('NAME PARAMASSIGN TYPE')
+    def param(self, p):
+        return pobj(type='param', subtype='func param', value=p.NAME, vartype=p[1])
     
     @_('NAME')
     def param(self, p):
@@ -370,9 +349,9 @@ class NDSParser(Parser):
     def expr(self, p):
         return pobj(type='arithmetic', subtype=p[1], left=p.expr0, right=p.expr1)
     
-    @_('XPLUS expr', 'XMINUS expr')
-    def expr(self, p):
-        return pobj(type='xarithmetic', subtype=p[0], left=p.expr)
+    # @_('XPLUS expr', 'XMINUS expr')
+    # def expr(self, p):
+    #     return pobj(type='xarithmetic', subtype=p[0], left=p.expr)
     
     @_('PLUS expr %prec UPLUS', 'MINUS expr %prec UMINUS')
     def expr(self, p):
@@ -440,7 +419,7 @@ class NDSParser(Parser):
     #ERRORS
     def error(self, p):
         if p:
-            raise Exception("Syntax error at token", p.type)
+            raise Exception("Syntax error at token %s in line %s" % (p.value[0], p.lineno))
         else:
             raise Exception("Syntax error at EOF")
 

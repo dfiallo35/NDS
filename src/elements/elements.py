@@ -44,37 +44,73 @@ class MapElement(Element):
 class Nation(MapElement):
     def __init__(self, name: str, provinces: dict, traits: list=[]):
         super().__init__(name)
-        self.provinces = provinces
-        self.traits = traits
+        self.contains = provinces
+        self.traitsvar = traits
 
-    @property
-    def extension(self) -> float:
+    #todo: set for all provinces
+    def extension_get(self) -> float:
         extension = 0
-        for prov in self.provinces.values():
+        for prov in self.contains.values():
             extension += prov.extension
         return extension
     
-    @property
-    def development(self) -> int:
+    def development_set(self, value: int):
+        ...
+    
+    extension= property(extension_get, development_set)
+    
+    
+    def development_get(self) -> int:
         development = 0
-        for prov in self.provinces.values():
+        for prov in self.contains.values():
             development += prov.development
         return development
+    
+    def development_set(self, value: int):
+        ...
+    
+    development= property(development_get, development_set)
+    
 
-    @property
-    def population(self) -> int:
+    def population_get(self) -> int:
         population = 0
-        for prov in self.provinces.values():
+        for prov in self.contains.values():
             population += prov.population
         return population
+    
+    def population_set(self, value: int):
+        ...
 
-    @property
-    def contains(self):
-        return list(self.provinces.keys())
+    population= property(population_get, population_set)
+
+    
+    def provinces_get(self):
+        return list(self.contains.keys())
+    
+    def provinces_set(self, value):
+        self.contains.update({value.name: value})
+    
+    def provinces_del(self, prov):
+        self.contains.pop(prov.name)
+    
+    provinces= property(provinces_get, provinces_set, provinces_del)
+
+
+    def traits_get(self):
+        return self.traitsvar
+    
+    def traits_set(self, value):
+        self.traitsvar.append(value)
+    
+    def traits_del(self, value):
+        self.traitsvar.remove(value)
+    
+    traits= property(traits_get, traits_set, traits_del)
+
     
     def get_nation_data(self, data_name: str):
         data= 0
-        for prov in self.provinces.values():
+        for prov in self.contains.values():
             if prov.data.get(data_name):
                 data+= prov.data[data_name]
         return data
@@ -82,7 +118,7 @@ class Nation(MapElement):
     def get_nation_all_data(self):
         """returns a dictionary with all the data(resources) of the nation"""
         all_data = {}
-        for prov in self.provinces.values():
+        for prov in self.contains.values():
             for data_name in prov.data.keys():
                 if all_data.get(data_name):
                     all_data[data_name]+= prov.data[data_name]
@@ -93,12 +129,10 @@ class Nation(MapElement):
     def change_data(self, data_name: str, value: int):
         """distributes a change in the country's data(resources) equally among all its provinces"""
         total_data=self.get_nation_data(data_name)
-        for prov in self.provinces.values():
+        for prov in self.contains.values():
             if prov.data.get(data_name):
                 prov.data[data_name]+= prov.data[data_name]*value/total_data
         
-
-
     def __str__(self):
         return f'{self.name} with extension: {self.extension}, development: {self.development}, population: {self.population}'
 
@@ -112,10 +146,10 @@ class Nation(MapElement):
                     'changed': {}
                 }
                 new_prov= copy(new.provinces)
-                for province in self.provinces:
+                for province in self.contains:
                     if new.provinces.get(province):
                         new_prov.pop(province)
-                        comp= self.provinces[province].compare(new.provinces[province])
+                        comp= self.contains[province].compare(new.provinces[province])
                         if comp:
                             changes['changed'][province]= comp
                     else:
@@ -135,10 +169,46 @@ class Nation(MapElement):
 class Province(MapElement):
     def __init__(self, name: str, extension:float, development: int, population: int, **kwargs):
         super().__init__(name)
-        self.extension = extension
-        self.development = development
-        self.population = population
-        self.__dict__.update(kwargs)
+        self.extensionvar = extension
+        self.developmentvar = development
+        self.populationvar = population
+
+        for i in kwargs:
+            def gett(self):
+                return self.__dict__[i+'var']
+            def sett(self, x):
+                self.__dict__[i+'var']= x
+
+            self.__dict__[i+'var']= kwargs[i]
+            setattr(self.__class__, i, property(fget= gett, fset= sett))
+    
+    
+    def population_get(self):
+        return self.populationvar
+    
+    def population_set(self, value: int):
+        self.populationvar= value
+    
+    population= property(population_get, population_set)
+
+    def development_get(self):
+        return self.developmentvar
+    
+    def development_set(self, value: int):
+        self.developmentvar= value
+    
+    development= property(development_get, development_set)
+
+    def extension_get(self):
+        return self.extensionvar
+    
+    def extension_set(self, value: int):
+        self.extensionvar= value
+    
+    extension= property(extension_get, extension_set)
+
+
+
 
     def __str__(self):
         return f'{self.name} with extension: {self.extension}, development: {self.development}, population: {self.population}'
@@ -300,14 +370,6 @@ class array(object):
     def __add__(self, other):
         return array(self.val + other.val)
     
-    def __getitem__(self, key):
-        return self.val[key]
-    
-    def __setitem__(self, key, value):
-        self.val[key] = value
-    
-    def __delitem__(self, key):
-        del self.val[key]
     
     def __len__(self):
         return len(self.val)
@@ -461,7 +523,7 @@ class Event:
         '''
         if self.type == 'unique':
             self.enabled= False
-            
+
             #fix: args input
         if self.code:
             if args:

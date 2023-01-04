@@ -3,6 +3,8 @@ from elements.elements import *
 from compiler.compiler import *
 from simulation.simulation import *
 
+import inspect
+
 #todo: generar codigo de funciones
 
 class Code:
@@ -12,7 +14,7 @@ class Code:
     
     @property
     def elements(self):
-        return self.map.mapelementsdict
+        return self.map.all
     
     @property
     def events(self):
@@ -34,7 +36,7 @@ class Code:
         '''
         
         #Convert variables to the types used in the code
-        inside_vars= {**self.to_value(vars)}
+        inside_vars= {**self.real_vars_to_code(vars)}
 
         #Iterate over the compiled code
         for compiled in compiled_list:
@@ -42,7 +44,7 @@ class Code:
             #Creates a new element
             if compiled.type == 'element':
                 if compiled.name not in self.vars and self.real_value(compiled.name) not in self.events:
-                    self.add_element(compiled.subtype, self.params(compiled, inside_vars, inside))
+                    self.add_element(self.real_value(compiled.subtype), self.params(compiled, inside_vars, inside))
                 else:
                     raise Exception(f'Error: {compiled.name} is already used')
             
@@ -65,16 +67,13 @@ class Code:
             #ELEMENT VARS
             #Updates a var of an element
             elif compiled.type == 'element var':
-                if self.real_value(compiled.name) in self.elements:
-
-                    if self.elements[self.real_value(compiled.name)].data.get(self.real_value(compiled.var)):
-                        self.elements[self.real_value(compiled.name)].data[self.real_value(compiled.var)] = self.real_value(self.value(compiled.value, inside_vars, inside))
-                    
-                    else:
-                        raise Exception(f'Error: var {compiled.var} does not exist in element {compiled.name}')
-                
-                else:
-                    raise Exception(f'Error: {compiled.name} is not a element name')
+                if compiled.get('op'):
+                    if compiled.op == '++':
+                        self.map.update(element=self.real_value(compiled.name), data={'add':{self.real_value(compiled.var): self.real_value(self.value(compiled.value, inside_vars, inside))}})
+                    elif compiled.op == '--':
+                        self.map.update(element=self.real_value(compiled.name), data={'delete':{self.real_value(compiled.var): self.real_value(self.value(compiled.value, inside_vars, inside))}})
+                else:    
+                    self.map.update(element=self.real_value(compiled.name), data={'update':{self.real_value(compiled.var): self.real_value(self.value(compiled.value, inside_vars, inside))}})
             
 
             #todo: working here
@@ -84,6 +83,11 @@ class Code:
                 #todo: add functions
                 if compiled.subtype == 'show':
                     print('>>', *self.func_params(compiled, inside_vars, inside))
+                
+                if compiled.subtype == 'simulate':
+                    #todo: init events
+                    sim= Simulate(self.map, )
+                    sim.simulate()
                 
             
             #LOOPS
@@ -156,7 +160,6 @@ class Code:
         :return: the code object
         '''
         if type(obj) == pobj:
-            
             if obj.type == 'expr':
                 if obj.subtype == 'number':
                     return number(obj.value)
@@ -185,19 +188,13 @@ class Code:
                         return self.vars[obj.value]
 
                     elif self.real_value(obj.value) in self.elements:
-                        return self.elements[self.real_value(obj.value)]
+                        return self.elements[self.real_value(obj.value)].name
 
                     else:
                         raise Exception(f'Name {obj.value} not found')
 
                 elif obj.subtype == 'arrow':
-                    if self.real_value(obj.name) in self.elements:
-                        if self.elements[self.real_value(obj.name)].data.get(self.real_value(obj.var)):
-                            return self.elements[obj.name].data[obj.var]
-                        else:
-                            raise Exception(f'Error: var {obj.var} does not exist in element {obj.name}')
-                    else:
-                        raise Exception(f'Error: {obj.name} is not a element name')
+                    return self.real_to_code(self.map.get_data(self.real_value(obj.name), self.real_value(obj.var)))
             
             elif obj.type == 'arithmetic':
                 left= self.value(obj.left, inside_vars, inside)
@@ -323,7 +320,7 @@ class Code:
         '''
         return [self.real_value(value) for value in obj]
     
-    def to_value(self, vars: dict):
+    def real_vars_to_code(self, vars: dict):
         '''
         Converts the real types to the code types
         :param vars: The dict of variables
@@ -342,6 +339,23 @@ class Code:
             else:
                 new_dict[key] = vars[key]
         return new_dict
+    
+    def real_to_code(self, obj):
+        '''
+        Converts the real types to the code types
+        :param obj: The object to convert
+        :return The object converted
+        '''
+        if type(obj) == list:
+            return array(obj)
+        elif type(obj) == str:
+            return string(obj)
+        elif type(obj) == int or type(obj) == float:
+            return number(obj)
+        elif type(obj) == bool:
+            return boolean(obj)
+        else:
+            return obj
 
     def func_params(self, obj: pobj, inside_vars: dict={}, inside: int=0):
         params= []
@@ -360,7 +374,6 @@ class Code:
         '''
         params= []
         params.append(obj.name)
-        
         for param in obj.params:
             if param.get('value'):
                 if param.subtype == 'exe param':
@@ -423,7 +436,23 @@ class Code:
 a= Code()
 a.compile(
     '''
-    event fib(1, 'w', true, 'y', [])(n){
+
+    province Havana(10, 20, 30)
+    province Mayabeque(10, 20, 30)
+    show(Havana->population)
+    Havana->population: 20
+    show(Havana->population)
+
+    trait crazy()
+
+    nation Cuba([Mayabeque], [crazy])
+    Cuba->provinces: ++Havana
+    Cuba->provinces: --Mayabeque
+    show(Cuba->provinces)
+
+
+    category socialism()
+    event fib(1, socialism, true, 'y', [])(n: number){
         if(n == 0){
             return 0
         }
@@ -434,57 +463,12 @@ a.compile(
             return fib(n-1) + fib(n-2)
         }
     }
-    show(fib(5))
-
-    show([1,2,3], 3,4)
-
-    # repeat(a, 0, 10){
-    #     show(a)
-    # }
-
-    # if (2==1){
-    #     show(1)
-    # }
-    # else{
-    #     show(2)
-    # }
-
-    # repeat(a, 0, 10){
-    #     show(a)
-    # }
-
-    # a=1
-    
-    # while(a<10){
-    #     show(a)
-    #     a= a+1
-    # }
+    show(fib(10))
     
 
-    # province Havana(extension: 10, development: 20, population: 30)
-    # show(Havana->extension)
-    # Havana->extension: 20
-    # show(Havana->extension)
-
-    # a=1
-    # event c(distribution: 1, category: 'a', enabled: true)(){
-    #     b=2
-    #     d=2
-    #     show(a)
-    #     # c(c: 2)
-    # }
-
-    # c(c:2)
-    # a=2
-    # event d(c: number, d: number){
-    #     b=2
-    #     d=2
-    #     show(a)
-    # }
-    # d(c:2)
     '''
 )
-# print('map', a.map.mapelementsdict)
-# print('vars', a.vars)
-# print('events', a.events)
+print('map', a.elements)
+print('vars', a.vars)
+print('events', a.events)
 

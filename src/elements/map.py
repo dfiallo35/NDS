@@ -9,6 +9,7 @@ except:
 
 import networkx as nx
 from networkx import Graph
+from inspect import getmembers as gm
 
 #todo: definir correctamente los traits
 #todo: borrar elementos del mapa
@@ -71,12 +72,16 @@ class Map:
         return {**self.nationdict, **self.provincedict, **self.neutraldict, **self.seadict}
     
     @property
+    def all(self) -> dict:
+        return {**self.nationdict, **self.provincedict, **self.neutraldict, **self.seadict, **self.traitdict, **self.categorydict, **self.eventdict, **self.decisions}
+    
+    @property
     def nation_province(self) -> dict[list]:
         """
         Get the nation provinces
         :return: the nation provinces
         """
-        return {name: [province for province in nation.provinces] for name, nation in self.nationdict.items()}
+        return {name: [province for province in nation.contains] for name, nation in self.nationdict.items()}
 
     @property
     def event_list(self):
@@ -207,49 +212,113 @@ class Map:
         Add an event to the map. If the event already exists, it will be updated
         :param event: the event
         '''
-        # if not self.categorydict.get(category):
-        #     raise Exception(f'The category {category} doesn\'t exist')
+        if not self.categorydict.get(category):
+            raise Exception(f'The category {category} doesn\'t exist')
         
         event= Event(name=name, distribution=distribution, category=category, enabled=enabled, type=type, execution=execution, code=code, args= args)
         self.eventdict[event.name]= event
         self.decisions[event.name]= decisions
         return event
-    
-
-   
-    def __add_update(self, element: str, updates):
-        '''
-        Add the updates to the element
-        :param element: the element
-        :param updates: the updates
-        '''
-        if updates.get('provinces'):
-            for prov in updates['provinces']:
-                self.mapelementsdict[element].provinces[prov]= self.provincedict[prov]
-            updates.pop('provinces')
-
-        if updates.get('neighbours'):
-            self.__add_edges(element, updates['neighbours'])
-            updates.pop('neighbours')
-        
-        if updates.get('traits'):
-            for trait in updates['traits']:
-                self.mapelementsdict[element].traits[trait]= self.traitdict[trait]
-            updates.pop('traits')
-        return updates
         
 
-    def update(self, element: str, **kwargs):
+    def update(self, element: str, data: dict):
         """
         Update an element
         :param element: the element
         :param kwargs: the new values
         """
+        if data.get('add'):
+            self.data_add(element, data['add'])
+        if data.get('delete'):
+            self.data_delete(element, data['delete'])
+        if data.get('update'):
+            self.data_update(element, data['update'])
+
+    
+    def data_add(self, element: str, data: dict):
+        """
+        Add data to an element
+        :param element: the element
+        :param data: the data
+        """
+        self.__not_exist_element(element)
+        
+        properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
+        for key in data:
+            if key in properties:
+                if type(properties[key].fget(self.all[element])) == list:
+                    if type(data[key]) == list:
+                        for i in data[key]:
+                            properties[key].fset(self.all[element], self.all[i])
+                    else:
+                        properties[key].fset(self.all[element], self.all[data[key]])
+                else:
+                    raise Exception(f'Error: the property {key} is not a list')
+            else:
+                raise Exception(f'The property {key} doesn\'t exist')
+
+    #todo: elements and list
+    def data_update(self, element: str, data: dict):
+        """
+        Change the data of an element
+        :param element: the element
+        :param data: the new data
+        """
         self.__not_exist_element(element)
 
-        updates= kwargs.copy()
-        updates= self.__add_update(element, updates)
-        self.mapelementsdict[element].__dict__.update(updates)
+        properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
+        for key in data:
+            if key in properties:
+                if type(data[key]) == type(properties[key].fget(self.all[element])):
+                    if type(data[key]) == list:
+                        for i in data[key]:
+                            if i in self.all:
+                                properties[key].fset(self.all[element], self.all[i])
+                            else:
+                                properties[key].fset(self.all[element], i)
+                    else:
+                        if data[key] in self.all:
+                            properties[key].fset(self.all[element], self.all[data[key]])
+                        else:
+                            properties[key].fset(self.all[element], data[key])
+                else:
+                    raise Exception(f'Error: the type of the property {key} is not {type(data[key])}')
+            else:
+                raise Exception(f'The element {element} doesn\'t have the attribute {key}')
+
+    def data_delete(self, element: str, data: dict):
+        """
+        Delete data from an element
+        :param element: the element
+        :param data: the data
+        """
+        self.__not_exist_element(element)
+
+        properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
+        for key in data:
+            if key in properties:
+                if type(properties[key].fget(self.all[element])) == list:
+                    if type(data[key]) == list:
+                        for i in data[key]:
+                            properties[key].fdel(self.all[element], self.all[i])
+                    else:
+                        properties[key].fdel(self.all[element], self.all[data[key]])
+                else:
+                    raise Exception(f'Error: the property {key} is not a list')
+            else:
+                raise Exception(f'The property {key} doesn\'t exist')
+        
+
+    #todo: working here
+    def get_data(self, element: str, data: str):
+        self.__not_exist_element(element)
+
+        properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
+        if data in properties:
+            return properties[data].fget(self.all[element])
+        else:
+            raise Exception(f'The element {element} doesn\'t have the attribute {data}')
+                
 
 
     def nation_neighbours(self, nation: str):
@@ -259,13 +328,13 @@ class Map:
         :return: the nation neighbours
         """
         neighbours = []
-        for province in self.nationdict[nation].provinces:
+        for province in self.nationdict[nation].contains:
             neighbours.extend(self.province_neighbours[province])
         neighbours = list(set(neighbours))
 
         nation_neighbours = []
         for nat in self.nationdict:
-            for province in self.nationdict[nat].provinces:
+            for province in self.nationdict[nat].contains:
                 if province in neighbours:
                     nation_neighbours.append(nat)
         nation_neighbours = list(set(nation_neighbours))
