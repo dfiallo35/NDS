@@ -1,11 +1,11 @@
-try:
-    from elements.elements import *
-except:
-    from pathlib import Path
-    import sys
-    sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-    from elements.elements import *
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+from elements.map_elements import *
+from elements.elements import *
+from elements.simulation_elements import *
 
 import networkx as nx
 from networkx import Graph

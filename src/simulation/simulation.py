@@ -1,16 +1,11 @@
-try:
-    from elements.elements import *
-    from elements.map import Map
-    from ia.planning_reacts import reaction_for_an_event
 
-except:
-    from pathlib import Path
-    import sys
-    sys.path.append(str(Path(__file__).resolve().parents[1]))
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-    from elements.elements import *
-    from elements.map import Map
-    from ia.planning_reacts import reaction_for_an_event
+from elements.elements import Element
+from elements.map import *
+from ia.planning_reacts import reaction_for_an_event
 
 from queue import PriorityQueue
 a = PriorityQueue()
@@ -28,7 +23,7 @@ class Pqueue:
     def event_list(self):
         return list(self.events.values())
 
-    def push(self, element: tuple[time,Event]) -> None:
+    def push(self, element: tuple[int,Event]) -> None:
         '''
         Push an event and its time in the queue
         :param time: the time the event should occur

@@ -1,48 +1,10 @@
-import numpy as np
-import scipy.stats as ss
-import matplotlib.pyplot as plt
-from scipy.stats._distn_infrastructure import rv_sample
+
 
 #todo: definir bien el uso de las distribuciones.
-class Distribution:
-    def __init__(self, distribution, scale:int=1):
-        self.distribution:rv_sample = distribution
-        self.scale= scale
-    
-    def rvs(self, **kwargs):
-        return self.distribution.rvs(**kwargs)
-    
-    def pdf(self, x, **kwargs):
-        return self.distribution.pdf(x, **kwargs)
-
-    def randvar(self, loc:int=0):
-        '''
-        Returns a random variable from the distribution
-        '''
-        return int(self.distribution.rvs(scale=self.scale, loc=loc))
-    
-    def generate_distribution(data: list, bins:int=100, **kwargs):
-        '''
-        Generates a distribution from a list of data
-        '''
-        if type(data) != list and type(data) != np.ndarray:
-            raise TypeError('Error: Data must be a list or a numpy array')
-        if len(data) == 0:
-            raise ValueError(f'Error: Data cannot be empty')
-        
-        hist_dist = ss.rv_histogram(np.histogram(data, bins=100))
-        dist= Distribution(hist_dist, **kwargs)
-        dist.__dict__['data']= data
-        return dist
-    
-    def plot(self, *args, **kwds):
-        '''
-        Plots the distribution
-        '''
-        x= np.linspace(self.distribution.ppf(0.01), self.distribution.ppf(0.99), 100)
-        fig, _= plt.subplots()
-        plt.plot(x, self.distribution.pdf(x, *args, **kwds), 'r-', lw=5, alpha=0.6, label='norm pdf')
-        return fig
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+from elements.simulation_elements import *
 
 
 #todo: define other distributions
@@ -118,5 +80,43 @@ class Multinomial(Distribution):
 
 # a= ss.rv_continuous()
 # b= ss.rv_discrete(values= ([1,2,3,4], [.4,.2,.1,.3]))
+# print(b.rvs())
+
+
+
+
+
+# a= ss.uniform
+# print(a.rvs(loc=0))
+# print(a.rvs(loc=0))
+
+
+
+
+
+# data = 
+# print(data)
+# hist = np.histogram(data, bins=100)
+# print(hist)
+hist_dist = Distribution.generate_distribution(ss.expon.rvs(size=10000000, loc=0, random_state=123), scale=10)
+print(hist_dist.randvar(loc=50))
+
+# import matplotlib.pyplot as plt
+# X = np.linspace(-5.0, 5.0, 100)
+# fig, ax = plt.subplots()
+# ax.set_title("PDF from Template")
+# ax.hist(hist_dist.data, density=True, bins=100)
+# ax.plot(X, hist_dist.pdf(X), label='PDF')
+# ax.legend()
+hist_dist.plot().savefig("hist_dist.png")
 
 # print(b.rvs())
+
+
+
+
+# a= ss.poisson
+# print(a.rvs(mu= 2, size=10))
+
+# a= ss.expon
+# print(a.rvs(loc=100, scale=2))

@@ -1,5 +1,7 @@
 from elements.map import Map
-from elements.elements import *
+from elements.compiler_objects import *
+from elements.simulation_elements import *
+
 from compiler.compiler import *
 from simulation.simulation import *
 
