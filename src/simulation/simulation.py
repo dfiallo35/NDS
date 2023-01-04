@@ -117,19 +117,23 @@ class Simulate:
 
                     #execute the event and return a dictionary
                     #the eventdict is a dictionary with: {'enable': <list of events to be added to the queue>, 'disable': <list of events to be disabled>}
+                    
                     old_map= copy(self.map)
                     eventdict: dict= event.execute(self.map)
-                    print(old_map.compare(self.map), old_map == self.map)
-                    if eventdict.get('enable'):
+
+                    #todo: log of changes
+                    old_map.compare(self.map)
+                    
+                    if eventdict and eventdict.get('enable'):
                         self.enable_events(time, eventdict['enable'])
-                    if eventdict.get('disable'):
+                    if eventdict and eventdict.get('disable'):
                         self.disable_events(eventdict['disable'])
                     
                     #generate the next event
                     self.generate_event(event, time)
 
                     #the nations make decisions based on the event and the map
-                    self.decide(map, event, time)
+                    self.decide(self.map, event, time)
 
 
     def generate_event(self, event: Event, time: int):
