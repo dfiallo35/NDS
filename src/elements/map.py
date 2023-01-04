@@ -13,7 +13,6 @@ from inspect import getmembers as gm
 
 #todo: definir correctamente los traits
 #todo: borrar elementos del mapa
-#fix: update method
 
 #todo: __exist_element for every element
 #todo: revisar los casos en que se sobreescriben los elementos o se da exepcion de que ya existen
@@ -118,7 +117,6 @@ class Map:
         
         nat= Nation(name, province_instances, traits)
         self.nationdict[name]= nat
-        return nat
 
 
     def add_province(self, name: str, extension: float, development: int, population: int, neighbours: list= [], **kwargs):
@@ -139,7 +137,6 @@ class Map:
         self.provincedict[name]= prov
         self.province_neighbours.add_node(name)
         self.__add_edges(name, neighbours)
-        return prov
 
 
     def add_sea(self, name: str, extension: float, neighbours: list= []):
@@ -156,7 +153,6 @@ class Map:
         self.seadict[name]= sea
         self.province_neighbours.add_node(name)
         self.__add_edges(name, neighbours)
-        return sea
 
 
     def add_neutral(self, name: str, extension: float, neighbours: list= []):
@@ -173,7 +169,6 @@ class Map:
         self.provincedict[name]= neutral
         self.province_neighbours.add_node(name)
         self.__add_edges(name, neighbours)
-        return neutral
     
     def add_trait(self, name: str):
         '''
@@ -183,7 +178,6 @@ class Map:
         self.__exist_element(name)
         trait= Trait(name= name)
         self.traitdict[name]= trait
-        return trait
     
     def add_category(self, name: str):
         '''
@@ -192,7 +186,6 @@ class Map:
         '''
         cat= Category(name)
         self.categorydict[name]= cat
-        return cat
     
     def add_decision_to_category(self, category: str, decision: Event):
         '''
@@ -215,10 +208,8 @@ class Map:
         if not self.categorydict.get(category):
             raise Exception(f'The category {category} doesn\'t exist')
         
-        event= Event(name=name, distribution=distribution, category=category, enabled=enabled, type=type, execution=execution, code=code, args= args)
-        self.eventdict[event.name]= event
-        self.decisions[event.name]= decisions
-        return event
+        event= Event(name=name, distribution=distribution, category=category, enabled=enabled, type=type, execution=execution, code=code, decisions=decisions, args= args)
+        self.eventdict[name]= event
         
 
     def update(self, element: str, data: dict):
@@ -257,7 +248,7 @@ class Map:
             else:
                 raise Exception(f'The property {key} doesn\'t exist')
 
-    #todo: elements and list
+    
     def data_update(self, element: str, data: dict):
         """
         Change the data of an element
@@ -309,7 +300,7 @@ class Map:
                 raise Exception(f'The property {key} doesn\'t exist')
         
 
-    #todo: working here
+    
     def get_data(self, element: str, data: str):
         self.__not_exist_element(element)
 

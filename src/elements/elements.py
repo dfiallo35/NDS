@@ -145,11 +145,11 @@ class Nation(MapElement):
                     'lost': [],
                     'changed': {}
                 }
-                new_prov= copy(new.provinces)
+                new_prov= copy(new.contains)
                 for province in self.contains:
-                    if new.provinces.get(province):
+                    if new.contains.get(province):
                         new_prov.pop(province)
-                        comp= self.contains[province].compare(new.provinces[province])
+                        comp= self.contains[province].compare(new.contains[province])
                         if comp:
                             changes['changed'][province]= comp
                     else:
@@ -493,9 +493,9 @@ class Category:
     def __str__(self) -> str:
         return f'{self.name}'
 
-from inspect import getfullargspec
+
 class Event:
-    def __init__(self, name: str, distribution: Distribution, category: Category, execution, code=None, enabled: bool= True, type: str= None, args: list=[]):
+    def __init__(self, name: str, distribution: Distribution, category: Category, execution, code=None, enabled: bool= True, type: str= None, decisions: list=[], args: list=[]):
         self.name= name
         self.category= category
         self.distribution= distribution
@@ -503,6 +503,7 @@ class Event:
         self.type= type
         self.execution= execution
         self.code= code
+        self.decisions= decisions
         
         self.args= args
 
@@ -514,8 +515,8 @@ class Event:
         '''
         return self.enabled
     
-    def __str__(self) -> str:
-        return f'{self.name}'
+    # def __str__(self) -> str:
+    #     return f'{self.name} - {self.category}'
 
     def execute(self, *args, **kwargs):
         '''

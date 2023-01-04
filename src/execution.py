@@ -3,8 +3,6 @@ from elements.elements import *
 from compiler.compiler import *
 from simulation.simulation import *
 
-import inspect
-
 #todo: generar codigo de funciones
 
 class Code:
