@@ -57,35 +57,99 @@ class number(object):
     
     #Arithmetic
     def __add__(self, other):
-        return number(self.val + other.val)
+        calc= self.val + other.val
+        if isinstance(calc, int):
+            return integer(calc)
+        else:
+            return decimal(calc)
     
     def __sub__(self, other):
-        return number(self.val - other.val)
+        calc= self.val - other.val
+        if isinstance(calc, int):
+            return integer(calc)
+        else:
+            return decimal(calc)
     
     def __mul__(self, other):
-        return number(self.val * other.val)
+        calc= self.val * other.val
+        if isinstance(calc, int):
+            return integer(calc)
+        else:
+            return decimal(calc)
     
     def __truediv__(self, other):
-        return number(self.val / other.val)
+        calc= self.val / other.val
+        if isinstance(calc, int):
+            return integer(calc)
+        else:
+            return decimal(calc)
     
     def __floordiv__(self, other):
-        return number(self.val // other.val)
+        calc= self.val // other.val
+        if isinstance(calc, int):
+            return integer(calc)
+        else:
+            return decimal(calc)
     
     def __mod__(self, other):
-        return number(self.val % other.val)
+        calc= self.val % other.val
+        if isinstance(calc, int):
+            return integer(calc)
+        else:
+            return decimal(calc)
     
     def __pow__(self, other):
-        return number(self.val ** other.val)
+        calc= self.val ** other.val
+        if isinstance(calc, int):
+            return integer(calc)
+        else:
+            return decimal(calc)
+    
+    #Arithmetic with assignment
+    # def __iadd__(self, other):
+    #     self.val += other.val
+    #     return self
+    
+    # def __isub__(self, other):
+    #     self.val -= other.val
+    #     return self
+    
     
     #Unary
     def __neg__(self):
-        return number(-self.val)
+        calc= -self.val
+        if isinstance(calc, int):
+            return integer(calc)
+        else:
+            return decimal(calc)
     
     def __pos__(self):
-        return number(self.val)
+        calc= self.val
+        if isinstance(calc, int):
+            return integer(calc)
+        else:
+            return decimal(calc)
     
     def __abs__(self):
-        return number(abs(self.val))
+        calc= abs(self.val)
+        if isinstance(calc, int):
+            return integer(calc)
+        else:
+            return decimal(calc)
+
+
+
+class integer(number):
+    def __init__(self, val) -> None:
+        super().__init__(val)
+
+    #return the type with type()
+
+
+
+class decimal(number):
+    def __init__(self, val) -> None:
+        super().__init__(val)
 
 
 
@@ -103,6 +167,7 @@ class boolean(object):
     
     def __str__(self):
         return str(self.val).lower()
+
 
 class array(object):
     def __init__(self, val) -> None:

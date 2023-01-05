@@ -1,4 +1,5 @@
 from sly import Lexer, Parser
+from elements.simulation_elements import *
 
 
 #todo: add floordiv
@@ -41,6 +42,7 @@ class NDSLexer(Lexer):
     NAME['sea'] = 'ELEMENT'
     NAME['trait'] = 'ELEMENT'
     NAME['category'] = 'ELEMENT'
+    NAME['distribution'] = 'ELEMENT'
     
     NAME['event'] = 'EVENT'
     
@@ -53,6 +55,8 @@ class NDSLexer(Lexer):
     NAME['show'] = 'FUNC'
     NAME['simulate'] = 'FUNC'
     NAME['size'] = 'FUNC'
+    NAME['type'] = 'FUNC'
+
     NAME['random'] = 'FUNC'
 
 
@@ -72,6 +76,8 @@ class NDSLexer(Lexer):
 
     #TYPES
     NAME['number'] = 'TYPE'
+    NAME['integer'] = 'TYPE'
+    NAME['decimal'] = 'TYPE'
     NAME['string'] = 'TYPE'
     NAME['bool'] = 'TYPE'
     NAME['list'] = 'TYPE'
@@ -273,9 +279,9 @@ class NDSParser(Parser):
     def exeparams(self, p):
         return []
     
-    # @_('NAME PARAMASSIGN expr')
-    # def exeparam(self, p):
-    #     return pobj(type='param', name=p.NAME, value=p.expr)
+    @_('NAME PARAMASSIGN expr')
+    def exeparam(self, p):
+        return pobj(type='param', subtype='exe param', name=p.NAME, value=p.expr)
     
     @_('expr')
     def exeparam(self, p):
@@ -309,9 +315,9 @@ class NDSParser(Parser):
     @_('NUMBER')
     def expr(self, p):
         try:
-            return pobj(type='expr', subtype='number', value=int(p.NUMBER))
+            return pobj(type='expr', subtype='integer', value=int(p.NUMBER))
         except:
-            return pobj(type='expr', subtype='number', value=float(p.NUMBER))
+            return pobj(type='expr', subtype='decimal', value=float(p.NUMBER))
     
     @_('STRING')
     def expr(self, p):
@@ -432,12 +438,16 @@ def compile(code: str):
 
 # for i in compile(
 #     '''
-#     province Havana(extension: 10, development: 20, population: 30)
-#     event c(d: 1)(){
-#         a=2
-#         d=2
-#     }
-#     c(c:2)
+#     # province New_York(2056, 20, 103856)
+
+#     a= 2+2
+
+#     # province Havana(extension: 10, development: 20, population: 30)
+#     # event c(d: 1)(){
+#     #     a=2
+#     #     d=2
+#     # }
+#     # c(c:2)
 #     '''
 # ):
 #     print(i)

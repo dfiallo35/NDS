@@ -5,8 +5,12 @@ from elements.simulation_elements import *
 from compiler.compiler import *
 from simulation.simulation import *
 
-#todo: generar codigo de funciones
+# for i in Distribution.distributions:
+#     print(f'NAME[\'{i}\'] = \'FUNC\'')
 
+
+
+#todo: generar codigo de funciones
 class Code:
     def __init__(self) -> None:
         self.map= Map()
@@ -36,7 +40,7 @@ class Code:
         '''
         
         #Convert variables to the types used in the code
-        inside_vars= {**self.real_vars_to_code(vars)}
+        inside_vars= {**{k:self.real_to_code(v) for k,v in vars.items()}}
 
         #Iterate over the compiled code
         for compiled in compiled_list:
@@ -76,7 +80,6 @@ class Code:
                     self.map.update(element=self.real_value(compiled.name), data={'update':{self.real_value(compiled.var): self.real_value(self.value(compiled.value, inside_vars, inside))}})
             
 
-            #todo: working here
             #FUNCTIONS
             #Execute a function
             elif compiled.type == 'func':
@@ -84,10 +87,35 @@ class Code:
                 if compiled.subtype == 'show':
                     print('>>', *self.func_params(compiled, inside_vars, inside))
                 
-                if compiled.subtype == 'simulate':
+                elif compiled.subtype == 'type':
+                    params= self.func_params(compiled, inside_vars, inside)
+                    if len(params) == 1:
+                        return self.real_to_code(type(self.value(params[0])).__name__)
+                    else:
+                        raise Exception('Error: type() only accepts one parameter')
+
+                elif compiled.subtype == 'size':
+                    params= self.func_params(compiled, inside_vars, inside)
+                    if len(params) == 1:
+                        if type(self.real_value(params[0])) == list:
+                            return self.real_to_code(len(params[0]))
+                        else:
+                            raise Exception('Error: size() only accepts lists')
+                    else:
+                        raise Exception('Error: size() only accepts one parameter')
+                
+                
+                elif compiled.subtype == 'simulate':
                     #todo: init events
-                    sim= Simulate(self.map, )
-                    sim.simulate()
+                    params= self.func_params(compiled, inside_vars, inside)
+                    if len(params) == 1:
+                        if type(params[0]) == time:
+                            sim= Simulate(self.map, Pqueue(self.map.event_list))
+                            sim.simulate(self.real_value(params[0]))
+                        else:
+                            raise Exception('Error: simulate() only accepts time')
+                    else:
+                        raise Exception('Error: simulate() only accepts one parameter')
                 
             
             #LOOPS
@@ -129,7 +157,7 @@ class Code:
             elif compiled.type == 'function':
                 # self.add_function(compiled)
                 if compiled.subtype == 'event':
-                    if self.real_value(compiled.name) not in self.elements and compiled.name not in self.vars:
+                    if self.real_value(compiled.name) not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
                         self.map.add_event(*self.real_value_list(self.params(compiled, inside_vars, inside)), execution= self.execute, code= compiled.script, args=self.extra_params(compiled.args))
                     else:
                         raise Exception(f'Error: {compiled.name} is already used')
@@ -167,8 +195,11 @@ class Code:
         '''
         if type(obj) == pobj:
             if obj.type == 'expr':
-                if obj.subtype == 'number':
-                    return number(obj.value)
+                if obj.subtype == 'integer':
+                    return integer(obj.value)
+                
+                elif obj.subtype == 'decimal':
+                    return decimal(obj.value)
                 
                 elif obj.subtype == 'time':
                     return time(int(obj.value[:-1]), obj.value[-1])
@@ -185,14 +216,14 @@ class Code:
                     return array([self.value(value, inside_vars, inside) for value in obj.value])
 
                 elif obj.subtype == 'name':
-
-                    if inside:
-                        if obj.value in inside_vars:
-                            return inside_vars[obj.value]
+                    
+                    if inside and (obj.value in inside_vars):
+                        return inside_vars[obj.value]
                     
                     elif obj.value in self.vars:
                         return self.vars[obj.value]
-
+                    
+                    
                     elif self.real_value(obj.value) in self.elements:
                         return self.elements[self.real_value(obj.value)].name
 
@@ -200,30 +231,27 @@ class Code:
                         raise Exception(f'Name {obj.value} not found')
 
                 elif obj.subtype == 'arrow':
-                    return self.real_to_code(self.map.get_data(self.real_value(obj.name), self.real_value(obj.var)))
+                    return self.real_to_code(self.map.get_data(self.real_value(self.value(obj.name)), self.real_value(obj.var)))
             
             elif obj.type == 'arithmetic':
                 left= self.value(obj.left, inside_vars, inside)
                 right= self.value(obj.right, inside_vars, inside)
                 
-                if self.same_type(left, right):
-                    try:
-                        if obj.subtype == '+':
-                            return left + right
-                        if obj.subtype == '*':
-                            return left * right
-                        if obj.subtype == '/':
-                            return left / right
-                        if obj.subtype == '-':
-                            return left - right
-                        if obj.subtype == '%':
-                            return left % right
-                        if obj.subtype == '**':
-                            return left**right
-                    except:
-                        raise Exception(f'Error: {left.type} does not support "{obj.subtype}" operation')
-                else:
-                    raise Exception('Error: Cant do arithmetic with different types')
+                try:
+                    if obj.subtype == '+':
+                        return left + right
+                    if obj.subtype == '*':
+                        return left * right
+                    if obj.subtype == '/':
+                        return left / right
+                    if obj.subtype == '-':
+                        return left - right
+                    if obj.subtype == '%':
+                        return left % right
+                    if obj.subtype == '**':
+                        return left**right
+                except:
+                    raise Exception(f'Error: {left.type} does not support "{obj.subtype}" operation')
             
             if obj.type == 'uarithmetic':
                 try:
@@ -285,6 +313,19 @@ class Code:
             
             else:
                 raise Exception(f'Error: {obj.type} is not a valid type')
+        
+        elif isinstance(obj, object):
+            return obj
+        
+        elif obj in inside_vars:
+            return inside_vars[obj]
+        
+        elif obj in self.vars:
+            return self.vars[obj]
+
+        elif self.elements.get(obj):
+            return self.elements[obj]
+
         else:
             raise Exception('The object is not recognized')
     
@@ -296,11 +337,11 @@ class Code:
         :param obj: The object to get the real value
         :return The real value of the object
         '''
-        if type(obj) == number:
-            try:
-                return int(obj.val)
-            except:
-                return float(obj.val)
+        if type(obj) == integer:
+            return int(obj.val)
+        
+        elif type(obj) == float:
+            return decimal(obj.val)
         
         elif type(obj) == time:
             return int(obj.days)
@@ -326,25 +367,6 @@ class Code:
         '''
         return [self.real_value(value) for value in obj]
     
-    def real_vars_to_code(self, vars: dict):
-        '''
-        Converts the real types to the code types
-        :param vars: The dict of variables
-        :return The dict of values
-        '''
-        new_dict= {}
-        for key in vars:
-            if type(vars[key]) == list:
-                new_dict[key] = array(vars[key])
-            elif type(vars[key]) == str:
-                new_dict[key] = string(vars[key])
-            elif type(vars[key]) == int or type(vars[key]) == float:
-                new_dict[key] = number(vars[key])
-            elif type(vars[key]) == bool:
-                new_dict[key] = boolean(vars[key])
-            else:
-                new_dict[key] = vars[key]
-        return new_dict
     
     def real_to_code(self, obj):
         '''
@@ -356,12 +378,19 @@ class Code:
             return array(obj)
         elif type(obj) == str:
             return string(obj)
-        elif type(obj) == int or type(obj) == float:
-            return number(obj)
+        elif type(obj) == int:
+            return integer(obj)
+        elif type(obj) == float:
+            return decimal(obj)
         elif type(obj) == bool:
             return boolean(obj)
-        else:
+        elif type(obj) == dict:
+            return array([self.real_to_code(value) for _, value in obj.items()])
+        elif isinstance(obj, object) or isinstance(obj, Element):
             return obj
+        else:
+            raise Exception(f'Error: The object {obj} is not recognized')
+
 
     def func_params(self, obj: pobj, inside_vars: dict={}, inside: int=0):
         params= []
@@ -404,7 +433,7 @@ class Code:
         :param obj: The object to do the conditions
         :return The object with the conditions
         '''
-        if (obj == number(0)).value or (obj == string('')).value or (obj == array([])).value or (obj == boolean(False)).value:
+        if (obj == integer(0)).value or obj == decimal(0.0).value or (obj == string('')).value or (obj == array([])).value or (obj == boolean(False)).value:
             return boolean(False)
         else:
             return boolean(True)
@@ -422,6 +451,7 @@ class Code:
             'neutral': self.map.add_neutral,
             'trait': self.map.add_trait,
             'category': self.map.add_category,
+            'distribution': self.map.add_distribution,
         }
         if element in elements:
             elements[element](*self.real_value_list(args))
@@ -437,7 +467,7 @@ class Code:
         :return True if the types are the same, False if not
         '''
         return type(a) == type(b)
-        
+
     
 a= Code()
 a.compile(
