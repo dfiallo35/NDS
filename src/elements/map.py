@@ -30,6 +30,9 @@ class Map:
         self.eventdict= dict()
         self.decisions= dict()
 
+        self.distdict= {k:v for k,v in Distribution.distributions.items()}
+        self.distributiondict= dict()
+
         self.resources= set()
 
         # Graph of the provinces, sea and neutral neighbours
@@ -72,7 +75,10 @@ class Map:
     
     @property
     def all(self) -> dict:
-        return {**self.nationdict, **self.provincedict, **self.neutraldict, **self.seadict, **self.traitdict, **self.categorydict, **self.eventdict, **self.decisions}
+        return {**self.nationdict, **self.provincedict, **self.neutraldict,
+                **self.seadict, **self.traitdict, **self.categorydict,
+                **self.eventdict, **self.decisions, **self.distdict,
+                **self.distributiondict}
     
     @property
     def nation_province(self) -> dict[list]:
@@ -211,6 +217,15 @@ class Map:
         event= Event(name=name, distribution=distribution, category=category, enabled=enabled, type=type, execution=execution, code=code, decisions=decisions, args= args)
         self.eventdict[name]= event
         
+    def add_distribution(self, name: str, distribution: Distribution, **kwargs):
+        '''
+        Add a distribution to the map
+        :param name: the distribution name
+        :param distribution: the distribution
+        '''
+        dist= Distribution(name, distribution, **kwargs)
+        self.distributiondict[name]= dist
+
 
     def update(self, element: str, data: dict):
         """

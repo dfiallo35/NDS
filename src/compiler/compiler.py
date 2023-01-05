@@ -4,7 +4,7 @@ from sly import Lexer, Parser
 #todo: add floordiv
 #todo: add, sub, mul, div to arrays
 class NDSLexer(Lexer):
-    tokens = {'ELEMENT', 'EVENT', 'DISTRIBUTION', 'DECISION',
+    tokens = {'ELEMENT', 'EVENT', 'DECISION',
             'FUNC', 'RETURN',
             'NAME','NUMBER', 'STRING', 'BOOL', 'TIME', 'TYPE',
             'ASSIGN', 'ARROW', 'PARAMASSIGN',
@@ -44,7 +44,7 @@ class NDSLexer(Lexer):
     
     NAME['event'] = 'EVENT'
     
-    NAME['distribution'] = 'DISTRIBUTION'
+    
     NAME['decision'] = 'DECISION'
 
     NAME['return'] = 'RETURN'
@@ -142,7 +142,7 @@ class NDSParser(Parser):
     
 
     precedence = (
-        ('left', 'ELEMENT', 'EVENT', 'DISTRIBUTION'),
+        ('left', 'ELEMENT', 'EVENT'),
         ('left', 'NAME', 'NUMBER', 'STRING', 'BOOL'),
         ('left', 'TIME'),
         ('left', 'ASSIGN'),
@@ -386,7 +386,7 @@ class NDSParser(Parser):
 
 
     #FUNCTIONS
-    @_('EVENT NAME "(" exeparams ")" "(" params ")" "{" inside_script "}"', 'DISTRIBUTION NAME "(" params ")" "{" inside_script "}"')
+    @_('EVENT NAME "(" exeparams ")" "(" params ")" "{" inside_script "}"')
     def function(self, p):
         return pobj(type='function', subtype=p[0], name=p.NAME, params=p.exeparams, args=p.params, script=p.inside_script)
     
@@ -419,7 +419,7 @@ class NDSParser(Parser):
     #ERRORS
     def error(self, p):
         if p:
-            raise Exception("Syntax error at token %s in line %s" % (p.value[0], p.lineno))
+            raise Exception("Syntax error at token %s in line %s" % (p.value, p.lineno))
         else:
             raise Exception("Syntax error at EOF")
 

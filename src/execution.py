@@ -133,6 +133,12 @@ class Code:
                         self.map.add_event(*self.real_value_list(self.params(compiled, inside_vars, inside)), execution= self.execute, code= compiled.script, args=self.extra_params(compiled.args))
                     else:
                         raise Exception(f'Error: {compiled.name} is already used')
+                
+                if compiled.subtype == 'distribution':
+                    if self.real_value(compiled.name) not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
+                        self.map.add_distribution(*self.real_value_list(self.params(compiled, inside_vars, inside)), execution= self.execute, code= compiled.script, args=self.extra_params(compiled.args))
+                    else:
+                        raise Exception(f'Error: {compiled.name} is already used')
             
             #EXECUTION
             #Execute a event

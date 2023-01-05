@@ -6,12 +6,18 @@ from elements.elements import *
 import numpy as np
 import scipy.stats as ss
 import matplotlib.pyplot as plt
-from scipy.stats._distn_infrastructure import rv_sample
+from inspect import getmembers as gm
+from scipy.stats._distn_infrastructure import rv_generic
 
 
-class Distribution:
-    def __init__(self, distribution, scale:int=1):
-        self.distribution:rv_sample = distribution
+
+
+class Distribution(Element):
+    distributions= {name:val for (name, val) in gm(ss, lambda x: isinstance(x, rv_generic))}
+    
+    def __init__(self, name: str, dist: str, scale:int=1):
+        super().__init__(name)
+        self.distribution:rv_generic = ss.__dict__[dist]
         self.scale= scale
     
     def rvs(self, **kwargs):
@@ -26,7 +32,7 @@ class Distribution:
         '''
         return int(self.distribution.rvs(scale=self.scale, loc=loc))
     
-    def generate_distribution(data: list, bins:int=100, **kwargs):
+    def generate_distribution(name: str, data: list, bins:int=100, **kwargs):
         '''
         Generates a distribution from a list of data
         '''
@@ -36,10 +42,11 @@ class Distribution:
             raise ValueError(f'Error: Data cannot be empty')
         
         hist_dist = ss.rv_histogram(np.histogram(data, bins=100))
-        dist= Distribution(hist_dist, **kwargs)
+        dist= Distribution(name, hist_dist, **kwargs)
         dist.__dict__['data']= data
         return dist
     
+    #fix: plot
     def plot(self, *args, **kwds):
         '''
         Plots the distribution
@@ -52,7 +59,7 @@ class Distribution:
 
 class Category(Element):
     def __init__(self, name: str):
-        self.name= name
+        super().__init__(name)
         self.decisions= list()
     
     def add_decision(self, decision):
@@ -64,7 +71,7 @@ class Category(Element):
 
 class Event(Element):
     def __init__(self, name: str, distribution: Distribution, category: Category, execution, code=None, enabled: bool= True, type: str= None, decisions: list=[], args: list=[]):
-        self.name= name
+        super().__init__(name)
         self.category= category
         self.distribution= distribution
         self.enabled= enabled
