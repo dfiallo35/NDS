@@ -1,6 +1,7 @@
 import re
 
 import get_nations
+import locationtagger
 import spacy
 import wikipedia
 from spacy import displacy
@@ -25,28 +26,47 @@ def main():
     # in 'country_hdi' is a dictionary with keys as countries and value as its hdi index
     
     countries, countries_hdi = get_nations.get_all_countries()
-    
+
+    countries_regions = dict()
+    countries_area = dict()
+    countries_population = dict()
+        
     country_content = get_pages(countries)
 
     for country in countries:
-        text_processing(country, country_content[country])
+        regions_to_process, area_to_process, population_to_process = text_processing(country, country_content[country])
+
+        # region, area, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)
+
+        # countries_regions[country] = regions
+        # countries_area[country] = area
+        # countries_population[country] = population
 
 
 def for_tests():
-    # countries = ["United States"]    
-    
+    countries = ["United States"]    
+
+    countries_regions = dict()
+    countries_area = dict()
+    countries_population = dict()
+        
     # country_content = get_pages(["United States"])
     
-    countries = ["Cuba"]
+    # countries = ["Cuba"]
     # countries_hdi = [{"Cuba": 0.87}]
 
     country_content = dict()
-    country_content["Cuba"] = "According to the official census of 2010, Cuba's population was 11,241,161, comprising 5,628,996 men and 5,612,165 women. The official area of the Republic of Cuba is 109,884 km2 (42,426 sq mi) (without the territorial waters) but a total of 350,730 km2 (135,418 sq mi) including the exclusive economic zone. Cuba is the second-most populous country in the Caribbean after Haiti, with over 11 million inhabitants.[13]"
-    # country_content["United States"] = "The U.S. Census Bureau reported 331,449,281 residents as of April 1, 2020,[o][389] making the United States the third most populous nation in the world, after China and India."
+    # country_content["Cuba"] = "According to the official census of 2010, Cuba's population was 11,241,161, comprising 5,628,996 men and 5,612,165 women. The official area of the Republic of Cuba is 109,884 km2 (42,426 sq mi) (without the territorial waters) but a total of 350,730 km2 (135,418 sq mi) including the exclusive economic zone. Cuba is the second-most populous country in the Caribbean after Haiti, with over 11 million inhabitants.[13]"
+    country_content["United States"] = "The U.S. Census Bureau reported 331,449,281 residents as of April 1, 2020,[o][389] making the United States the third most populous nation in the world, after China and India."
     
     for country in countries:
-        text_processing(country, country_content[country])
+        regions_to_process, area_to_process, population_to_process = text_processing(country, country_content[country])
 
+        # region, are, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)
+
+        # countries_regions[country] = regions
+        # countries_area[country] = area
+        # countries_population[country] = population
 
 
 # OK
@@ -99,15 +119,15 @@ def sent_tokenize(text: str):
 def text_processing(country: str, content: str):  
     sentences = sent_tokenize(content)
 
-    list_regions = set()
-    area_sents = set()
-    population_sents = set()
+    list_regions = []
+    area_sents = []
+    population_sents = []
 
     for sent in sentences:
         # detecting countries, cities, regions
        
         list_regions = regions_extract(sent)
-
+        
         print("regions in text: ", list_regions)
 
         areas = []
@@ -117,7 +137,10 @@ def text_processing(country: str, content: str):
         pop_matcher = population_matcher(sent)
 
         for match_id, start, end in pop_matcher:
+            # for match_id_1, start_1, end_1 in pop_matcher:
             span = sent[start:end]
+            
+            population_sents.append(span)
             print("pop_matcher: ", span.text)
 
 
@@ -135,7 +158,8 @@ def text_processing(country: str, content: str):
         _area_matcher = area_matcher(sent)
 
         for match_id, start, end in _area_matcher:
-            span = sent[start:end]
+            span = sent[start:end]            
+            area_sents.append(span)
             print("area_matcher: ", span.text) 
 
 
@@ -145,6 +169,8 @@ def text_processing(country: str, content: str):
         # for match_id, start, end in _area_phrase_matcher:
         #     span = sent[start:end]
         #     print("area_phrase_matcher: ", span.text)
+
+    return list_regions, area_sents, population_sents
 
 
 def regions_extract(sent):
@@ -173,11 +199,27 @@ def population_matcher(sent):
             {"TEXT": {"REGEX": "reside"}, "OP": "*"}
 
         ],
+        [
+            {"TEXT" : {"REGEX": "total"}},   
+            {"TEXT" : {"REGEX": "population"}},             
+            {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+            {"LIKE_NUM": True, "OP": "+"},
+            {"TEXT": {"REGEX": "reside"}, "OP": "*"}
+
+        ],
+        # [
+        #     {"POS": "PROPN"},   
+        #     {"TEXT" : {"REGEX": "population"}},             
+        #     {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+        #     {"LIKE_NUM": True, "OP": "+"},
+        #     {"TEXT": {"REGEX": "reside"}, "OP": "*"}
+
+        # ],
         [  
             {"LOWER" : "census"},             
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "+"}, 
             {"LIKE_NUM": True, "OP": "+"},
-            {"TEXT": {"REGEX": "reside"}, "OP": "*"}
+            # {"TEXT": {"REGEX": "reside"}, "OP": "*"}
         ],
         [    
             {"LOWER" : {"REGEX": "census"}},   
@@ -185,7 +227,7 @@ def population_matcher(sent):
             {"TEXT" : {"REGEX": "population"}},          
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"},
-            {"TEXT": {"REGEX": "reside"}, "OP": "*"}
+            # {"TEXT": {"REGEX": "reside"}, "OP": "*"}
 
         ]
     ]
@@ -228,6 +270,44 @@ def area_matcher(sent):
     matches = (matcher(sent))
 
     return matches
+
+
+# def match_sentence_processing(country: str,  regions_to_process: list, sents_area_to_process, sents_population_to_process):
+#     temp_area_text = []
+#     temp_area_matche_id = []
+
+#     for item in sents_area_to_process:
+#         if len(temp_area) == 0:
+#             temp_area.append(item.text)
+#             # temp_area_matche_id(item)
+
+#         else:
+#             item.text
+
+
+
+def getting_regions(country: str, region_list: list):
+    """
+    """
+    
+    # text = ' '.join(r for r in region_list)
+
+    place_entity = locationtagger.find_locations(text)
+    
+    if country in place_entity.country_regions:
+        for reg in  place_entity.country_regions[country]:
+            regions[country].add(reg)
+
+        # regions[country]. = set(place_entity.country_regions[country])
+
+    # if country in place_entity.country_cities:
+    #     for reg in  place_entity.country_cities[country]:
+    #         regions[country].add(reg)
+
+    if city in place_entity.region_cities:
+        for reg in place_entity.region_cities[city]:
+            regions[country].add(reg)
+
 
 
 # Phrase matchers
