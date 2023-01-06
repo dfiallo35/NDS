@@ -17,11 +17,16 @@ class Distribution(Element):
     
     def __init__(self, name: str, dist: str, scale:int=1):
         super().__init__(name)
-        self.distribution:rv_generic = ss.__dict__[dist]
+        self.distribution:rv_generic = dist
         self.scale= scale
     
+    @property
     def rvs(self, **kwargs):
-        return self.distribution.rvs(**kwargs)
+        return float(self.distribution.rvs(**kwargs))
+    
+    @property
+    def irvs(self, **kwargs):
+        return int(self.distribution.rvs(**kwargs))
     
     def pdf(self, x, **kwargs):
         return self.distribution.pdf(x, **kwargs)

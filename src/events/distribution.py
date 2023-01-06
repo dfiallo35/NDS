@@ -98,17 +98,18 @@ class Multinomial(Distribution):
 # print(data)
 # hist = np.histogram(data, bins=100)
 # print(hist)
-hist_dist = Distribution.generate_distribution(ss.expon.rvs(size=10000000, loc=0, random_state=123), scale=10)
-print(hist_dist.randvar(loc=50))
+# hist_dist = Distribution.generate_distribution(ss.expon.rvs(size=10000000, loc=0, random_state=123), scale=10)
+# print(hist_dist.randvar(loc=50))
 
 # import matplotlib.pyplot as plt
 # X = np.linspace(-5.0, 5.0, 100)
 # fig, ax = plt.subplots()
 # ax.set_title("PDF from Template")
-# ax.hist(hist_dist.data, density=True, bins=100)
+# ax.hist(hist_dist.data, density=True, bins=30)
 # ax.plot(X, hist_dist.pdf(X), label='PDF')
 # ax.legend()
-hist_dist.plot().savefig("hist_dist.png")
+# plt.savefig("hist_dist.png")
+# hist_dist.plot().savefig("hist_dist.png")
 
 # print(b.rvs())
 

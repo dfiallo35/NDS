@@ -5,12 +5,10 @@ from elements.simulation_elements import *
 from compiler.compiler import *
 from simulation.simulation import *
 
-# for i in Distribution.distributions:
-#     print(f'NAME[\'{i}\'] = \'FUNC\'')
-
-
-
+#fix: None
 #todo: generar codigo de funciones
+
+#todo: params with param name
 class Code:
     def __init__(self) -> None:
         self.map= Map()
@@ -47,6 +45,9 @@ class Code:
             #ELEMENTS
             #Creates a new element
             if compiled.type == 'element':
+                if compiled.subtype == 'map':
+                    raise Exception('Error: map can not be created')
+
                 if compiled.name not in self.vars and self.real_value(compiled.name) not in self.events:
                     self.add_element(self.real_value(compiled.subtype), self.params(compiled, inside_vars, inside))
                 else:
@@ -84,8 +85,11 @@ class Code:
             #Execute a function
             elif compiled.type == 'func':
                 #todo: add functions
+
+                #todo: show for class is str
                 if compiled.subtype == 'show':
-                    print('>>', *self.func_params(compiled, inside_vars, inside))
+                    params= self.func_params(compiled, inside_vars, inside)
+                    print('>>', *params)
                 
                 elif compiled.subtype == 'type':
                     params= self.func_params(compiled, inside_vars, inside)
@@ -93,6 +97,19 @@ class Code:
                         return self.real_to_code(type(self.value(params[0])).__name__)
                     else:
                         raise Exception('Error: type() only accepts one parameter')
+                
+                elif compiled.subtype == 'pos':
+                    params= self.func_params(compiled, inside_vars, inside)
+                    if len(params) == 2:
+                        if type(params[0]) == array:
+                            if type(params[1]) == integer:
+                                return self.real_to_code(params[0].value[params[1].value])
+                            else:
+                                raise Exception('Error: pos() only accepts integers as second parameter')
+                        else:
+                            raise Exception('Error: pos() only accepts lists as first parameter')
+                    else:
+                        raise Exception('Error: pos() only accepts two parameters')
 
                 elif compiled.subtype == 'size':
                     params= self.func_params(compiled, inside_vars, inside)
@@ -220,6 +237,8 @@ class Code:
                     if inside and (obj.value in inside_vars):
                         return inside_vars[obj.value]
                     
+                    #todo: to map
+
                     elif obj.value in self.vars:
                         return self.vars[obj.value]
                     
@@ -231,7 +250,12 @@ class Code:
                         raise Exception(f'Name {obj.value} not found')
 
                 elif obj.subtype == 'arrow':
-                    return self.real_to_code(self.map.get_data(self.real_value(self.value(obj.name)), self.real_value(obj.var)))
+                    if obj.get('params'):
+                        return self.real_to_code(self.map.get_data(self.real_value(self.value(obj.name)), self.real_value(obj.var), self.real_value(self.func_params(obj))))
+                    if obj.name == 'map':
+                        return self.real_to_code(self.map.get_map_data(self.real_value(obj.var)))
+                    else:
+                        return self.real_to_code(self.map.get_data(self.real_value(self.value(obj.name)), self.real_value(obj.var)))
             
             elif obj.type == 'arithmetic':
                 left= self.value(obj.left, inside_vars, inside)
@@ -251,7 +275,7 @@ class Code:
                     if obj.subtype == '**':
                         return left**right
                 except:
-                    raise Exception(f'Error: {left.type} does not support "{obj.subtype}" operation')
+                    raise Exception(f'Error: {left.type} and {right.type} does not support "{obj.subtype}" operation')
             
             if obj.type == 'uarithmetic':
                 try:

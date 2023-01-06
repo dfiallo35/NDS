@@ -30,7 +30,8 @@ class Map:
         self.eventdict= dict()
         self.decisions= dict()
 
-        self.distdict= {k:v for k,v in Distribution.distributions.items()}
+        #fix: must be and Distribution element
+        self.distdict= {k:Distribution(k, v) for k,v in Distribution.distributions.items()}
         self.distributiondict= dict()
 
         self.resources= set()
@@ -38,7 +39,7 @@ class Map:
         # Graph of the provinces, sea and neutral neighbours
         self.province_neighbours= Graph()
     
-    #check: test for map, nations are ok
+
     def compare(self, new):
         '''
         Compare the map with another map
@@ -241,12 +242,13 @@ class Map:
             self.data_update(element, data['update'])
 
     
-    def data_add(self, element: str, data: dict):
+    def data_add(self, element: str, data: dict, *args, **kwargs):
         """
         Add data to an element
         :param element: the element
         :param data: the data
         """
+        element= self.get_element_name(element)
         self.__not_exist_element(element)
         
         properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
@@ -270,6 +272,7 @@ class Map:
         :param element: the element
         :param data: the new data
         """
+        element= self.get_element_name(element)
         self.__not_exist_element(element)
 
         properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
@@ -298,6 +301,7 @@ class Map:
         :param element: the element
         :param data: the data
         """
+        element= self.get_element_name(element)
         self.__not_exist_element(element)
 
         properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
@@ -314,14 +318,20 @@ class Map:
             else:
                 raise Exception(f'The property {key} doesn\'t exist')
         
-
+    def get_map_data(self, data: str):
+        properties= {name:val for (name, val) in gm(Map, lambda x: isinstance(x, property))}
+        if data in properties:
+            return properties[data].fget(self)
+        else:
+            raise Exception(f'The map doesn\'t have the attribute {data}')
     
-    def get_data(self, element: str, data: str):
+    def get_data(self, element: str, data: str, *args, **kwargs):
+        element= self.get_element_name(element)
         self.__not_exist_element(element)
 
         properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
         if data in properties:
-            return properties[data].fget(self.all[element])
+            return properties[data].fget(self.all[element], *args, **kwargs)
         else:
             raise Exception(f'The element {element} doesn\'t have the attribute {data}')
                 
@@ -346,6 +356,18 @@ class Map:
         nation_neighbours = list(set(nation_neighbours))
         return nation_neighbours
 
+    def get_element_name(self, element: str):
+        """
+        Get the name of an element
+        :param element: the element
+        :return: the name
+        """
+        if isinstance(element, str):
+            return element
+        elif isinstance(element, Element):
+            return element.name
+        else:
+            raise Exception("Error: The element must be a string or an element")
 
     def __add_edges(self, province: str, neighbours: list):
         """
@@ -386,7 +408,7 @@ class Map:
         :param name: the element name
         :param elements_dict: the dictionary of the elements
         """
-        if not self.mapelementsdict.get(element):
+        if not self.all.get(element):
             raise Exception(f"The Element {element} not exists")
     
     def __not_exist_elements(self, elements: list):

@@ -1,5 +1,4 @@
 from sly import Lexer, Parser
-from elements.simulation_elements import *
 
 
 #todo: add floordiv
@@ -45,10 +44,7 @@ class NDSLexer(Lexer):
     NAME['distribution'] = 'ELEMENT'
     
     NAME['event'] = 'EVENT'
-    
-    
     NAME['decision'] = 'DECISION'
-
     NAME['return'] = 'RETURN'
 
     #SPECIAL FUNCTIONS
@@ -56,10 +52,9 @@ class NDSLexer(Lexer):
     NAME['simulate'] = 'FUNC'
     NAME['size'] = 'FUNC'
     NAME['type'] = 'FUNC'
+    NAME['pos'] = 'FUNC'
 
     NAME['random'] = 'FUNC'
-
-
     # NAME[''] = 'FUNC'
 
     #FUNCTIONS
@@ -139,8 +134,6 @@ class pobj:
 #fix: las lineas de codigo no comienzan a machear desde script, buscan machear con todo los elementos de ela gramatica.
 #todo: precedences
 #todo: mejorar la deteccion de errores
-
-#todo: agregar funciones especiales(print, simulate, len....)
 
 class NDSParser(Parser):
     tokens = NDSLexer.tokens
@@ -363,11 +356,14 @@ class NDSParser(Parser):
     def expr(self, p):
         return pobj(type='uarithmetic', subtype=p[0], value=p.expr)
     
+    #todo: expr to name
     @_('NAME ARROW NAME')
     def expr(self, p):
         return pobj(type='expr', subtype='arrow', name=p.NAME0, var=p.NAME1)
     
-
+    @_('NAME ARROW NAME "(" exeparams ")"')
+    def expr(self, p):
+        return pobj(type='expr', subtype='arrow', name=p.NAME0, var=p.NAME1, params= p.exeparams)
 
     #LIST
     @_('expr "," list_expr')
@@ -451,3 +447,17 @@ def compile(code: str):
 #     '''
 # ):
 #     print(i)
+
+
+# from inspect import getmembers as gm
+
+# class a:
+#     def aa(self, x, y):
+#         print(x,y)
+    
+#     b= property(fget=aa)
+
+# x= a()
+# properties= {name:val for (name, val) in gm(a, lambda x: isinstance(x, property))}
+
+# properties['b'].fget(x, 1)

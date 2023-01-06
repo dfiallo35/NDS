@@ -181,13 +181,13 @@ class array(object):
         return len(self.val)
     
     def __str__(self):
-        l= []
+        vals=[]
         for i in self.val:
-            if type(i) == number:
-                l.append(i.value)
+            if isinstance(i, string):
+                vals.append('\'' + str(i) + '\'')
             else:
-                l.append(str(i))
-        return str(l)
+                vals.append(str(i))
+        return '['+', '.join(vals) +']'
 
 
 # TIME

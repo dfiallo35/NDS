@@ -61,7 +61,7 @@ class Nation(MapElement):
 
     
     def provinces_get(self):
-        return list(self.contains.keys())
+        return self.contains
     
     def provinces_set(self, value):
         self.contains.update({value.name: value})
@@ -71,7 +71,7 @@ class Nation(MapElement):
     
     provinces= property(provinces_get, provinces_set, provinces_del)
 
-
+    #todo: traits dict
     def traits_get(self):
         return self.traitsvar
     
@@ -110,7 +110,7 @@ class Nation(MapElement):
                 prov.data[data_name]+= prov.data[data_name]*value/total_data
         
     def __str__(self):
-        return f'{self.name} with extension: {self.extension}, development: {self.development}, population: {self.population}'
+        return f'{self.name}'
 
     def compare(self, new):
         if self.name == new.name:
@@ -187,7 +187,7 @@ class Province(MapElement):
 
 
     def __str__(self):
-        return f'{self.name} with extension: {self.extension}, development: {self.development}, population: {self.population}'
+        return f'{self.name}'
     
     def compare(self, new):
         if self.name == new.name:
