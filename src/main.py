@@ -40,8 +40,11 @@ if run:
         output = f.getvalue()
         c.markdown('**Output**')
         c.text(output)
+        # c.code(output)
     except Exception as e:
         c.markdown('**Output**')
         c.text(e)
+        # c.code(e)
+        
 else:
     c.markdown('**Output**')
