@@ -101,3 +101,7 @@ for j in a.values():
 
 # print( [i["action"].action if i["action"] else None for i in get_path(decide_simulation_test(m.nationdict["Cuba"]))])
 
+
+# distributions= {name:val for (name, val) in gm(ss, lambda x: isinstance(x, rv_generic))}
+
+# print(distributions.keys())
