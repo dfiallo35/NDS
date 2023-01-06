@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 
-class PlanningProblem:#(Problem):
+class PlanningProblem:
     """General Planning Problem"""
     def __init__(self, initial_state, actions, goal_state) -> None:
         self.initial_state = initial_state

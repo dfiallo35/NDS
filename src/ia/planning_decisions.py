@@ -20,19 +20,6 @@ class PlanningDecisions(PlanningProblem):
     def is_goal_state(self,state):
         """Check if the state is a goal state."""
         return self.goal_state(state)
-        # for goal in self.goal_state:
-        #     if not (state.data[goal]>=self.goal_state[goal][1]):
-        #         return False
-        # return True 
-
-
-    # def is_goal_state(self,state):
-    #     """Check if the state is a goal state."""
-    #     for goal in self.goal_state:
-    #         if not apply_operator(self.goal_state[goal][0],state.data[goal],self.goal_state[goal][1]):
-    #             return False
-    #     return True 
-
 
 class Decision(Action):
     def __init__(self, action, preconds, effects):
@@ -47,34 +34,4 @@ class Decision(Action):
         """return the new state after apply it an action"""   
         return self.effects(state)
 
-    # def check_preconds(self,state):
-    #     for precond in self.preconds:
-    #         if not apply_operator(self.preconds[precond][0],state.data[precond],self.preconds[precond][1]):
-    #             return False
-    #     return True
-    
-    # def apply_action(self, state):     
-    #     """return the new state after apply it an action"""   
-    #     new_state=deepcopy(state)
-    #     self.make_action(new_state)
-    #     return new_state
-    
-    # def make_action(self,state):
-    #     for effect in self.effects:
-    #         state.data[effect]=apply_operator(self.effects[effect][0], state.data[effect],self.effects[effect][1])
-
-# def apply_operator(operator, val1,val2):
-#     if operator=="<":
-#         return val1 < val2
-#     if operator==">":
-#         return val1 > val2
-#     if operator=="<=":
-#         return val1 <= val2
-#     if operator==">=":
-#         return val1 >= val2
-#     if operator=="+":
-#         return val1 + val2
-#     if operator=="-":
-#         return val1 - val2
-#     return False
 

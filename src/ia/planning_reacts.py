@@ -10,16 +10,20 @@ def reaction_for_an_event(event,map,new_map,changes,time):
     decisions={}
     for nation in nations:
         decisions[nation]= PlanningDecisions(nation,map.decisions,get_target(nation,changes)).make_planning()
+
+
     return decisions
     
-    
-# def apply_event_to_map(event,map):
-#     """Apply the event to the map"""
-#     ...
 
-# def get_changes_to_map(old_map,new_map):
-#     """Compare the map with the map obtained after the event and return the diferences both maps"""
-#     ...
+def get_time():
+    ...
+
+
+
+def get_only_actions(tree):
+    """Get a list of actions from the states tree of the planning"""
+    return [i["action"].action if i["action"] else None for i in get_path(tree)]
+
 
 def get_affected_nations(map,changes):
     """From map changes, returns a list of nations that were affected"""
@@ -38,7 +42,6 @@ def get_target(nation,changes):
                 goals[elem]=goals[elem]+changes["changed"][nation.name]["changed"][province]["changed"][elem][0]
             else:
                 goals[elem]=changes["changed"][nation.name]["changed"][province]["changed"][elem][0]
-
     #convert the goals into a function than comprobate this goal
     goals_function = lambda nation: all([nation.get_nation_data(goal)>=goals[goal] for goal in goals])
     return goals_function

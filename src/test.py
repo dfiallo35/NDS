@@ -13,7 +13,7 @@ m.add_province('Florida', 10, 10, 120)
 m.add_nation('USA', ['Florida'])
 m.add_province('Madrid', 10, 10, 120)
 
-m.update('Habana', development= 20)
+# m.update('Habana')
 
 m.add_category('Social')
 m.add_category('Economic')
