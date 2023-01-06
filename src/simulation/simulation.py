@@ -183,7 +183,7 @@ class Simulate:
             initial_time=initial_time + distribution.rvs*scale
             timed_decisions.push((initial_time, decision))
         return timed_decisions
-            
+
     def get_evets_from_decisions(decisions):
         """Get the events from the decisions"""
         events=[]

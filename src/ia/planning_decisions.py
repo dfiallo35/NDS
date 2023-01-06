@@ -21,10 +21,12 @@ class PlanningDecisions(PlanningProblem):
         """Check if the state is a goal state."""
         return self.goal_state(state)
 
-class Decision(Action):
-    def __init__(self, action, preconds, effects):
-       super().__init__(action, preconds, effects)
 
+class Decision(Action):
+    def __init__(self, action, preconds, event):
+        super().__init__(action, preconds, event.execute)
+        self.event=event
+        self.effects=event.execute
 
     def check_preconds(self,state):
         """Check if the preconditions are true"""      
