@@ -243,8 +243,17 @@ class Code:
                     if compiled.name not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
                         args, kwargs= self.params_names(compiled, inside_vars, inside)
                         args= self.to_python([compiled.name, *args])
-                        kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'code': compiled.script, 'args': self.extra_params(compiled.args)}})
+                        kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'code': compiled.script, 'params': self.extra_params(compiled.args)}})
                         self.map.add_event(*self.to_python(args), **self.to_python(kwargs))
+                    else:
+                        raise Exception(f'Error: {compiled.name} is already used')
+                
+                if compiled.subtype == 'decision':
+                    if compiled.name not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
+                        args, kwargs= self.params_names(compiled, inside_vars, inside)
+                        args= self.to_python([compiled.name, *args])
+                        kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'cond': compiled.condition, 'params': self.extra_params(compiled.args)}})
+                        self.map.add_decision(*self.to_python(args), **self.to_python(kwargs))
                     else:
                         raise Exception(f'Error: {compiled.name} is already used')
             
@@ -265,7 +274,9 @@ class Code:
             
             elif compiled.type == 'return':
                 return self.value(compiled.value, inside_vars, inside)
-
+            
+            elif compiled.type == 'func condition':
+                return self.to_python(self.value(compiled.value, inside_vars, inside))
 
             else:
                 raise Exception('Error: unknown type')
@@ -548,48 +559,52 @@ class Code:
 a= Code()
 a.compile(
     '''
-    category socialism()
-    category capitalism()
+    # category socialism()
+    # category capitalism()
 
-    province Havana(100, 10, 10345)    
-    province Mayabeque(236, 10, 204)
-    province New_York(2056, 20, 103856)
-    province California(341, 30, 402175)
+    # province Havana(100, 10, 10345)    
+    # province Mayabeque(236, 10, 204)
+    # province New_York(2056, 20, 103856)
+    # province California(341, 30, 402175)
 
-    nation Cuba([Havana, Mayabeque], [socialism])
-    nation USA([New_York, California], [capitalism])
+    # nation Cuba([Havana, Mayabeque], [socialism])
+    # nation USA([New_York, California], [capitalism])
     
 
-    event population_growth(expon, socialism, true, '', [])(){
-        for(prov, map->provinces){
-            a=prov
-            show('before', prov->population)
-            prov->population: expon->irvs(loc: prov->population)
-            show('after', prov->population)
-        }
-    }
-    population_growth()
-
-    simulate(10d)
-
-    # nation Cuba([Mayabeque], [crazy])
-    # Cuba->provinces: ++Havana
-    # Cuba->provinces: --Mayabeque
-    # show(Cuba->provinces)
-
-
-    # event fib(dist: expon, cat: socialism, enabled: true, tp: 'y', dec: [])(n: number){
-    #     if(n == 0){
-    #         return 0
-    #     }
-    #     if(n ==1){
-    #         return 1
-    #     }
-    #     else{
-    #         return fib(n-1) + fib(n-2)
+    # event population_growth(expon, socialism, true, '', [])<>{
+    #     for(prov, map->provinces){
+    #         a=prov
+    #         show('before', prov->population)
+    #         prov->population: expon->irvs(loc: prov->population)
+    #         show('after', prov->population)
     #     }
     # }
-    # show(fib(10))
+    # population_growth()
+
+    # simulate(10d)
+
+    # # nation Cuba([Mayabeque], [crazy])
+    # # Cuba->provinces: ++Havana
+    # # Cuba->provinces: --Mayabeque
+    # # show(Cuba->provinces)
+
+    
+
+    category socialism()
+    event fib(dist: expon, cat: socialism, enabled: true, tp: 'y', dec: [])(n: number){
+        if(n == 0){
+            return 0
+        }
+        if(n ==1){
+            return 1
+        }
+        else{
+            return fib(n-1) + fib(n-2)
+        }
+    }
+    show(fib(10))
+
+    decision a(n==1, fib)(n)
     
 
     # event a (dist: expon, socialism, true, 'y', [])(n: number){
@@ -600,6 +615,7 @@ a.compile(
 
     '''
 )
+# print(a.map.decisions['a'].condition(1))
 # print('map', a.elements)
 # print('vars', a.vars)
 # print('events', a.events)

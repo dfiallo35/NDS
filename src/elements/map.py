@@ -11,13 +11,8 @@ import networkx as nx
 from networkx import Graph
 from inspect import getmembers as gm
 
-#todo: definir correctamente los traits
+
 #todo: borrar elementos del mapa
-
-#todo: __exist_element for every element
-#todo: revisar los casos en que se sobreescriben los elementos o se da exepcion de que ya existen
-
-
 class Map:
     def __init__(self) -> None:
         self.nationdict = dict()
@@ -28,9 +23,9 @@ class Map:
 
         self.categorydict= dict()
         self.eventdict= dict()
-        self.decisions= dict()
+        self.decisionsdict= dict()
 
-        #fix: must be and Distribution element
+        
         self.distdict= {k:Distribution(name=k, dist=v) for k,v in Distribution.distributions.items()}
         self.distributiondict= dict()
 
@@ -107,9 +102,9 @@ class Map:
         return self.distributiondict
     
     #todo: change names
-    # @property
-    # def decisions(self) -> dict:
-    #     return self.decisions
+    @property
+    def decisions(self) -> dict:
+        return self.decisionsdict
     
     # @property
     # def resources(self) -> set:
@@ -120,7 +115,7 @@ class Map:
     def all(self) -> dict:
         return {**self.nationdict, **self.provincedict, **self.neutraldict,
                 **self.seadict, **self.traitdict, **self.categorydict,
-                **self.eventdict, **self.decisions, **self.distdict,
+                **self.eventdict, **self.decisionsdict, **self.distdict,
                 **self.distributiondict}
     
     @property
@@ -274,7 +269,7 @@ class Map:
             self.categorydict[category].add_decision(decision)
     
     #todo: controle types
-    def add_event(self, name: str, dist: Distribution, cat: str, enabled: bool, tp: str, dec: list, execution, code= None, args: list=[]):
+    def add_event(self, name: str, dist: Distribution, cat: str, enabled: bool, tp: str, dec: list, execution, code= None, params: list=[]):
         '''
         Add an event to the map. If the event already exists, it will be updated
         :param event: the event
@@ -292,7 +287,7 @@ class Map:
         if not self.categorydict.get(cat):
             raise Exception(f'The category {cat} doesn\'t exist')
         
-        event= Event(name=name, dist=self.all[dist], category=self.all[cat], enabled=enabled, type=tp, execution=execution, code=code, decisions=dec, args= args)
+        event= Event(name=name, dist=self.all[dist], category=self.all[cat], enabled=enabled, type=tp, execution=execution, code=code, decisions=dec, params= params)
         self.eventdict[name]= event
         
     def add_distribution(self, name: str, dist: Distribution, **kwargs):
@@ -310,6 +305,20 @@ class Map:
         dist= Distribution(name, dist, **kwargs)
         self.distributiondict[name]= dist
 
+    def add_decision(self, name: str, event: Event, cond, execution, params: list= []):
+        '''
+        Add a decision to the map
+        :param name: the decision name
+        :param distribution: the distribution
+        '''
+        name= self.element_name(name)
+        event= self.element_name(event)
+
+        self.alredy_exist(name)
+        self.not_exist(event)
+
+        dec= Decision(name, cond, self.all[event], execution, params)
+        self.decisionsdict[name]= dec
 
     def update(self, element: str, data: dict):
         """

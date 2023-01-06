@@ -78,7 +78,7 @@ class Category(Element):
 
 
 class Event(Element):
-    def __init__(self, name: str, dist: Distribution, category: Category, execution, code=None, enabled: bool= True, type: str= None, decisions: list=[], args: list=[]):
+    def __init__(self, name: str, dist: Distribution, category: Category, execution, code=None, enabled: bool= True, type: str= None, decisions: list=[], params: list=[]):
         super().__init__(name)
         self.category= category
         self.distribution= dist
@@ -88,7 +88,7 @@ class Event(Element):
         self.code= code
         self.decisions= decisions
         
-        self.args= args
+        self.params= params
 
     
     @property
@@ -109,11 +109,14 @@ class Event(Element):
             self.enabled= False
 
             #fix: args input
-        if self.code:
-            if args:
-                return self.execution(compiled_list=self.code, inside=1, vars= {k:v for k,v in zip(self.args, args)})
-            else:
-                return self.execution(compiled_list=self.code, inside=1)
+        if self.code:  
+            for i in kwargs:
+                if i not in self.params:
+                    raise ValueError(f'Error: {i} is not in the arguments')
+                else:
+                    self.params.remove(i)
+            params= {**{k:v for k,v in zip(self.params, args)}, **kwargs}
+            return self.execution(compiled_list=self.code, inside=1, vars= params)
         else:
             if args:
                 return self.execution(*args)
@@ -130,3 +133,26 @@ class Event(Element):
     
     def __str__(self) -> str:
         return f'{self.name}'
+
+
+class Decision(Element):
+    def __init__(self, name: str, cond, event: Event, execution, params: list=[]):
+        super().__init__(name)
+        self.cond= cond
+        self.event= event
+        self.execution= execution
+
+        self.params= params
+    
+    def condition(self, *args, **kwargs):
+        '''
+        Returns the condition of the decision
+        '''
+        for i in kwargs:
+            if i not in self.params:
+                raise ValueError(f'Error: {i} is not in the arguments')
+            else:
+                self.params.remove(i)
+        params= {**{k:v for k,v in zip(self.params, args)}, **kwargs}
+        return self.execution(compiled_list=self.cond, inside=1, vars= params)
+

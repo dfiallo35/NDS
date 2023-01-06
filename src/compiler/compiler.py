@@ -391,6 +391,15 @@ class NDSParser(Parser):
     def function(self, p):
         return pobj(type='function', subtype=p[0], name=p.NAME, params=p.exeparams, args=p.params, script=p.inside_script)
     
+    @_('DECISION NAME "(" func_condition "," exeparams ")" "(" params ")"')
+    def function(self, p):
+        return pobj(type='function', subtype=p[0], name=p.NAME, params=p.exeparams, condition=p.func_condition, args=p.params)
+
+    @_('condition')
+    def func_condition(self, p):
+        return [pobj(type='func condition', value=p.condition)]
+    
+
 
     #EXECUTION
     @_('NAME "(" exeparams ")"')
@@ -458,15 +467,3 @@ def compile(code: str):
 #     print(i)
 
 
-# from inspect import getmembers as gm
-
-# class a:
-#     def aa(self, x, y):
-#         print(x,y)
-    
-#     b= property(fget=aa)
-
-# x= a()
-# properties= {name:val for (name, val) in gm(a, lambda x: isinstance(x, property))}
-
-# properties['b'].fget(x, 1)
