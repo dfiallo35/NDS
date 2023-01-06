@@ -144,9 +144,9 @@ class NDSParser(Parser):
 
     precedence = (
         ('left', 'ELEMENT', 'EVENT'),
-        ('left', 'NAME', 'NUMBER', 'STRING', 'BOOL'),
-        ('left', 'TIME'),
-        ('left', 'ASSIGN'),
+        ('left', 'NAME', 'NUMBER', 'STRING', 'BOOL', 'TIME'),
+        ('left', 'ASSIGN', 'PARAMASSIGN'),
+        ('left', 'ARROW'),
         ('left', 'FUNC'),
         ('left', 'FOR', 'WHILE', 'IF', 'ELSE'),
 

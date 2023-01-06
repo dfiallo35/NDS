@@ -333,6 +333,7 @@ class Map:
                         else:
                             properties[key].fset(self.all[element], data[key])
                 else:
+                    print(element, data[key], key)
                     raise Exception(f'Error: the type of the property {key} is not {type(data[key])}')
             else:
                 raise Exception(f'The element {element} doesn\'t have the attribute {key}')

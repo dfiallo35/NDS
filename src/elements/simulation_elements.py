@@ -21,15 +21,18 @@ class Distribution(Element):
         self.scale= scale
     
     @property
-    def rvs(self, **kwargs):
-        return float(self.distribution.rvs(**kwargs))
+    def rvs(self, *args, **kwargs):
+        return float(self.distribution.rvs(*args, **kwargs))
     
     @property
-    def irvs(self, **kwargs):
-        return int(self.distribution.rvs(**kwargs))
+    def irvs(self, *args, **kwargs):
+        dist= self.distribution.rvs(*args, **kwargs)
+        if isinstance(dist, list) or isinstance(dist, np.ndarray):
+            return [int(i) for i in self.distribution.rvs( *args, **kwargs)]
+        return int(self.distribution.rvs(*args, **kwargs))
     
-    def pdf(self, x, **kwargs):
-        return self.distribution.pdf(x, **kwargs)
+    def pdf(self, x, *args, **kwargs):
+        return self.distribution.pdf(x, *args, **kwargs)
 
     def randvar(self, loc:int=0):
         '''

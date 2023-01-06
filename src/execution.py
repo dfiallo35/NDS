@@ -83,11 +83,11 @@ class Code:
                 if compiled.subtype == 'element':
                     if compiled.get('op'):
                         if compiled.op == '++':
-                            self.map.update(element=self.to_python(compiled.name), data={'add':{self.to_python(compiled.var): self.to_python(self.value(compiled.value, inside_vars, inside))}})
+                            self.map.update(element=self.to_python(self.value(compiled.name, inside_vars, inside)), data={'add':{self.to_python(compiled.var): self.to_python(self.value(compiled.value, inside_vars, inside))}})
                         elif compiled.op == '--':
-                            self.map.update(element=self.to_python(compiled.name), data={'delete':{self.to_python(compiled.var): self.to_python(self.value(compiled.value, inside_vars, inside))}})
+                            self.map.update(element=self.to_python(self.value(compiled.name, inside_vars, inside)), data={'delete':{self.to_python(compiled.var): self.to_python(self.value(compiled.value, inside_vars, inside))}})
                     else:    
-                        self.map.update(element=self.to_python(compiled.name), data={'update':{self.to_python(compiled.var): self.to_python(self.value(compiled.value, inside_vars, inside))}})
+                        self.map.update(element=self.to_python(self.value(compiled.name, inside_vars, inside)), data={'update':{self.to_python(compiled.var): self.to_python(self.value(compiled.value, inside_vars, inside))}})
                 
                 elif compiled.subtype == 'expr':
                     if self.to_python(compiled.name) not in self.elements and self.to_python(compiled.name) not in self.events:
@@ -118,7 +118,8 @@ class Code:
                 elif compiled.subtype == 'type':
                     params= self.params(compiled, inside_vars, inside)
                     if len(params) == 1:
-                        return self.to_object(type(self.value(params[0])).__name__)
+                        #check: params of value
+                        return self.to_object(type(self.value(params[0], inside_vars, inside)).__name__)
                     else:
                         raise Exception('Error: type() only accepts one parameter')
                 
@@ -240,8 +241,8 @@ class Code:
                     if compiled.name not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
                         
                         args, kwargs= self.params_names(compiled, inside_vars, inside)
-                        args= [compiled.name, *args]
-                        kwargs= {**kwargs, **{'execution': self.execute, 'code': compiled.script, 'args': self.extra_params(compiled.args)}}
+                        args= self.to_python_list([compiled.name, *args])
+                        kwargs= self.to_python_dict({**kwargs, **{'execution': self.execute, 'code': compiled.script, 'args': self.extra_params(compiled.args)}})
                         self.map.add_event(*self.to_python_list(args), **self.to_python_dict(kwargs))
                     
                     else:
@@ -253,7 +254,12 @@ class Code:
             elif compiled.type == 'execution':
                 if self.events.get(self.to_python(compiled.name)):
                     args, kwargs= self.params_names(compiled, inside_vars, inside)
-                    return self.events[compiled.name].execute(*args, **kwargs)
+                    args= self.to_python_list(args)
+                    kwargs= self.to_python_dict(kwargs)
+                    ex= self.to_object(self.events[compiled.name].execute(*args, **kwargs))
+                    if self.to_python(ex) != None:
+                        return ex
+                    
                 else:
                     raise Exception(f'Error: event {compiled.name} does not exist')
             
@@ -316,11 +322,16 @@ class Code:
 
                 elif obj.subtype == 'arrow':
                     if obj.get('params'):
-                        return self.to_object(self.map.get_data(self.to_python(self.value(obj.name)), self.to_python(obj.var), self.to_python(self.params(obj))))
+                        return self.to_object(self.map.get_data(self.to_python(self.value(obj.name, inside_vars, inside)),
+                                            self.to_python(obj.var),
+                                            self.to_python(self.params(obj, inside_vars, inside))))
+                    
                     if obj.name == 'map':
                         return self.to_object(self.map.get_map_data(self.to_python(obj.var)))
+                    
                     else:
-                        return self.to_object(self.map.get_data(self.to_python(self.value(obj.name)), self.to_python(obj.var)))
+                        return self.to_object(self.map.get_data(self.to_python(self.value(obj.name, inside_vars, inside)),
+                                            self.to_python(obj.var)))
             
 
             elif obj.type == 'arithmetic':
@@ -434,8 +445,8 @@ class Code:
         if type(obj) == integer:
             return int(obj.val)
         
-        elif type(obj) == float:
-            return decimal(obj.val)
+        elif type(obj) == decimal:
+            return float(obj.val)
         
         elif type(obj) == time:
             return int(obj.days)
@@ -449,6 +460,9 @@ class Code:
         elif type(obj) == array:
             return list(obj.val)
         
+        elif type(obj) == list:
+            return [self.to_python(i) for i in obj]
+
         else:
             return obj
     
@@ -490,6 +504,8 @@ class Code:
             return array([self.to_object(value) for _, value in obj.items()])
         elif isinstance(obj, object) or isinstance(obj, Element):
             return obj
+        elif obj == None:
+            return None
         else:
             raise Exception(f'Error: The object {obj} is not recognized')
 
@@ -571,11 +587,15 @@ a.compile(
     nation USA([New_York, California], [capitalism])
     
 
-    # event population_growth(expon, socialism, true, '', [])(){
-    #     for(prov, map->provinces){
-    #         prov->population: 
-    #     }
-    # }
+    event population_growth(expon, socialism, true, '', [])(){
+        for(prov, map->provinces){
+            a=prov
+            show('before', prov->population)
+            prov->population: expon->irvs(loc: prov->population)
+            show('after', prov->population)
+        }
+    }
+    population_growth()
 
     # simulate(10d)
 
