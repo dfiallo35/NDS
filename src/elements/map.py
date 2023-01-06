@@ -75,6 +75,48 @@ class Map:
         return {**self.nationdict, **self.provincedict, **self.neutraldict, **self.seadict}
     
     @property
+    def nations(self) -> dict:
+        return self.nationdict
+    
+    @property
+    def provinces(self) -> dict:
+        return self.provincedict
+    
+    @property
+    def neutrals(self) -> dict:
+        return self.neutraldict
+    
+    @property
+    def seas(self) -> dict:
+        return self.seadict
+    
+    @property
+    def traits(self) -> dict:
+        return self.traitdict
+    
+    @property
+    def categories(self) -> dict:
+        return self.categorydict
+    
+    @property
+    def events(self) -> dict:
+        return self.eventdict
+    
+    @property
+    def distributions(self) -> dict:
+        return self.distributiondict
+    
+    #todo: change names
+    # @property
+    # def decisions(self) -> dict:
+    #     return self.decisions
+    
+    # @property
+    # def resources(self) -> set:
+    #     return self.resources
+
+
+    @property
     def all(self) -> dict:
         return {**self.nationdict, **self.provincedict, **self.neutraldict,
                 **self.seadict, **self.traitdict, **self.categorydict,
