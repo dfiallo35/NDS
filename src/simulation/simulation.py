@@ -186,9 +186,9 @@ class Simulate:
 
     def get_evets_from_decisions(decisions):
         """Get the events from the decisions"""
-        events=[]
-        for decision in decisions:
-            events.append(Event(decision.name,None,decision.Category,decision.effect))
+        events={}
+        for nation in decisions.keys():
+            events[nation]=decisions[nation].event
         return events
 
 

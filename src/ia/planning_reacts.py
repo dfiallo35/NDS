@@ -38,11 +38,16 @@ def get_target(nation,changes):
     goals={}
     for province in changes["changed"][nation.name]["changed"].keys():
         for elem in changes["changed"][nation.name]["changed"][province]["changed"]:
-            if goals.__contains__(elem):
-                goals[elem]=goals[elem]+changes["changed"][nation.name]["changed"][province]["changed"][elem][0]
-            else:
-                goals[elem]=changes["changed"][nation.name]["changed"][province]["changed"][elem][0]
+            if(gets_worse(elem,changes["changed"][nation.name]["changed"][province]["changed"][elem][0],changes["changed"][nation.name]["changed"][province]["changed"][elem][1])):#todo aqui comprobar si el cambio es positivo o negativo
+                if goals.__contains__(elem):
+                    goals[elem]=goals[elem]+changes["changed"][nation.name]["changed"][province]["changed"][elem][0]
+                else:
+                    goals[elem]=changes["changed"][nation.name]["changed"][province]["changed"][elem][0]
     #convert the goals into a function than comprobate this goal
-    #todo aqui comprobar si el cambio es positivo o negativo
     goals_function = lambda nation: all([nation.get_nation_data(goal)>=goals[goal] for goal in goals])
     return goals_function
+
+
+def gets_worse(field,initial_state,final_state):
+    """Check if the change is a bad change for the nation"""
+    return final_state.get_nation_data(field)<initial_state.get_nation_data(field)
