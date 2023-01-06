@@ -8,10 +8,10 @@ class NDSLexer(Lexer):
             'FUNC', 'RETURN',
             'NAME','NUMBER', 'STRING', 'BOOL', 'TIME', 'TYPE',
             'ASSIGN', 'ARROW', 'PARAMASSIGN',
-            'REPEAT', 'WHILE', 'IF', 'ELSE',
+            'FOR', 'WHILE', 'IF', 'ELSE',
             'NOT', 'AND', 'OR', 'XOR',
             'GREATER', 'EGREATER', 'LESS', 'ELESS', 'XPLUS', 'XMINUS', 'EQUALS', 'NOTEQUALS', 
-            'PLUS', 'MINUS', 'MULTIPLY', 'DIVIDE', 'POW', 'MOD'}
+            'PLUS', 'MINUS', 'MULTIPLY', 'DIVIDE', 'POW', 'MOD', 'FLOORDIV',}
     
     literals = { '(', ')', '{', '}', '[', ']', ';', ','}
 
@@ -23,6 +23,7 @@ class NDSLexer(Lexer):
     newline = r'\n+'
     def newline(self, t):
         self.lineno += t.value.count('\n')
+    
 
     #VARIABLES
     NAME= r'[_]*[a-zA-Z][a-zA-Z0-9_]*'
@@ -58,7 +59,7 @@ class NDSLexer(Lexer):
     # NAME[''] = 'FUNC'
 
     #FUNCTIONS
-    NAME['repeat'] = 'REPEAT'
+    NAME['for'] = 'FOR'
     NAME['while'] = 'WHILE'
     NAME['if'] = 'IF'
     NAME['else'] = 'ELSE'
@@ -108,6 +109,7 @@ class NDSLexer(Lexer):
     POW = r'\*\*'
     MULTIPLY = r'\*'
     MOD= r'\%'
+    FLOORDIV = r'//'
     DIVIDE = r'/'
 
     # Ignored pattern
@@ -146,10 +148,10 @@ class NDSParser(Parser):
         ('left', 'TIME'),
         ('left', 'ASSIGN'),
         ('left', 'FUNC'),
-        ('left', 'REPEAT', 'WHILE', 'IF', 'ELSE'),
+        ('left', 'FOR', 'WHILE', 'IF', 'ELSE'),
 
         ('left', 'PLUS', 'MINUS'),
-        ('left', 'MULTIPLY', 'DIVIDE', 'MOD', 'POW'),
+        ('left', 'MULTIPLY', 'FLOORDIV', 'DIVIDE', 'MOD', 'POW'),
 
         ('left', 'AND', 'OR', 'XOR'),
         ('left', 'EQUALS', 'NOTEQUALS', 'GREATER', 'LESS', 'EGREATER', 'ELESS'),
@@ -228,11 +230,11 @@ class NDSParser(Parser):
     #ELEMENTS VARS
     @_('NAME ARROW NAME PARAMASSIGN expr')
     def var(self, p):
-        return pobj(type='element var', name=p.NAME0, var=p.NAME1, value=p.expr)
+        return pobj(type='var', subtype='element', name=p.NAME0, var=p.NAME1, value=p.expr)
     
     @_('NAME ARROW NAME PARAMASSIGN XPLUS expr', 'NAME ARROW NAME PARAMASSIGN XMINUS expr')
     def var(self, p):
-        return pobj(type='element var', name=p.NAME0, var=p.NAME1, value=p.expr, op=p[4])
+        return pobj(type='var', subtype='element', name=p.NAME0, var=p.NAME1, value=p.expr, op=p[4])
     
 
 
@@ -251,11 +253,11 @@ class NDSParser(Parser):
 
     @_('NAME PARAMASSIGN TYPE')
     def param(self, p):
-        return pobj(type='param', subtype='func param', value=p.NAME, vartype=p[1])
+        return pobj(type='func param', subtype='assign', value=p.NAME, vartype=p[1])
     
     @_('NAME')
     def param(self, p):
-        return pobj(type='param', subtype='func param', value=p.NAME)
+        return pobj(type='func param', value=p.NAME)
     
     
 
@@ -274,11 +276,11 @@ class NDSParser(Parser):
     
     @_('NAME PARAMASSIGN expr')
     def exeparam(self, p):
-        return pobj(type='param', subtype='exe param', name=p.NAME, value=p.expr)
+        return pobj(type='exe param', subtype='assign', name=p.NAME, value=p.expr)
     
     @_('expr')
     def exeparam(self, p):
-        return pobj(type='param', subtype='exe param', value=p.expr)
+        return pobj(type='exe param', value=p.expr)
     
     
 
@@ -344,13 +346,10 @@ class NDSParser(Parser):
 
 
     #ARITHMETIC
-    @_('expr PLUS expr', 'expr MINUS expr', 'expr MULTIPLY expr', 'expr DIVIDE expr', 'expr POW expr', 'expr MOD expr')
+    @_('expr PLUS expr', 'expr MINUS expr', 'expr MULTIPLY expr', 'expr DIVIDE expr', 'expr POW expr', 'expr MOD expr', 'expr FLOORDIV expr')
     def expr(self, p):
         return pobj(type='arithmetic', subtype=p[1], left=p.expr0, right=p.expr1)
     
-    # @_('XPLUS expr', 'XMINUS expr')
-    # def expr(self, p):
-    #     return pobj(type='xarithmetic', subtype=p[0], left=p.expr)
     
     @_('PLUS expr %prec UPLUS', 'MINUS expr %prec UMINUS')
     def expr(self, p):
@@ -412,9 +411,9 @@ class NDSParser(Parser):
     def function(self, p):
         return pobj(type='loop', subtype=p[0], condition=p.condition, script=p.inside_script)
 
-    @_('REPEAT "(" NAME "," expr "," expr ")" "{" inside_script "}"')
+    @_('FOR "(" NAME "," exeparams ")" "{" inside_script "}"')
     def function(self, p):
-        return pobj(type='loop', subtype=p[0], var=p.NAME, start=p.expr0, end=p.expr1, script=p.inside_script)
+        return pobj(type='loop', subtype=p[0], var=p.NAME, params=p.exeparams, script=p.inside_script)
 
 
     
@@ -424,6 +423,16 @@ class NDSParser(Parser):
             raise Exception("Syntax error at token %s in line %s" % (p.value, p.lineno))
         else:
             raise Exception("Syntax error at EOF")
+    
+    # def error(self, p):
+    #     if not p:
+    #         return
+
+    #     while True:
+    #         tok = next(self.tokens, None)
+    #         if not tok or tok.type == ';':
+    #             break
+    #     self.restart()
 
 
 def compile(code: str):
