@@ -75,10 +75,10 @@ class Category(Element):
 
 
 class Event(Element):
-    def __init__(self, name: str, distribution: Distribution, category: Category, execution, code=None, enabled: bool= True, type: str= None, decisions: list=[], args: list=[]):
+    def __init__(self, name: str, dist: Distribution, category: Category, execution, code=None, enabled: bool= True, type: str= None, decisions: list=[], args: list=[]):
         super().__init__(name)
         self.category= category
-        self.distribution= distribution
+        self.distribution= dist
         self.enabled= enabled
         self.type= type
         self.execution= execution

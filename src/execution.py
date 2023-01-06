@@ -5,6 +5,11 @@ from elements.simulation_elements import *
 from compiler.compiler import *
 from simulation.simulation import *
 
+import inspect
+
+#get the args of a function
+# print(inspect.getfullargspec(Map.add_nation).args)
+
 #fix: None
 #todo: generar codigo de funciones
 
@@ -20,7 +25,7 @@ class Code:
     
     @property
     def events(self):
-        return self.map.eventdict
+        return self.map.events
 
     def compile(self, code: str):
         '''
@@ -140,6 +145,30 @@ class Code:
                     else:
                         raise Exception('Error: size() only accepts one parameter')
                 
+                #return the list of params of a function
+                elif compiled.subtype == 'params':
+                    params= self.params(compiled, inside_vars, inside)
+                    if len(params) == 1:
+                        p= params[0]
+                        if isinstance(p, Event):
+                            return ['dist', 'cat', 'enabled', 'tp', 'dec']
+                        elif isinstance(p, Nation):
+                            return ['provinces', 'traits']
+                        elif isinstance(p, Province):
+                            return ['extension', 'development', 'population', 'neighbors']
+                        elif isinstance(p, Sea):
+                            return ['extension', 'neighbors']
+                        elif isinstance(p, Neutral):
+                            return ['extension', 'neighbors']
+                        elif isinstance(p, Trait):
+                            return []
+                        elif isinstance(p, Category):
+                            return []
+                        elif isinstance(p, Distribution):
+                            return ['dist']
+                    else:
+                        raise Exception('Error: params() only accepts one parameter')
+                
                 
                 elif compiled.subtype == 'simulate':
                     #todo: init events
@@ -207,24 +236,24 @@ class Code:
             #FUNCTIONS
             #Creates a new function
             elif compiled.type == 'function':
-                # self.add_function(compiled)
                 if compiled.subtype == 'event':
-                    if self.to_python(compiled.name) not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
-                        self.map.add_event(*self.to_python_list(self.elements_params(compiled, inside_vars, inside)), execution= self.execute, code= compiled.script, args=self.extra_params(compiled.args))
-                    else:
-                        raise Exception(f'Error: {compiled.name} is already used')
-                
-                if compiled.subtype == 'distribution':
-                    if self.to_python(compiled.name) not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
-                        self.map.add_distribution(*self.to_python_list(self.elements_params(compiled, inside_vars, inside)), execution= self.execute, code= compiled.script, args=self.extra_params(compiled.args))
+                    if compiled.name not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
+                        
+                        args, kwargs= self.params_names(compiled, inside_vars, inside)
+                        args= [compiled.name, *args]
+                        kwargs= {**kwargs, **{'execution': self.execute, 'code': compiled.script, 'args': self.extra_params(compiled.args)}}
+                        self.map.add_event(*self.to_python_list(args), **self.to_python_dict(kwargs))
+                    
                     else:
                         raise Exception(f'Error: {compiled.name} is already used')
             
+
             #EXECUTION
             #Execute a event
             elif compiled.type == 'execution':
                 if self.events.get(self.to_python(compiled.name)):
-                    return self.events[self.to_python(compiled.name)].execute(*self.to_python_list(self.params(compiled, inside_vars, inside)))
+                    args, kwargs= self.params_names(compiled, inside_vars, inside)
+                    return self.events[compiled.name].execute(*args, **kwargs)
                 else:
                     raise Exception(f'Error: event {compiled.name} does not exist')
             
@@ -432,6 +461,14 @@ class Code:
         '''
         return [self.to_python(value) for value in obj]
     
+    def to_python_dict(self, obj: dict):
+        '''
+        Returns the real value of a dict of objects
+        :param obj: The dict of objects to get the real value
+        :return The real value of the dict of objects
+        '''
+        return {key: self.to_python(value) for key, value in obj.items()}
+    
     
     def to_object(self, obj):
         '''
@@ -476,6 +513,18 @@ class Code:
         params += self.params(obj, inside_vars, inside)
         return params
 
+    def params_names(self, obj: pobj, inside_vars: dict={}, inside: int=0):
+        params_list= []
+        params_dict= {}
+        for param in obj.params:
+            if param.get('name'):
+                params_dict[param.name]= self.value(param.value, inside_vars, inside)
+            else:
+                if params_dict:
+                    raise Exception('Error: You cannot exist a named parameter after an unnamed parameter')
+                params_list.append(self.value(param.value, inside_vars, inside))
+        
+        return params_list, params_dict
 
     def extra_params(self, extra: list):
         '''
@@ -537,21 +586,21 @@ a.compile(
 
 
     category socialism()
-    # event fib(1, socialism, true, 'y', [])(n: number){
-    #     if(n == 0){
-    #         return 0
-    #     }
-    #     if(n ==1){
-    #         return 1
-    #     }
-    #     else{
-    #         return fib(n-1) + fib(n-2)
-    #     }
-    # }
-    # show(fib(10))
+    event fib(dist: expon, cat: socialism, enabled: true, tp: 'y', dec: [])(n: number){
+        if(n == 0){
+            return 0
+        }
+        if(n ==1){
+            return 1
+        }
+        else{
+            return fib(n-1) + fib(n-2)
+        }
+    }
+    show(fib(10))
     
 
-    # event a (1, socialism, true, 'y', [])(n: number){
+    # event a (dist: expon, socialism, true, 'y', [])(n: number){
     #     show(n)
     # }
     # b= a(10)

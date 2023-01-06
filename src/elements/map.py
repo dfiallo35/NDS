@@ -249,24 +249,24 @@ class Map:
             self.categorydict[category]= Category(category)
             self.categorydict[category].add_decision(decision)
     
-    def add_event(self, name: str, distribution: Distribution, category: str, enabled: bool, type: str, decisions: list, execution, code= None, args: list=[]):
+    def add_event(self, name: str, dist: Distribution, cat: str, enabled: bool, tp: str, dec: list, execution, code= None, args: list=[]):
         '''
         Add an event to the map. If the event already exists, it will be updated
         :param event: the event
         '''
-        if not self.categorydict.get(category):
-            raise Exception(f'The category {category} doesn\'t exist')
+        if not self.categorydict.get(cat):
+            raise Exception(f'The category {cat} doesn\'t exist')
         
-        event= Event(name=name, distribution=distribution, category=category, enabled=enabled, type=type, execution=execution, code=code, decisions=decisions, args= args)
+        event= Event(name=name, dist=dist, category=cat, enabled=enabled, type=tp, execution=execution, code=code, decisions=dec, args= args)
         self.eventdict[name]= event
         
-    def add_distribution(self, name: str, distribution: Distribution, **kwargs):
+    def add_distribution(self, name: str, dist: Distribution, **kwargs):
         '''
         Add a distribution to the map
         :param name: the distribution name
         :param distribution: the distribution
         '''
-        dist= Distribution(name, distribution, **kwargs)
+        dist= Distribution(name, dist, **kwargs)
         self.distributiondict[name]= dist
 
 
