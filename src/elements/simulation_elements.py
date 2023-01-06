@@ -125,6 +125,7 @@ class Event(Element):
         '''
         Returns the time of the next execution of the event
         '''
+        print(self.distribution, type(self.distribution))
         return self.distribution.randvar()
     
     def __str__(self) -> str:

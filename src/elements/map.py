@@ -31,7 +31,7 @@ class Map:
         self.decisions= dict()
 
         #fix: must be and Distribution element
-        self.distdict= {k:Distribution(k, v) for k,v in Distribution.distributions.items()}
+        self.distdict= {k:Distribution(name=k, dist=v) for k,v in Distribution.distributions.items()}
         self.distributiondict= dict()
 
         self.resources= set()
@@ -154,11 +154,17 @@ class Map:
         :param provinces: contains the provinces of the nation
         :param traits: the nation traits
         '''
-        self.__exist_element(name)
-        self.__not_exist_elements(provinces)
-        for nat in self.nationdict.values():
-            self.__one_of_list_exist_in_list(provinces, nat.contains)
+        name= self.element_name(name)
+        provinces= self.element_name(provinces)
+        traits= self.element_name(traits)
 
+        self.alredy_exist(name)
+        self.not_exist_list(provinces)
+
+        for nat in self.nationdict.values():
+            for prov in nat.provinces:
+                if prov in provinces:
+                    raise Exception(f'Province {prov} already in nation {nat.name}')
 
         province_instances= dict()
         for prov in provinces:
@@ -177,8 +183,11 @@ class Map:
         :param population: the province population
         :param neighbours: the province neighbours
         '''
-        self.__exist_element(name)
-        self.__not_exist_elements(neighbours)
+        name= self.element_name(name)
+        neighbours= self.element_name(neighbours)
+
+        self.alredy_exist(name)
+        self.not_exist_list(neighbours)
 
         for i in kwargs:
             self.resources.add(i)
@@ -195,8 +204,11 @@ class Map:
         :param extension: the sea extension
         :param neighbours: the sea neighbours
         '''
-        self.__exist_element(name)
-        self.__not_exist_elements(neighbours)
+        name= self.element_name(name)
+        neighbours= self.element_name(neighbours)
+
+        self.alredy_exist(name)
+        self.not_exist_list(neighbours)
 
         sea= Sea(name, extension, neighbours)
         self.seadict[name]= sea
@@ -211,8 +223,11 @@ class Map:
         :param extension: the neutral extension
         :param neighbours: the neutral neighbours
         '''
-        self.__exist_element(name)
-        self.__not_exist_elements(neighbours)
+        name= self.element_name(name)
+        neighbours= self.element_name(neighbours)
+
+        self.alredy_exist(name)
+        self.not_exist_list(neighbours)
 
         neutral= Neutral(name, extension, neighbours)
         self.provincedict[name]= neutral
@@ -224,7 +239,10 @@ class Map:
         Add a trait to the map
         :param name: the trait name
         '''
-        self.__exist_element(name)
+        name= self.element_name(name)
+        
+        self.alredy_exist(name)
+
         trait= Trait(name= name)
         self.traitdict[name]= trait
     
@@ -233,6 +251,10 @@ class Map:
         Add a category to the map
         :param name: the category name
         '''
+        name= self.element_name(name)
+        
+        self.alredy_exist(name)
+
         cat= Category(name)
         self.categorydict[name]= cat
     
@@ -242,6 +264,8 @@ class Map:
         :param category: the category
         :param decision: the decision
         '''
+        # name= self.element_name(name)
+        # self.alredy_exist(name)
         cat= self.categorydict.get(category)
         if cat:
             cat.add_decision(decision)
@@ -249,15 +273,26 @@ class Map:
             self.categorydict[category]= Category(category)
             self.categorydict[category].add_decision(decision)
     
+    #todo: controle types
     def add_event(self, name: str, dist: Distribution, cat: str, enabled: bool, tp: str, dec: list, execution, code= None, args: list=[]):
         '''
         Add an event to the map. If the event already exists, it will be updated
         :param event: the event
         '''
+        name= self.element_name(name)
+        cat= self.element_name(cat)
+        dec= self.element_name(dec)
+        dist= self.element_name(dist)
+
+        self.alredy_exist(name)
+        self.not_exist_list(dec)
+        self.not_exist(dist)
+        self.not_exist(cat)
+
         if not self.categorydict.get(cat):
             raise Exception(f'The category {cat} doesn\'t exist')
         
-        event= Event(name=name, dist=dist, category=cat, enabled=enabled, type=tp, execution=execution, code=code, decisions=dec, args= args)
+        event= Event(name=name, dist=self.all[dist], category=self.all[cat], enabled=enabled, type=tp, execution=execution, code=code, decisions=dec, args= args)
         self.eventdict[name]= event
         
     def add_distribution(self, name: str, dist: Distribution, **kwargs):
@@ -266,6 +301,12 @@ class Map:
         :param name: the distribution name
         :param distribution: the distribution
         '''
+        name= self.element_name(name)
+        dist= self.element_name(dist)
+
+        self.alredy_exist(name)
+        self.not_exist(dist)
+
         dist= Distribution(name, dist, **kwargs)
         self.distributiondict[name]= dist
 
@@ -290,8 +331,8 @@ class Map:
         :param element: the element
         :param data: the data
         """
-        element= self.get_element_name(element)
-        self.__not_exist_element(element)
+        element= self.element_name(element)
+        self.not_exist(element)
         
         properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
         for key in data:
@@ -314,8 +355,8 @@ class Map:
         :param element: the element
         :param data: the new data
         """
-        element= self.get_element_name(element)
-        self.__not_exist_element(element)
+        element= self.element_name(element)
+        self.not_exist(element)
 
         properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
         for key in data:
@@ -333,7 +374,6 @@ class Map:
                         else:
                             properties[key].fset(self.all[element], data[key])
                 else:
-                    print(element, data[key], key)
                     raise Exception(f'Error: the type of the property {key} is not {type(data[key])}')
             else:
                 raise Exception(f'The element {element} doesn\'t have the attribute {key}')
@@ -344,8 +384,8 @@ class Map:
         :param element: the element
         :param data: the data
         """
-        element= self.get_element_name(element)
-        self.__not_exist_element(element)
+        element= self.element_name(element)
+        self.not_exist(element)
 
         properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
         for key in data:
@@ -369,8 +409,8 @@ class Map:
             raise Exception(f'The map doesn\'t have the attribute {data}')
     
     def get_data(self, element: str, data: str, *args, **kwargs):
-        element= self.get_element_name(element)
-        self.__not_exist_element(element)
+        element= self.element_name(element)
+        self.not_exist(element)
 
         properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
         if data in properties:
@@ -386,6 +426,9 @@ class Map:
         :param nation: the nation name
         :return: the nation neighbours
         """
+        nation= self.element_name(nation)
+        self.not_exist(nation)
+
         neighbours = []
         for province in self.nationdict[nation].contains:
             neighbours.extend(self.province_neighbours[province])
@@ -411,6 +454,17 @@ class Map:
             return element.name
         else:
             raise Exception("Error: The element must be a string or an element")
+    
+    def element_name(self, element: list):
+        """
+        Get the name of an element
+        :param element: the element
+        :return: the name
+        """
+        if isinstance(element, list):
+            return [self.get_element_name(i) for i in element]
+        else:
+            return self.get_element_name(element)
 
     def __add_edges(self, province: str, neighbours: list):
         """
@@ -425,68 +479,20 @@ class Map:
                 raise Exception("Map element not found")
 
 
-    def __exist_element(self, element: str):
-        """
-        Detect if the element exists in the map
-        :param name: the element name
-        :param elements_dict: the dictionary of the elements
-        """
-        if self.mapelementsdict.get(element):
-            raise Exception(f"The Element {element} already exists")
+    def alredy_exist(self, element: str):
+        element= self.get_element_name(element)
+        if element in self.all:
+            raise Exception(f'The element {element} already exist')
+    
+    def alredy_exist_list(self, element: list):
+        for i in element:
+            self.alredy_exist(i)
 
-
-    def __exist_elements(self, elements: list):
-        """
-        Detect if elements exist on the map
-        :param elements: the elements list
-        :param elements_dict: the dictionary of the elements
-        """
-        for element in elements:
-            if not self.mapelementsdict.get(element):
-                raise Exception(f"The Element {element} already exists")
-
-    def __not_exist_element(self, element: str):
-        """
-        Detect if the element not exists in the map
-        :param name: the element name
-        :param elements_dict: the dictionary of the elements
-        """
-        if not self.all.get(element):
-            raise Exception(f"The Element {element} not exists")
+    def not_exist(self, element: str):
+        element= self.get_element_name(element)
+        if element not in self.all:
+            raise Exception(f'The element {element} doesn\'t exist')
     
-    def __not_exist_elements(self, elements: list):
-        """
-        Detect if elements not exist on the map
-        :param elements: the elements list
-        :param elements_dict: the dictionary of the elements
-        """
-        for element in elements:
-            if not self.mapelementsdict.get(element):
-                raise Exception(f"The Element {element} not exists")
-    
-    def __exist_in_list(self, element: str, elements: list[str]):
-        '''
-        Detect if the element exists in the list and raise an exception if it does
-        :param element: the element
-        :param elements: the elements list
-        '''
-        if element in elements:
-            raise Exception(f"The Element {element} already exists")
-    
-    def __one_of_list_exist_in_list(self, elements1: list[str], elements2: list[str]):
-        '''
-        Detect if one element exists in the list and raise an exception if it does
-        :param elements1: the elements list
-        :param elements2: the elements list
-        '''
-        for el in elements1:
-            self.__exist_in_list(el, elements2)
-    
-    def __exist_in_dict(self, element: str, elements: dict):
-        '''
-        Detect if the element exists in the dict and raise an exception if it does
-        :param element: the element
-        :param elements: the elements dict
-        '''
-        if elements.get(element):
-            raise Exception(f"The Element {element} already exists")
+    def not_exist_list(self, element: list):
+        for i in element:
+            self.not_exist(i)

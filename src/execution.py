@@ -57,7 +57,9 @@ class Code:
 
                 if compiled.name not in self.vars and self.to_python(compiled.name) not in self.events:
                     element= self.to_python(compiled.subtype)
-                    args= self.elements_params(compiled, inside_vars, inside)
+                    args, kwargs= self.params_names(compiled, inside_vars, inside)
+                    args= self.to_python([compiled.name, *args])
+                    kwargs= self.to_python(kwargs)
                     elements={
                         'nation': self.map.add_nation,
                         'province': self.map.add_province,
@@ -69,7 +71,7 @@ class Code:
                     }
 
                     if element in elements:
-                        elements[element](*self.to_python_list(args))
+                        elements[element](*args, **kwargs)
                     else:
                         raise Exception('The element is not recognized')
 
@@ -239,12 +241,10 @@ class Code:
             elif compiled.type == 'function':
                 if compiled.subtype == 'event':
                     if compiled.name not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
-                        
                         args, kwargs= self.params_names(compiled, inside_vars, inside)
-                        args= self.to_python_list([compiled.name, *args])
-                        kwargs= self.to_python_dict({**kwargs, **{'execution': self.execute, 'code': compiled.script, 'args': self.extra_params(compiled.args)}})
-                        self.map.add_event(*self.to_python_list(args), **self.to_python_dict(kwargs))
-                    
+                        args= self.to_python([compiled.name, *args])
+                        kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'code': compiled.script, 'args': self.extra_params(compiled.args)}})
+                        self.map.add_event(*self.to_python(args), **self.to_python(kwargs))
                     else:
                         raise Exception(f'Error: {compiled.name} is already used')
             
@@ -254,8 +254,8 @@ class Code:
             elif compiled.type == 'execution':
                 if self.events.get(self.to_python(compiled.name)):
                     args, kwargs= self.params_names(compiled, inside_vars, inside)
-                    args= self.to_python_list(args)
-                    kwargs= self.to_python_dict(kwargs)
+                    args= self.to_python(args)
+                    kwargs= self.to_python(kwargs)
                     ex= self.to_object(self.events[compiled.name].execute(*args, **kwargs))
                     if self.to_python(ex) != None:
                         return ex
@@ -315,7 +315,7 @@ class Code:
                     
                     
                     elif obj.value in self.elements:
-                        return self.elements[obj.value].name
+                        return self.elements[obj.value]
 
                     else:
                         raise Exception(f'Name {obj.value} not found')
@@ -462,26 +462,12 @@ class Code:
         
         elif type(obj) == list:
             return [self.to_python(i) for i in obj]
+        
+        elif type(obj) == dict:
+            return {key: self.to_python(value) for key, value in obj.items()}
 
         else:
             return obj
-    
-
-    def to_python_list(self, obj: list):
-        '''
-        Returns the real value of a list of objects
-        :param obj: The list of objects to get the real value
-        :return The real value of the list of objects
-        '''
-        return [self.to_python(value) for value in obj]
-    
-    def to_python_dict(self, obj: dict):
-        '''
-        Returns the real value of a dict of objects
-        :param obj: The dict of objects to get the real value
-        :return The real value of the dict of objects
-        '''
-        return {key: self.to_python(value) for key, value in obj.items()}
     
     
     def to_object(self, obj):
@@ -514,19 +500,6 @@ class Code:
         params= []
         for param in obj.params:
             params.append(self.value(param.value, inside_vars, inside))
-        return params
-    
-    def elements_params(self, obj: pobj, inside_vars: dict={}, inside: int=0):
-        '''
-        Returns the params of a function
-        :param obj: The function
-        :param inside_vars: The variables inside the function
-        :param inside: The number of functions inside the function
-        :return The params of the function
-        '''
-        params= []
-        params.append(obj.name)
-        params += self.params(obj, inside_vars, inside)
         return params
 
     def params_names(self, obj: pobj, inside_vars: dict={}, inside: int=0):
@@ -597,7 +570,7 @@ a.compile(
     }
     population_growth()
 
-    # simulate(10d)
+    simulate(10d)
 
     # nation Cuba([Mayabeque], [crazy])
     # Cuba->provinces: ++Havana
@@ -605,19 +578,18 @@ a.compile(
     # show(Cuba->provinces)
 
 
-    category socialism()
-    event fib(dist: expon, cat: socialism, enabled: true, tp: 'y', dec: [])(n: number){
-        if(n == 0){
-            return 0
-        }
-        if(n ==1){
-            return 1
-        }
-        else{
-            return fib(n-1) + fib(n-2)
-        }
-    }
-    show(fib(10))
+    # event fib(dist: expon, cat: socialism, enabled: true, tp: 'y', dec: [])(n: number){
+    #     if(n == 0){
+    #         return 0
+    #     }
+    #     if(n ==1){
+    #         return 1
+    #     }
+    #     else{
+    #         return fib(n-1) + fib(n-2)
+    #     }
+    # }
+    # show(fib(10))
     
 
     # event a (dist: expon, socialism, true, 'y', [])(n: number){
