@@ -7,6 +7,7 @@ import wikipedia
 from spacy import displacy
 from spacy.matcher import Matcher, PhraseMatcher
 from spacy.tokenizer import Tokenizer
+import math
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -36,16 +37,18 @@ def main():
     for country in countries:
         regions_to_process, area_to_process, population_to_process = text_processing(country, country_content[country])
 
-        # region, area, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)
-
+        # regions, area, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)
+        
+        area, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)
+        
         # countries_regions[country] = regions
-        # countries_area[country] = area
-        # countries_population[country] = population
+        countries_area[country] = area
+        countries_population[country] = population
+
+        print("area: ", area, "population: ", population)
 
 
 def for_tests():
-    countries = ["United States"]    
-
     countries_regions = dict()
     countries_area = dict()
     countries_population = dict()
@@ -57,16 +60,22 @@ def for_tests():
 
     country_content = dict()
     # country_content["Cuba"] = "According to the official census of 2010, Cuba's population was 11,241,161, comprising 5,628,996 men and 5,612,165 women. The official area of the Republic of Cuba is 109,884 km2 (42,426 sq mi) (without the territorial waters) but a total of 350,730 km2 (135,418 sq mi) including the exclusive economic zone. Cuba is the second-most populous country in the Caribbean after Haiti, with over 11 million inhabitants.[13]"
-    country_content["United States"] = "The U.S. Census Bureau reported 331,449,281 residents as of April 1, 2020,[o][389] making the United States the third most populous nation in the world, after China and India."
+    
+    countries = ["United States"]    
+    country_content["United States"] = "The U.S. Census Bureau reported 331,449,281 residents as of April 1, 2020,[o][389] making the United States the third most populous nation in the world, after China and India. The 48 contiguous states and the District of Columbia occupy a combined area of 3,119,885 square miles (8,080,470 km2). Of this area, 2,959,064 square miles (7,663,940 km2) is contiguous land, composing 83.65% of total U.S. land area. About 15% is occupied by Alaska, a state in northwestern North America, with the remainder in Hawaii, a state and archipelago in the central Pacific, and the five populated but unincorporated insular territories of Puerto Rico, American Samoa, Guam, the Northern Mariana Islands, and the U.S. Virgin Islands. Measured by only land area, the United States is third in size behind Russia and China, and just ahead of Canada."
     
     for country in countries:
         regions_to_process, area_to_process, population_to_process = text_processing(country, country_content[country])
 
-        # region, are, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)
-
+        # region, area, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)        area, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)
+        
+        area, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)
+        
         # countries_regions[country] = regions
-        # countries_area[country] = area
-        # countries_population[country] = population
+        countries_area[country] = area
+        countries_population[country] = population
+
+        print("area: ", area, "population: ", population)
 
 
 # OK
@@ -272,17 +281,36 @@ def area_matcher(sent):
     return matches
 
 
-# def match_sentence_processing(country: str,  regions_to_process: list, sents_area_to_process, sents_population_to_process):
-#     temp_area_text = []
-#     temp_area_matche_id = []
+def match_sentence_processing(country: str,  regions_to_process: list, sents_area_to_process, sents_population_to_process):
+    country_area = 0
+    country_population = 0
 
-#     for item in sents_area_to_process:
-#         if len(temp_area) == 0:
-#             temp_area.append(item.text)
-#             # temp_area_matche_id(item)
+    for sent in sents_area_to_process:
+        for token in sent:
+            if token.like_num:
+                digits = ""
+                digits = "".join(token.text[i] for i in range(0, len(token.text)) if token.text[i] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
+                
+                if token.head.text == "mi2" or (token.head.text == "mile"): # and sent[token.head.text] == "mile"):
+                    temp =  int(digits) * 2.589988
+                
+                    if country_area < temp:
+                        country_area = int(temp)
+                
+                if token.head.text == "km2" and country_area < int(digits):
+                    country_area = int(digits)      
+                    
+    for sent in sents_population_to_process:
+        for token in sent:
+            if token.like_num:
+                digits = ""
+                digits = "".join(token.text[i] for i in range(0, len(token.text)) if token.text[i] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
 
-#         else:
-#             item.text
+                if country_population < int(digits):
+                    country_population = int(digits)        
+
+
+    return country_area, country_population
 
 
 
@@ -340,6 +368,6 @@ def population_phrase_matcher(sent):
     return pop_phrase_matcher
 
 
-main()
+# main()
 
-# for_tests()
+for_tests()
