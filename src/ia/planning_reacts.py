@@ -4,21 +4,14 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 from ia.planning_decisions import *
 
 
-def reaction_for_an_event(event,map,new_map,changes,time):
+def reaction_for_an_event(map,new_map,changes):
     """Get a list of actions to react this event"""
     nations = get_affected_nations(new_map,changes)
     decisions={}
     for nation in nations:
-        decisions[nation]= PlanningDecisions(nation,map.decisions,get_target(nation,changes)).make_planning()
-
-
+        decisions[nation]= get_only_actions(PlanningDecisions(nation,map.decisions,get_target(nation,changes)).make_planning())
     return decisions
     
-
-def get_time():
-    ...
-
-
 
 def get_only_actions(tree):
     """Get a list of actions from the states tree of the planning"""

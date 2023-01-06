@@ -167,10 +167,29 @@ class Simulate:
         new_map=copy(map)
         event.execute(new_map)
         changes=map.compare(new_map)        
-        decisions=reaction_for_an_event(event, map, new_map,changes,time)
-        return decisions
+        decisions=self.get_evets_from_decisions(reaction_for_an_event(map, new_map,changes))
+        for nation in decisions.keys():
+            timed_decisions=self.get_time(time,decisions[nation],distribution="uniform")
+            for time_dec in timed_decisions:
+                self.event_queue.push(time_dec)
+        # return decisions
 
     
+    def get_time(initial_time,decisions,distribution="uniform",scale=10):
+        """Get the time of the event and return a list of tuples with the time and the event""" 
+        distribution=Distribution(distribution,distribution)
+        timed_decisions=[]
+        for decision in decisions:
+            initial_time=initial_time + distribution.rvs*scale
+            timed_decisions.push((initial_time, decision))
+        return timed_decisions
+            
+    def get_evets_from_decisions(decisions):
+        """Get the events from the decisions"""
+        events=[]
+        for decision in decisions:
+            events.append(Event(decision.name,None,decision.Category,decision.effect))
+        return events
 
 
 
