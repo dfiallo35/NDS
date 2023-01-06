@@ -54,6 +54,8 @@ class NDSLexer(Lexer):
     NAME['size'] = 'FUNC'
     NAME['type'] = 'FUNC'
     NAME['pos'] = 'FUNC'
+    NAME['rvs'] = 'FUNC'
+    NAME['irvs'] = 'FUNC'
 
     NAME['random'] = 'FUNC'
     # NAME[''] = 'FUNC'
@@ -152,7 +154,6 @@ class NDSParser(Parser):
 
         ('left', 'PLUS', 'MINUS'),
         ('left', 'MULTIPLY', 'FLOORDIV', 'DIVIDE', 'MOD', 'POW'),
-
         ('left', 'AND', 'OR', 'XOR'),
         ('left', 'EQUALS', 'NOTEQUALS', 'GREATER', 'LESS', 'EGREATER', 'ELESS'),
 

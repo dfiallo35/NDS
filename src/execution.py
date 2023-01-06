@@ -148,6 +148,25 @@ class Code:
                     else:
                         raise Exception('Error: size() only accepts one parameter')
                 
+                elif compiled.subtype == 'rvs':
+                    args, kwargs= self.params_names(compiled, inside_vars, inside)
+                    args= self.to_python(args)
+                    kwargs= self.to_python(kwargs)
+                    if not isinstance(args[0], Distribution) and not kwargs.get('dist'):
+                        raise Exception('Error: rvs() only accepts distributions as first parameter')
+                    else:
+                        return Distribution.rvs(*args, **kwargs)
+                
+                elif compiled.subtype == 'irvs':
+                    args, kwargs= self.params_names(compiled, inside_vars, inside)
+                    args= self.to_python(args)
+                    kwargs= self.to_python(kwargs)
+                    if not isinstance(args[0], Distribution) and not kwargs.get('dist'):
+                        raise Exception('Error: irvs() only accepts distributions as first parameter')
+                    else:
+                        return Distribution.irvs(*args, **kwargs)
+
+                
                 #return the list of params of a function
                 elif compiled.subtype == 'params':
                     params= self.params(compiled, inside_vars, inside)
@@ -540,11 +559,19 @@ class Code:
         :param obj: The object to do the conditions
         :return The object with the conditions
         '''
-        if (obj == integer(0)).value or obj == decimal(0.0).value or (obj == string('')).value or (obj == array([])).value or (obj == boolean(False)).value:
+        if isinstance(obj, integer) and (obj == integer(0)).value:
+            return boolean(False)
+        elif isinstance(obj, decimal) and (obj == decimal(0.0)).value:
+            return boolean(False)
+        elif isinstance(obj, string) and (obj == string('')).value:
+            return boolean(False)
+        elif isinstance(obj, array) and (obj == array([])).value:
+            return boolean(False)
+        elif isinstance(obj, boolean) and (obj == boolean(False)).value:
             return boolean(False)
         else:
-            return boolean(True)    
-    
+            return boolean(True)
+
     
     def same_type(self, a, b):
         '''
@@ -559,6 +586,7 @@ class Code:
 a= Code()
 a.compile(
     '''
+    show(irvs(expon, 10, 10))
     # category socialism()
     # category capitalism()
 
@@ -571,7 +599,7 @@ a.compile(
     # nation USA([New_York, California], [capitalism])
     
 
-    # event population_growth(expon, socialism, true, '', [])<>{
+    # event population_growth(expon, socialism, true, '', [])(){
     #     for(prov, map->provinces){
     #         a=prov
     #         show('before', prov->population)
@@ -583,10 +611,10 @@ a.compile(
 
     # simulate(10d)
 
-    # # nation Cuba([Mayabeque], [crazy])
-    # # Cuba->provinces: ++Havana
-    # # Cuba->provinces: --Mayabeque
-    # # show(Cuba->provinces)
+    # nation Cuba([Mayabeque], [crazy])
+    # Cuba->provinces: ++Havana
+    # Cuba->provinces: --Mayabeque
+    # show(Cuba->provinces)
 
     
 
@@ -605,7 +633,6 @@ a.compile(
     show(fib(10))
 
     decision a(n==1, fib)(n)
-    
 
     # event a (dist: expon, socialism, true, 'y', [])(n: number){
     #     show(n)

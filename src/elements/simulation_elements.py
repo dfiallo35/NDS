@@ -20,16 +20,20 @@ class Distribution(Element):
         self.distribution:rv_generic = dist
         self.scale= scale
     
-    @property
-    def rvs(self, *args, **kwargs):
-        return float(self.distribution.rvs(*args, **kwargs))
+    def rvs(dist, *args, **kwargs):
+        d= dist.distribution.rvs(*args, **kwargs)
+        if isinstance(d, list) or isinstance(dist, np.ndarray):
+            return [float(i) for i in d]
+        else:
+            return float(d)
     
-    @property
-    def irvs(self, *args, **kwargs):
-        dist= self.distribution.rvs(*args, **kwargs)
-        if isinstance(dist, list) or isinstance(dist, np.ndarray):
-            return [int(i) for i in self.distribution.rvs( *args, **kwargs)]
-        return int(self.distribution.rvs(*args, **kwargs))
+    
+    def irvs(dist, *args, **kwargs):
+        d= dist.distribution.rvs(*args, **kwargs)
+        if isinstance(d, list) or isinstance(dist, np.ndarray):
+            return [int(i) for i in d]
+        else:
+            return int(d)
     
     def pdf(self, x, *args, **kwargs):
         return self.distribution.pdf(x, *args, **kwargs)
