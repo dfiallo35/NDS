@@ -161,5 +161,5 @@ class Decision(Element):
             params= {**{k:v for k,v in zip(self.params, args)}, **kwargs}
             return self.execution(compiled_list=self.cond, inside=1, vars= params)
         else:
-            return self.execution( *args, **kwargs)
+            return self.execution(*args, **kwargs)
 

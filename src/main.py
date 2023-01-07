@@ -38,13 +38,11 @@ if run:
         with contextlib.redirect_stdout(f):
             compiler.compile(code)
         output = f.getvalue()
-        c.markdown('**Output**')
-        c.text(output)
+        # c.text(output)
         # c.code(output)
+        st.text_area('**Output**', height=200, value=output, disabled=True)
     except Exception as e:
-        c.markdown('**Output**')
-        c.text(e)
-        # c.code(e)
+        st.text_area('**Output**', height=100, value=e, disabled=True)
         
 else:
     c.markdown('**Output**')
