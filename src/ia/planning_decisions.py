@@ -22,7 +22,7 @@ class PlanningDecisions(PlanningProblem):
         return self.goal_state(state)
 
 
-class Decision(Action):
+class ActionDecision(Action):
     def __init__(self, action, preconds, event):
         super().__init__(action, preconds, event.execute)
         self.event=event
