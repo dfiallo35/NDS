@@ -26,9 +26,9 @@ def main():
     countries_area = dict()
     countries_population = dict()
     
-    country_content = get_pages(countries)
+    country_content = get_pages(countries[4:10])
 
-    for country in countries:
+    for country in countries[4:10]:
         regions_to_process, area_to_process, population_to_process = text_processing(country, country_content[country])
 
         area, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)
@@ -406,8 +406,9 @@ def match_sentence_processing(country: str,  regions_to_process: list, sents_are
                             # if dot:
                             #     n = n + 1
 
-                    int_digits = float(digits)
-                    # int_digits = int(digits)
+                    if digits != "":
+                        int_digits = float(digits)
+                        # int_digits = int(digits)
                     
                     if token.head.text == "million":
                         # int_digits = int_digits * (10 ** (6 - n))
