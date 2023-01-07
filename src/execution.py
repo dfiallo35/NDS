@@ -634,14 +634,18 @@ a.compile(
 
     event population_growth(pg, socialism, true, []){
         for(prov, map->provinces){
-            show('before', prov->population)
             prov->population: irvs(expon, loc: prov->population)
-            show('after', prov->population)
         }
     }
-    population_growth()
 
-    simulate(10d)
+    # event population_mortality(pg, socialism, true, []){
+    #     for(prov, map->provinces){
+    #         a= prov->population
+    #         prov->population: a - irvs(expon, loc: 0)
+    #     }
+    # }
+
+    simulate(100d)
 
     # nation Cuba([Mayabeque], [crazy])
     # Cuba->provinces: ++Havana
