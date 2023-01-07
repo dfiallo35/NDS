@@ -56,6 +56,8 @@ class NDSLexer(Lexer):
     NAME['pos'] = 'FUNC'
     NAME['rvs'] = 'FUNC'
     NAME['irvs'] = 'FUNC'
+    #todo: gen dist
+    NAME['gen_dist'] = 'FUNC'
 
     NAME['enable'] = 'FUNC'
     NAME['disable'] = 'FUNC'

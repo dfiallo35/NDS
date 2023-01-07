@@ -15,10 +15,14 @@ from scipy.stats._distn_infrastructure import rv_generic
 class Distribution(Element):
     distributions= {name:val for (name, val) in gm(ss, lambda x: isinstance(x, rv_generic))}
     
-    def __init__(self, name: str, dist: str, scale:int=1):
+    def __init__(self, name: str, dist, *args, **kwargs):
         super().__init__(name)
-        self.distribution:rv_generic = dist
-        self.scale= scale
+        if isinstance(dist, str):
+            self.distribution:rv_generic = Distribution.distributions[dist]
+        else:
+            self.distribution:rv_generic = dist
+        self.args= args
+        self.kwargs= kwargs
     
     def rvs(dist, *args, **kwargs):
         d= dist.distribution.rvs(*args, **kwargs)
@@ -42,7 +46,7 @@ class Distribution(Element):
         '''
         Returns a random variable from the distribution
         '''
-        return int(self.distribution.rvs(scale=self.scale, loc=loc))
+        return int(self.distribution.rvs(loc=loc, *self.args, **self.kwargs))
     
     def generate_distribution(name: str, data: list, bins:int=100, **kwargs):
         '''
@@ -136,7 +140,6 @@ class Event(Element):
         '''
         Returns the time of the next execution of the event
         '''
-        print(self.distribution, type(self.distribution))
         return self.distribution.randvar()
     
     def __str__(self) -> str:
