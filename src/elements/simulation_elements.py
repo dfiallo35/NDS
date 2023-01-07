@@ -102,8 +102,8 @@ class Event(Element):
         '''
         return self.enabled
     
-    # def __str__(self) -> str:
-    #     return f'{self.name} - {self.category}'
+    def __str__(self) -> str:
+        return f'{self.name}'
 
     def execute(self, *args, **kwargs):
         '''
@@ -112,15 +112,19 @@ class Event(Element):
         if self.type == 'unique':
             self.enabled= False
 
-            #fix: args input
-        if self.code:  
-            for i in kwargs:
-                if i not in self.params:
-                    raise ValueError(f'Error: {i} is not in the arguments')
-                else:
-                    self.params.remove(i)
-            params= {**{k:v for k,v in zip(self.params, args)}, **kwargs}
-            return self.execution(compiled_list=self.code, inside=1, vars= params)
+        if self.code:
+            
+            if not self.params:
+                self.execution(compiled_list=self.code, inside=1)
+            
+            else:
+                for i in kwargs:
+                    if i not in self.params:
+                        raise ValueError(f'Error: {i} is not in the arguments')
+                    else:
+                        self.params.remove(i)
+                params= {**{k:v for k,v in zip(self.params, args)}, **kwargs}
+                return self.execution(compiled_list=self.code, inside=1, vars= params)
         else:
             if args:
                 return self.execution(*args)

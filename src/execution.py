@@ -117,6 +117,30 @@ class Code:
                     params= self.params(compiled, inside_vars, inside)
                     print('>>', *params)
                 
+                elif compiled.subtype == 'enable':
+                    params= self.params(compiled, inside_vars, inside)
+                    if len(params) > 1 or len(params) == 0:
+                        raise Exception('Error: enable() only accepts one parameter')
+                    if type(params[0]) == array:
+                        for i in params[0].value:
+                            if type(i) != Event:
+                                raise Exception('Error: enable() only accepts events')
+                            self.map.enable(i.value)
+                    if type(params[0]) == Event:
+                        self.map.enable(params[0].value)
+                
+                elif compiled.subtype == 'disable':
+                    params= self.params(compiled, inside_vars, inside)
+                    if len(params) > 1 or len(params) == 0:
+                        raise Exception('Error: disable() only accepts one parameter')
+                    if type(params[0]) == array:
+                        for i in params[0].value:
+                            if type(i) != Event:
+                                raise Exception('Error: disable() only accepts events')
+                            self.map.disable(i.value)
+                    if type(params[0]) == Event:
+                        self.map.disable(params[0].value)
+                
                 elif compiled.subtype == 'type':
                     params= self.params(compiled, inside_vars, inside)
                     if len(params) == 1:
@@ -259,11 +283,18 @@ class Code:
             #Creates a new function
             elif compiled.type == 'function':
                 if compiled.subtype == 'event':
+                    
                     if compiled.name not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
-                        args, kwargs= self.params_names(compiled, inside_vars, inside)
-                        args= self.to_python([compiled.name, *args])
-                        kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'code': compiled.script, 'params': self.extra_params(compiled.args)}})
-                        self.map.add_event(*self.to_python(args), **self.to_python(kwargs))
+                        
+                        if compiled.get('args'):
+                            self.map.add_event(self.to_python(compiled.name), execution=self.execute, code=compiled.script, params=self.extra_params(compiled.args))
+                        
+                        else:
+                            args, kwargs= self.params_names(compiled, inside_vars, inside)
+                            args= self.to_python([compiled.name, *args])
+                            kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'code': compiled.script}})
+                            self.map.add_simulation_event(*self.to_python(args), **self.to_python(kwargs))
+                        
                     else:
                         raise Exception(f'Error: {compiled.name} is already used')
                 
@@ -281,6 +312,9 @@ class Code:
             #Execute a event
             elif compiled.type == 'execution':
                 if self.events.get(self.to_python(compiled.name)):
+                    if self.events[self.to_python(compiled.name)].type != 'static':
+                        raise Exception(f'Error: event {compiled.name} is not static')
+
                     args, kwargs= self.params_names(compiled, inside_vars, inside)
                     args= self.to_python(args)
                     kwargs= self.to_python(kwargs)
@@ -618,8 +652,9 @@ a.compile(
 
     
 
-    category socialism()
-    event fib(dist: expon, cat: socialism, enabled: true, tp: 'y', dec: [])(n: number){
+    # category socialism()
+
+    event fib <<n: number>>{
         if(n == 0){
             return 0
         }
@@ -632,7 +667,7 @@ a.compile(
     }
     show(fib(10))
 
-    decision a(n==1, fib)(n)
+    # decision a(n==1, fib)<< n >>
 
     # event a (dist: expon, socialism, true, 'y', [])(n: number){
     #     show(n)

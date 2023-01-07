@@ -7,7 +7,7 @@ class NDSLexer(Lexer):
     tokens = {'ELEMENT', 'EVENT', 'DECISION',
             'FUNC', 'RETURN',
             'NAME','NUMBER', 'STRING', 'BOOL', 'TIME', 'TYPE',
-            'ASSIGN', 'ARROW', 'PARAMASSIGN',
+            'ASSIGN', 'ARROW', 'PARAMASSIGN', 'LF', 'RF',
             'FOR', 'WHILE', 'IF', 'ELSE',
             'NOT', 'AND', 'OR', 'XOR',
             'GREATER', 'EGREATER', 'LESS', 'ELESS', 'XPLUS', 'XMINUS', 'EQUALS', 'NOTEQUALS', 
@@ -57,6 +57,9 @@ class NDSLexer(Lexer):
     NAME['rvs'] = 'FUNC'
     NAME['irvs'] = 'FUNC'
 
+    NAME['enable'] = 'FUNC'
+    NAME['disable'] = 'FUNC'
+
     NAME['random'] = 'FUNC'
     # NAME[''] = 'FUNC'
 
@@ -81,7 +84,8 @@ class NDSLexer(Lexer):
     NAME['list'] = 'TYPE'
     NAME['time'] = 'TYPE'
     
-
+    LF= r'<<'
+    RF= r'>>'
     
     #OPERATORS
     EQUALS= r'=='
@@ -388,11 +392,16 @@ class NDSParser(Parser):
 
 
     #FUNCTIONS
-    @_('EVENT NAME "(" exeparams ")" "(" params ")" "{" inside_script "}"')
+    @_('EVENT NAME LF params RF "{" inside_script "}"')
     def function(self, p):
-        return pobj(type='function', subtype=p[0], name=p.NAME, params=p.exeparams, args=p.params, script=p.inside_script)
+        return pobj(type='function', subtype=p[0], name=p.NAME, args=p.params, script=p.inside_script)
     
-    @_('DECISION NAME "(" func_condition "," exeparams ")" "(" params ")"')
+    @_('EVENT NAME "(" exeparams ")" "{" inside_script "}"')
+    def function(self, p):
+        return pobj(type='function', subtype=p[0], name=p.NAME, params=p.exeparams, script=p.inside_script)
+
+
+    @_('DECISION NAME "(" func_condition "," exeparams ")" LF params RF')
     def function(self, p):
         return pobj(type='function', subtype=p[0], name=p.NAME, params=p.exeparams, condition=p.func_condition, args=p.params)
 
