@@ -126,10 +126,7 @@ class Event(Element):
                 params= {**{k:v for k,v in zip(self.params, args)}, **kwargs}
                 return self.execution(compiled_list=self.code, inside=1, vars= params)
         else:
-            if args:
-                return self.execution(*args)
-            else:
-                return self.execution()
+            return self.execution(*args, **kwargs)
 
 
     def next(self) -> float:
@@ -155,11 +152,14 @@ class Decision(Element):
         '''
         Returns the condition of the decision
         '''
-        for i in kwargs:
-            if i not in self.params:
-                raise ValueError(f'Error: {i} is not in the arguments')
-            else:
-                self.params.remove(i)
-        params= {**{k:v for k,v in zip(self.params, args)}, **kwargs}
-        return self.execution(compiled_list=self.cond, inside=1, vars= params)
+        if self.cond:
+            for i in kwargs:
+                if i not in self.params:
+                    raise ValueError(f'Error: {i} is not in the arguments')
+                else:
+                    self.params.remove(i)
+            params= {**{k:v for k,v in zip(self.params, args)}, **kwargs}
+            return self.execution(compiled_list=self.cond, inside=1, vars= params)
+        else:
+            return self.execution( *args, **kwargs)
 
