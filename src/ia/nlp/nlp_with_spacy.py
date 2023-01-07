@@ -26,9 +26,9 @@ def main():
     countries_area = dict()
     countries_population = dict()
     
-    country_content = get_pages(countries[4:10])
+    country_content = get_pages(countries[6:8])
 
-    for country in countries[4:10]:
+    for country in countries[6:8]:
         regions_to_process, area_to_process, population_to_process = text_processing(country, country_content[country])
 
         area, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)
@@ -58,8 +58,12 @@ def for_tests():
     # countries = ["United States"]    
     # country_content["United States"] = "The U.S. Census Bureau reported 331,449,281 residents as of April 1, 2020,[o][389] making the United States the third most populous nation in the world, after China and India. The 48 contiguous states and the District of Columbia occupy a combined area of 3,119,885 square miles (8,080,470 km2). Of this area, 2,959,064 square miles (7,663,940 km2) is contiguous land, composing 83.65% of total U.S. land area. About 15% is occupied by Alaska, a state in northwestern North America, with the remainder in Hawaii, a state and archipelago in the central Pacific, and the five populated but unincorporated insular territories of Puerto Rico, American Samoa, Guam, the Northern Mariana Islands, and the U.S. Virgin Islands. Measured by only land area, the United States is third in size behind Russia and China, and just ahead of Canada."
     
-    countries = ["Norway"]
-    country_content["Norway"] = "Norway has a total area of 385,207 square kilometres (148,729 sq mi) and had a population of 5,425,270 in January 2022"
+    # countries = ["Norway"]
+    # country_content["Norway"] = "Norway has a total area of 385,207 square kilometres (148,729 sq mi) and had a population of 5,425,270 in January 2022"
+
+    countries = ["Ireland"]
+    country_content["Ireland"] = "Ireland has a total area of 84,421 km2 (32,595 sq mi), of which the Republic of Ireland occupies 83 percent. Ireland and Great Britain, together with many nearby smaller islands, are known collectively as the British Isles. As the term British Isles is controversial in relation to Ireland, the alternate term Britain and Ireland is often used as a neutral term for the islands."
+
 
     for country in countries:
         regions_to_process, area_to_process, population_to_process = text_processing(country, country_content[country])
@@ -150,7 +154,7 @@ def match_pop(sent, population_sents):
         span = sent[start:end]
             
         population_sents.append(span)
-        # print("pop_matcher: ", span.text)
+        print("pop_matcher: ", span.text)
 
 
 def match_area(sent, area_sents):
@@ -159,7 +163,7 @@ def match_area(sent, area_sents):
     for match_id, start, end in _area_matcher:
         span = sent[start:end]            
         area_sents.append(span)
-        # print("area_matcher: ", span.text) 
+        print("area_matcher: ", span.text) 
 
 
 def regions_extract(sent):
@@ -234,116 +238,116 @@ def area_matcher(sent):
 
     pattern = [
         [
-            {"TEXT" : {"REGEX": "area"}}, 
+            {"TEXT" : {"REGEX": "area"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX":"km2"}}
         ], 
         [
-            {"TEXT" : {"REGEX": "area"}}, 
+            {"TEXT" : {"REGEX": "area"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX":"square"}}, 
             {"TEXT": {"REGEX":"kilometer"}}
         ], 
         [
-            {"TEXT" : {"REGEX": "area"}}, 
+            {"TEXT" : {"REGEX": "area"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX":"square"}}, 
             {"TEXT": {"REGEX":"kilometre"}}
         ],
         [
-            {"TEXT" : {"REGEX": "span"}}, 
+            {"TEXT" : {"REGEX": "span"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX":"km2"}}
         ], 
         [
-            {"TEXT" : {"REGEX": "encompass"}}, 
+            {"TEXT" : {"REGEX": "encompass"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX":"km2"}}
         ], 
         [
-            {"TEXT" : {"REGEX": "area"}}, 
+            {"TEXT" : {"REGEX": "area"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX": "mi"}}, 
             {"TEXT": {"REGEX": "mi"}}
         ],
         [
-            {"TEXT" : {"REGEX": "span"}}, 
+            {"TEXT" : {"REGEX": "span"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX": "mi"}}, 
             {"TEXT": {"REGEX": "mi"}}
         ],
         [
-            {"TEXT" : {"REGEX": "encompass"}}, 
+            {"TEXT" : {"REGEX": "encompass"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX": "mi"}}, 
             {"TEXT": {"REGEX": "mi"}}
         ],
         [
-            {"TEXT" : {"REGEX": "area"}}, 
+            {"TEXT" : {"REGEX": "area"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX": "square"}}, 
             {"TEXT": {"REGEX": "mile"}}
         ],
         [
-            {"TEXT" : {"REGEX": "span"}}, 
+            {"TEXT" : {"REGEX": "span"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX": "square"}}, 
             {"TEXT": {"REGEX": "mile"}}
         ],
         [
-            {"TEXT" : {"REGEX": "encompass"}}, 
+            {"TEXT" : {"REGEX": "encompass"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX": "square"}}, 
             {"TEXT": {"REGEX": "mile"}}
         ],
         [
-            {"TEXT" : {"REGEX": "area"}}, 
+            {"TEXT" : {"REGEX": "area"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX": "square"}}, 
             {"TEXT": {"REGEX": "kilometer"}}
         ],
         [
-            {"TEXT" : {"REGEX": "area"}}, 
+            {"TEXT" : {"REGEX": "area"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX": "square"}}, 
             {"TEXT": {"REGEX": "kilometre"}}
         ],
         [
-            {"TEXT" : {"REGEX": "span"}}, 
+            {"TEXT" : {"REGEX": "span"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX": "square"}}, 
             {"TEXT": {"REGEX": "kilometer"}}
         ],
         [
-            {"TEXT" : {"REGEX": "span"}}, 
+            {"TEXT" : {"REGEX": "span"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX": "square"}}, 
             {"TEXT": {"REGEX": "kilometre"}}
         ],
         [
-            {"TEXT" : {"REGEX": "encompass"}}, 
+            {"TEXT" : {"REGEX": "encompass"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX": "square"}}, 
             {"TEXT": {"REGEX": "kilometer"}}
         ],
         [
-            {"TEXT" : {"REGEX": "encompass"}}, 
+            {"TEXT" : {"REGEX": "encompass"}, "OP": "*"}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX": "square"}}, 
@@ -387,31 +391,17 @@ def match_sentence_processing(country: str,  regions_to_process: list, sents_are
             if token.text != "million" and token.text != "thousand":                         
                 # print(token.text)
                 if token.like_num and token.ent_type_ != "PERECENT":                    
-                    
-                    # print(token.text)
                     digits = ""  
-                    # dot = False
-                    # n = 0
 
-                    for i in range(0, len(token.text)):
-                        
-                        # if token.text[i] == ".":
-                        #     dot = True
-                        #     continue
-                        
+                    for i in range(0, len(token.text)):                        
                         if token.text[i] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."]:
-                        # if token.text[i] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
                             digits = digits + token.text[i] 
-
-                            # if dot:
-                            #     n = n + 1
 
                     if digits != "":
                         int_digits = float(digits)
                         # int_digits = int(digits)
                     
                     if token.head.text == "million":
-                        # int_digits = int_digits * (10 ** (6 - n))
                         int_digits = int_digits * (10 ** 6)
 
                     if country_population < int_digits:
@@ -444,36 +434,6 @@ def getting_regions(country: str, region_list: list):
         for reg in place_entity.region_cities[city]:
             regions[country].add(reg)
 
-
-
-# Phrase matchers
-
-def area_phrase_matcher(sent):
-    matcher = PhraseMatcher(nlp.vocab)
-
-    area_term = ["area"]
-        
-    pattern_area = [nlp.make_doc(text) for text in area_term]
-
-    matcher.add("area_phrase_matcher", None, *pattern_area)
-
-    area_phrase_matcher = matcher(sent)
-    
-    return area_phrase_matcher
-
-
-def population_phrase_matcher(sent):
-    matcher = PhraseMatcher(nlp.vocab)
-
-    pop_terms = ["population", "be"]
-        
-    pattern_pop = [nlp.make_doc(text) for text in pop_terms]
-
-    matcher.add("pop_phrase_matcher", None, *pattern_pop)
-
-    pop_phrase_matcher = matcher(sent)
-
-    return pop_phrase_matcher
 
 
 main()
