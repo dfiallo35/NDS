@@ -49,6 +49,13 @@ class object:
         return boolean(not self.val)
     
 
+class null(object):
+    def __init__(self):
+        super().__init__(None)
+    
+    def __str__(self):
+        return 'null'
+
 
 class number(object):
     def __init__(self, val) -> None:
@@ -106,14 +113,33 @@ class number(object):
             return decimal(calc)
     
     #Arithmetic with assignment
-    # def __iadd__(self, other):
-    #     self.val += other.val
-    #     return self
+    def __iadd__(self, other):
+        self.val += other.val
+        return self
     
-    # def __isub__(self, other):
-    #     self.val -= other.val
-    #     return self
+    def __isub__(self, other):
+        self.val -= other.val
+        return self
     
+    def __imul__(self, other):
+        self.val *= other.val
+        return self
+    
+    def __itruediv__(self, other):
+        self.val /= other.val
+        return self
+    
+    def __ifloordiv__(self, other):
+        self.val //= other.val
+        return self
+    
+    def __imod__(self, other):
+        self.val %= other.val
+        return self
+    
+    def __ipow__(self, other):
+        self.val **= other.val
+        return self
     
     #Unary
     def __neg__(self):

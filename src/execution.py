@@ -5,10 +5,10 @@ from elements.simulation_elements import *
 from compiler.compiler import *
 from simulation.simulation import *
 
-import inspect
 
-#get the args of a function
-# print(inspect.getfullargspec(Map.add_nation).args)
+
+
+
 
 #fix: None
 #todo: generar codigo de funciones
@@ -49,13 +49,37 @@ class Code:
         for compiled in compiled_list:
 
             #ELEMENTS
-            #Creates a new element
             #todo: verification of args
             if compiled.type == 'element':
                 if compiled.subtype == 'map':
                     raise Exception('Error: map can not be created')
+                
+                if compiled.subtype == 'event':
+                    
+                    if compiled.name not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
+                        
+                        if compiled.get('args'):
+                            self.map.add_event(self.to_python(compiled.name), execution=self.execute, code=compiled.script, params=self.extra_params(compiled.args))
+                        
+                        else:
+                            args, kwargs= self.params_names(compiled, inside_vars, inside)
+                            args= self.to_python([compiled.name, *args])
+                            kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'code': compiled.script}})
+                            self.map.add_simulation_event(*self.to_python(args), **self.to_python(kwargs))
+                        
+                    else:
+                        raise Exception(f'Error: {compiled.name} is already used')
+                
+                elif compiled.subtype == 'decision':
+                    if compiled.name not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
+                        args, kwargs= self.params_names(compiled, inside_vars, inside)
+                        args= self.to_python([compiled.name, *args])
+                        kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'cond': compiled.condition, 'params': self.extra_params(compiled.args)}})
+                        self.map.add_decision(*self.to_python(args), **self.to_python(kwargs))
+                    else:
+                        raise Exception(f'Error: {compiled.name} is already used')
 
-                if compiled.name not in self.vars and self.to_python(compiled.name) not in self.events:
+                elif compiled.name not in self.vars and self.to_python(compiled.name) not in self.events:
                     element= self.to_python(compiled.subtype)
                     args, kwargs= self.params_names(compiled, inside_vars, inside)
                     args= self.to_python([compiled.name, *args])
@@ -279,35 +303,7 @@ class Code:
                 
                 else:
                     raise Exception('Error: unknown loop type')
-
-            
-            #FUNCTIONS
-            #Creates a new function
-            elif compiled.type == 'function':
-                if compiled.subtype == 'event':
-                    
-                    if compiled.name not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
-                        
-                        if compiled.get('args'):
-                            self.map.add_event(self.to_python(compiled.name), execution=self.execute, code=compiled.script, params=self.extra_params(compiled.args))
-                        
-                        else:
-                            args, kwargs= self.params_names(compiled, inside_vars, inside)
-                            args= self.to_python([compiled.name, *args])
-                            kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'code': compiled.script}})
-                            self.map.add_simulation_event(*self.to_python(args), **self.to_python(kwargs))
-                        
-                    else:
-                        raise Exception(f'Error: {compiled.name} is already used')
                 
-                if compiled.subtype == 'decision':
-                    if compiled.name not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
-                        args, kwargs= self.params_names(compiled, inside_vars, inside)
-                        args= self.to_python([compiled.name, *args])
-                        kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'cond': compiled.condition, 'params': self.extra_params(compiled.args)}})
-                        self.map.add_decision(*self.to_python(args), **self.to_python(kwargs))
-                    else:
-                        raise Exception(f'Error: {compiled.name} is already used')
             
 
             #EXECUTION
@@ -615,10 +611,13 @@ class Code:
         '''
         return type(a) == type(b)
 
-    
+
 a= Code()
 a.compile(
     '''
+    show(1 == 4)
+
+
     category socialism()
     category capitalism()
 
@@ -644,7 +643,7 @@ a.compile(
         }
     }
 
-    simulate(100d)
+    # simulate(100d)
 
     # nation Cuba([Mayabeque], [crazy])
     # Cuba->provinces: ++Havana
@@ -655,18 +654,18 @@ a.compile(
 
     # category socialism()
 
-    # event fib <<n: number>>{
-    #     if(n == 0){
-    #         return 0
-    #     }
-    #     if(n ==1){
-    #         return 1
-    #     }
-    #     else{
-    #         return fib(n-1) + fib(n-2)
-    #     }
-    # }
-    # show(fib(10))
+    event fib <<n: number>>{
+        if(n == 0){
+            return 0
+        }
+        if(n ==1){
+            return 1
+        }
+        else{
+            return fib(n-1) + fib(n-2)
+        }
+    }
+    show(fib(10))
 
     # decision a(n==1, fib)<< n >>
 

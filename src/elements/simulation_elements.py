@@ -159,7 +159,7 @@ class Decision(Element):
                 else:
                     self.params.remove(i)
             params= {**{k:v for k,v in zip(self.params, args)}, **kwargs}
-            return self.execution(compiled_list=self.cond, inside=1, vars= params)
+            return self.execution(compiled_list=[self.cond], inside=1, vars= params)
         else:
             return self.execution(*args, **kwargs)
 
