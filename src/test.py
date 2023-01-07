@@ -21,15 +21,13 @@ m.add_trait('Comunist')
 def mortality(map, **kwargs):
     for province in map.provincedict.values():
         province.population= province.population * 0.99
-    return {'disable:': ['population_growth']}
-m.add_simulation_event(name="mortality",dist=Distribution("uniform","uniform"),cat= 'Social',enabled=False,dec=[],execution=mortality)
+m.add_simulation_event(name="mortality",dist=Distribution(name="uniform",dist="uniform",scale=10),cat= 'Social',enabled=True,dec=[],execution=mortality)
 
 def decrease_industrialization(map, **kwargs):
     for province in map.provincedict.values():
         if(province.data.get("industrialization")):
             province.data["industrialization"]-= 1
-    return {'disable:': ['decrease_industrialization']}
-m.add_simulation_event(name="decrease_industrialization",dist=Distribution("uniform","uniform"),cat= 'Economic',enabled=False,dec=[],execution=decrease_industrialization)
+m.add_simulation_event(name="decrease_industrialization",dist=Distribution("uniform","uniform",scale=10),cat= 'Economic',enabled=True,dec=[],execution=decrease_industrialization)
 
 
 def industrialization_increases( state,**kargs):
@@ -39,7 +37,7 @@ def industrialization_increases( state,**kargs):
     return new_state
 m.add_simulation_event(name="industrialization_increases",dist=Distribution("uniform","uniform"),cat= 'Economic',enabled=False,dec=[],execution=industrialization_increases)
 precond_industrialization =lambda state, **kwargs: state.get_nation_data("economic_resources")>1000
-m.add_decision(name="industrialization_increases",event=m.events["industrialization_increases"],cond=precond_industrialization,execution=)
+m.add_decision(name="industrialization_increases_dec",event=m.events["industrialization_increases"],cond=None,execution=precond_industrialization)
 
 
 def average_living_standard_increases( state,**kargs):
@@ -49,7 +47,7 @@ def average_living_standard_increases( state,**kargs):
     return new_state
 m.add_simulation_event(name="average_living_standard_increases",dist=Distribution("uniform","uniform"),cat= 'Social',enabled=False,dec=[],execution=average_living_standard_increases)
 precond_average_living_standard=lambda state, **kwargs: state.get_nation_data("economic_resources")>20000
-m.add_decision(name="average_living_standard_increases",event=m.events["average_living_standard_increases"],cond=precond_average_living_standard,execution=)
+m.add_decision(name="average_living_standard_increases_dec",event=m.events["average_living_standard_increases"],cond=None,execution=precond_average_living_standard)
 
 
 def tourism_increases( state,**kargs):
@@ -59,10 +57,10 @@ def tourism_increases( state,**kargs):
     return new_state
 m.add_simulation_event(name="tourism_increases",dist=Distribution("uniform","uniform"),cat= 'Economic',enabled=False,dec=[],execution=tourism_increases)
 precond_tourism=lambda state, **kwargs: state.get_nation_data("economic_resources")>5000
-m.add_decision(name="tourism_increases",event=m.events["tourism_increases"],cond=precond_tourism,execution=)
+m.add_decision(name="tourism_increases_dec",event=m.events["tourism_increases"],cond=None,execution=precond_tourism)
 
 
-for nation in m.nationdict:
+for nation in m.nationdict.values():
     for province in nation.provinces.values():
         province.data["economic_resources"]=100000
         province.data["industrialization"] =3
@@ -72,7 +70,7 @@ for nation in m.nationdict:
 
 def Simulation_test():
     print('init',[i.population for i in list(m.provincedict.values())])
-    a= Simulate(m, Pqueue(m.event_list)).simulate(10)
+    a= Simulate(m, Pqueue(m.event_enabled_list)).simulate(100)
 
     print('end', [i.population for i in list(m.provincedict.values())])
 
