@@ -26,9 +26,9 @@ def main():
     countries_area = dict()
     countries_population = dict()
     
-    country_content = get_pages(countries[0:40])
+    country_content = get_pages(countries)
 
-    for country in countries[0:40]:
+    for country in countries:
         regions_to_process, area_to_process, population_to_process = text_processing(country, country_content[country])
 
         area, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)
