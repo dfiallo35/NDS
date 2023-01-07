@@ -36,19 +36,18 @@ m.add_trait('Comunist')
 
 # m.add_event(name='population_growth' ,distribution= "uniform", category= 'Social', enabled= True, execution= population_growth, type= 'unique', decisions=[])
 
-# def mortality(map, **kwargs):
-#     for province in map.provincedict.values():
-#         province.population= province.population * 0.99
-#     return {'disable:': ['population_growth']}
-# m.add_event(name='mortality' ,distribution= "uniform", category= 'Social', enabled= False, execution= mortality, type= 'unique', decisions=[])
-# m.add_event(name="mortality")
+def mortality(map, **kwargs):
+    for province in map.provincedict.values():
+        province.population= province.population * 0.99
+    return {'disable:': ['population_growth']}
+m.add_event(name="mortality",dist=Distribution("uniform","uniform"),cat= 'Social',enabled=False,tp="",dec=[],execution=mortality)
 
 def decrease_industrialization(map, **kwargs):
     for province in map.provincedict.values():
         if(province.data.get("industrialization")):
             province.data["industrialization"]-= 1
     return {'disable:': ['decrease_industrialization']}
-m.add_event(name='decrease_industrialization' ,distribution= "uniform", category= 'Economic', enabled= True, execution= decrease_industrialization, type= 'unique', decisions=[])
+m.add_event(name="decrease_industrialization",dist=Distribution("uniform","uniform"),cat= 'Economic',enabled=False,tp="",dec=[],execution=decrease_industrialization)
 
 
 def industrialization_increases( state,**kargs):
@@ -81,37 +80,11 @@ precond_tourism=lambda state, **kwargs: state.get_nation_data("economic_resource
 m.add_decision(name="tourism_increases",event=m.events["tourism_increases"],cond=precond_tourism)
 
 
-# def goal_statep1(state,**kargs):
-#     return state.get_nation_data("industrialization")>=5 and state.get_nation_data("average_living_standard")>=4 and state.get_nation_data("tourism")>=5
-
-# actions=[ActionDecision(action="increase_industrialization",preconds=precond_industrialization ,effects=industrialization_increases),
-#          ActionDecision(action="increase_average_living_standard",preconds=precond_average_living_standard ,effects=average_living_standard_increases),
-#          ActionDecision(action="increase_tourism",preconds=precond_tourism ,effects=tourism_increases)]
-
-# m.add_decision(name="tourism_increases",event=m.events["tourism_increases"],cond=precond_tourism)
-
-
-# def decide_simulation_test(nation:Nation):
-    
-#     a = Simulate(m, Pqueue(m.event_list))
-
-#     actions=[ActionDecision(action="increase_industrialization",preconds=precond_industrialization , effects=effects_industrialization),
-#             ActionDecision(action="increase_average_living_standard",preconds=precond_average_living_standard ,effects=effects_average_living_standard),
-#             ActionDecision(action="increase_tourism",preconds=precond_tourism ,effects=effects_tourism)]
-    
-#     m.decisions=actions
-
-#     for province in m.nationdict["Cuba"].provinces.values():
-#         province.data["economic_resources"]=100000
-#         province.data["industrialization"] =3
-#         province.data["average_living_standard"]=3
-#         province.data["tourism"]=3
-
-#     b= a.decide(m, m.eventdict["decrease_industrialization"], 0)
-#     d=2
-#     return b
-
-# a=decide_simulation_test(m.nationdict["Cuba"])
+for province in m.nationdict["Cuba"].provinces.values():
+    province.data["economic_resources"]=100000
+    province.data["industrialization"] =3
+    province.data["average_living_standard"]=3
+    province.data["tourism"]=3
 
 
 
