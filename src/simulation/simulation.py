@@ -152,7 +152,9 @@ class Simulate:
         changes=map.compare(new_map)        
         decisions=self.get_evets_from_decisions(reaction_for_an_event(map, new_map,changes))
         for nation in decisions.keys():
-            timed_decisions=self.get_time(time,decisions[nation],distribution="uniform")
+            timed_decisions= self.get_time(time,decisions[nation],distribution="uniform")
+            if timed_decisions == time:
+                timed_decisions+=1
             for time_dec in timed_decisions:
                 self.event_queue.push(time_dec)
         # return decisions
