@@ -33,6 +33,11 @@ class Map:
 
         # Graph of the provinces, sea and neutral neighbours
         self.province_neighbours= Graph()
+
+        self.en_dis_events= {
+            'enable': [],
+            'disable': []
+        }
     
 
     def compare(self, new):
@@ -141,6 +146,25 @@ class Map:
         :return: the enabled events list
         '''
         return [event for event in self.event_list if event.enabled]
+
+    def enable(self, event: Event):
+        '''
+        Enable an event
+        :param event: the event
+        '''
+        self.not_exist(event.name)
+        if event.name  in self.en_dis_events['enable']:
+            self.en_dis_events['enable'].remove(event.name)
+            if event.name not in self.en_dis_events['disable']:
+                self.en_dis_events['enable'].append(event.name)
+    
+    def disable(self, event: Event):
+        '''
+        Disable an event
+        :param event: the event
+        '''
+        self.not_exist(event.name)
+        self.en_dis_events['disable'].append(event.name)
 
     def add_nation(self, name: str, provinces: list, traits: list= []):
         '''
@@ -269,7 +293,19 @@ class Map:
             self.categorydict[category].add_decision(decision)
     
     #todo: controle types
-    def add_event(self, name: str, dist: Distribution, cat: str, enabled: bool, tp: str, dec: list, execution, code= None, params: list=[]):
+    def add_event(self, name: str, execution, code= None, params: list=[]):
+        '''
+        Add an event to the map. If the event already exists, it will be updated
+        :param event: the event
+        '''
+        name= self.element_name(name)
+        self.alredy_exist(name)
+        
+        event= Event(name=name, dist=None, category=None, enabled=False, type='static', execution=execution, code=code, decisions=None, params= params)
+        self.eventdict[name]= event
+
+    #todo: types
+    def add_simulation_event(self, name: str, dist: Distribution, cat: str, enabled: bool, tp: str, dec: list, execution, code= None):
         '''
         Add an event to the map. If the event already exists, it will be updated
         :param event: the event
