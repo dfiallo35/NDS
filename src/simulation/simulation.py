@@ -114,14 +114,14 @@ class Simulate:
                 if event.is_enabled and self.map.eventdict[event.name].is_enabled:
                     print(time, event)
 
-                    old_map= copy(self.map)
+                    old_map = copy(self.map)
                     event.execute(self.map)
 
                     #todo: log of changes
                     old_map.compare(self.map)
                     
                     self.generate_event(event, time)
-                    # self.decide(self.map, event, time)
+                    self.decide(self.map, event, time)
 
 
     def generate_event(self, event: Event, time: int):
@@ -176,7 +176,7 @@ class Simulate:
         return timed_decisions
 
     def get_events_from_decisions(self,decisions):
-        """Get the events from the decisions"""
+        """Get the events from the decisions"""        
         events={}
         for nation in decisions.keys():
             events[nation]=[decision.event for decision in decisions[nation]]#decisions[nation]

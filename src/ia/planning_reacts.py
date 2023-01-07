@@ -16,6 +16,8 @@ def reaction_for_an_event(map,new_map,changes):
 
 def get_only_actions(tree):
     """Get a list of actions from the states tree of the planning"""
+    if( not tree):
+        return []
     dec=[i["action"] if i["action"] else None for i in get_path(tree)]
     return [i for i in dec if i]
 
