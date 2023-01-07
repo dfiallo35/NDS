@@ -11,14 +11,6 @@ import math
 
 nlp = spacy.load("en_core_web_sm")
 
-# spacy_stopwords = spacy.lang.en.stop_words.STOP_WORDS
-
-# # removes stopwords and punctuation signs
-# clean_doc = [token for token in my_doc if not token.is_stop and not token.is_punct]
-
-# # Lemmatization 
-# clean_doc_lemma = [token.lemma_ for token in clean_doc]
-
 
 # Initialize
 def main():
@@ -28,24 +20,26 @@ def main():
     
     countries, countries_hdi = get_nations.get_all_countries()
 
+    # countries = ["Czechia"]
+
     countries_regions = dict()
     countries_area = dict()
     countries_population = dict()
-        
+    
     country_content = get_pages(countries)
 
     for country in countries:
         regions_to_process, area_to_process, population_to_process = text_processing(country, country_content[country])
 
-        # regions, area, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)
-        
         area, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)
         
         # countries_regions[country] = regions
         countries_area[country] = area
         countries_population[country] = population
 
-        print("area: ", area, "population: ", population)
+
+    print("areas: ", countries_area)
+    print("population: ", countries_population)
 
 
 def for_tests():
@@ -59,11 +53,14 @@ def for_tests():
     # countries_hdi = [{"Cuba": 0.87}]
 
     country_content = dict()
-    # country_content["Cuba"] = "According to the official census of 2010, Cuba's population was 11,241,161, comprising 5,628,996 men and 5,612,165 women. The official area of the Republic of Cuba is 109,884 km2 (42,426 sq mi) (without the territorial waters) but a total of 350,730 km2 (135,418 sq mi) including the exclusive economic zone. Cuba is the second-most populous country in the Caribbean after Haiti, with over 11 million inhabitants.[13]"
+    # country_content["Cuba"] = "According to the official census of 2010, Cuba's population was 11.2 million, comprising 5,628,996 men and 5,612,165 women. The official area of the Republic of Cuba is 109,884 km2 (42,426 sq mi) (without the territorial waters) but a total of 350,730 km2 (135,418 sq mi) including the exclusive economic zone. Cuba is the second-most populous country in the Caribbean after Haiti, with over 11 million inhabitants.[13]"
     
-    countries = ["United States"]    
-    country_content["United States"] = "The U.S. Census Bureau reported 331,449,281 residents as of April 1, 2020,[o][389] making the United States the third most populous nation in the world, after China and India. The 48 contiguous states and the District of Columbia occupy a combined area of 3,119,885 square miles (8,080,470 km2). Of this area, 2,959,064 square miles (7,663,940 km2) is contiguous land, composing 83.65% of total U.S. land area. About 15% is occupied by Alaska, a state in northwestern North America, with the remainder in Hawaii, a state and archipelago in the central Pacific, and the five populated but unincorporated insular territories of Puerto Rico, American Samoa, Guam, the Northern Mariana Islands, and the U.S. Virgin Islands. Measured by only land area, the United States is third in size behind Russia and China, and just ahead of Canada."
+    # countries = ["United States"]    
+    # country_content["United States"] = "The U.S. Census Bureau reported 331,449,281 residents as of April 1, 2020,[o][389] making the United States the third most populous nation in the world, after China and India. The 48 contiguous states and the District of Columbia occupy a combined area of 3,119,885 square miles (8,080,470 km2). Of this area, 2,959,064 square miles (7,663,940 km2) is contiguous land, composing 83.65% of total U.S. land area. About 15% is occupied by Alaska, a state in northwestern North America, with the remainder in Hawaii, a state and archipelago in the central Pacific, and the five populated but unincorporated insular territories of Puerto Rico, American Samoa, Guam, the Northern Mariana Islands, and the U.S. Virgin Islands. Measured by only land area, the United States is third in size behind Russia and China, and just ahead of Canada."
     
+    countries = ["Norway"]
+    country_content["Norway"] = "Norway has a total area of 385,207 square kilometres (148,729 sq mi) and had a population of 5,425,270 in January 2022"
+
     for country in countries:
         regions_to_process, area_to_process, population_to_process = text_processing(country, country_content[country])
 
@@ -84,8 +81,13 @@ def get_pages(countries: list):
 
     # for country in countries[0:4]:
     for country in countries:
-        content = wikipedia.page(title=country, auto_suggest=False).content # auto_suggest=False fix problems with Cuba's and Canada's pages upload 
-  
+        title = country + " country"
+
+        if country == "Czechia":
+            title = "Czech Republic"
+
+        content = wikipedia.page(title=title).content # auto_suggest=False fix problems with Cuba's and Canada's pages upload
+
         country_content[country] = content
             
     return country_content
@@ -100,9 +102,6 @@ def clean(doc):
     # remove empty tokens
     tokens = [token for token in tokens if token.text.strip() != ""] 
     
-    # # remove punctuation marks
-    # token = [token for token in tokens if not token.is_punct]
-
     # lemmatize
     text = " ".join([token.lemma_ for token in tokens])
 
@@ -113,15 +112,12 @@ def clean(doc):
 def sent_tokenize(text: str):
     raw_doc = nlp(text)
 
-    # sentences = list(raw_doc.sents)
-
     clean_text = clean(raw_doc)
 
     doc = nlp(clean_text)
 
     sentences = list(doc.sents)
     
-    # print(sentences)
     return sentences
 
 
@@ -133,53 +129,37 @@ def text_processing(country: str, content: str):
     population_sents = []
 
     for sent in sentences:
-        # detecting countries, cities, regions
-       
+        # detecting countries, cities, regions       
         list_regions = regions_extract(sent)
         
-        print("regions in text: ", list_regions)
-
-        areas = []
-        pop = []
+        # print("regions in text: ", list_regions)
 
         # Population matcher
-        pop_matcher = population_matcher(sent)
-
-        for match_id, start, end in pop_matcher:
-            # for match_id_1, start_1, end_1 in pop_matcher:
-            span = sent[start:end]
-            
-            population_sents.append(span)
-            print("pop_matcher: ", span.text)
-
-
-        # Population phrase matcher
-
-        # pop_phrase_matcher = population_phrase_matcher(sent)
-
-        # for match_id, start, end in pop_phrase_matcher:
-        #     span = sent[start:end]
-        #     print("pop_phrase_matcher: ", span.text)
-
-       
+        match_pop(sent, population_sents)
+        
         # Area matcher
-
-        _area_matcher = area_matcher(sent)
-
-        for match_id, start, end in _area_matcher:
-            span = sent[start:end]            
-            area_sents.append(span)
-            print("area_matcher: ", span.text) 
-
-
-        # Area phrase matcher
-        # _area_phrase_matcher = area_phrase_matcher(sent)       
-
-        # for match_id, start, end in _area_phrase_matcher:
-        #     span = sent[start:end]
-        #     print("area_phrase_matcher: ", span.text)
-
+        match_area(sent, area_sents)
+        
     return list_regions, area_sents, population_sents
+
+
+def match_pop(sent, population_sents):
+    pop_matcher = population_matcher(sent)
+
+    for match_id, start, end in pop_matcher:
+        span = sent[start:end]
+            
+        population_sents.append(span)
+        # print("pop_matcher: ", span.text)
+
+
+def match_area(sent, area_sents):
+    _area_matcher = area_matcher(sent)
+
+    for match_id, start, end in _area_matcher:
+        span = sent[start:end]            
+        area_sents.append(span)
+        # print("area_matcher: ", span.text) 
 
 
 def regions_extract(sent):
@@ -193,13 +173,14 @@ def regions_extract(sent):
 
 
 def population_matcher(sent):
-    # print(sent)
-    # for token in sent:
-    #     print(token.text, " ", token.pos_)
-
     matcher = Matcher(nlp.vocab)
     
     pattern = [
+        [
+            # {"TEXT" : {"REGEX": {"IN": ["population", "census"]}}},   
+            {"TEXT" : {"REGEX": "population"}},             
+            {"LIKE_NUM": True, "OP": "+"},
+        ],
         [
             # {"TEXT" : {"REGEX": {"IN": ["population", "census"]}}},   
             {"TEXT" : {"REGEX": "population"}},             
@@ -262,6 +243,46 @@ def area_matcher(sent):
             {"TEXT" : {"REGEX": "area"}}, 
             {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
             {"LIKE_NUM": True, "OP": "+"}, 
+            {"TEXT": {"REGEX":"square"}}, 
+            {"TEXT": {"REGEX":"kilometer"}}
+        ], 
+        [
+            {"TEXT" : {"REGEX": "area"}}, 
+            {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+            {"LIKE_NUM": True, "OP": "+"}, 
+            {"TEXT": {"REGEX":"square"}}, 
+            {"TEXT": {"REGEX":"kilometre"}}
+        ],
+        [
+            {"TEXT" : {"REGEX": "span"}}, 
+            {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+            {"LIKE_NUM": True, "OP": "+"}, 
+            {"TEXT": {"REGEX":"km2"}}
+        ], 
+        [
+            {"TEXT" : {"REGEX": "encompass"}}, 
+            {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+            {"LIKE_NUM": True, "OP": "+"}, 
+            {"TEXT": {"REGEX":"km2"}}
+        ], 
+        [
+            {"TEXT" : {"REGEX": "area"}}, 
+            {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+            {"LIKE_NUM": True, "OP": "+"}, 
+            {"TEXT": {"REGEX": "mi"}}, 
+            {"TEXT": {"REGEX": "mi"}}
+        ],
+        [
+            {"TEXT" : {"REGEX": "span"}}, 
+            {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+            {"LIKE_NUM": True, "OP": "+"}, 
+            {"TEXT": {"REGEX": "mi"}}, 
+            {"TEXT": {"REGEX": "mi"}}
+        ],
+        [
+            {"TEXT" : {"REGEX": "encompass"}}, 
+            {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+            {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX": "mi"}}, 
             {"TEXT": {"REGEX": "mi"}}
         ],
@@ -271,7 +292,63 @@ def area_matcher(sent):
             {"LIKE_NUM": True, "OP": "+"}, 
             {"TEXT": {"REGEX": "square"}}, 
             {"TEXT": {"REGEX": "mile"}}
-        ]
+        ],
+        [
+            {"TEXT" : {"REGEX": "span"}}, 
+            {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+            {"LIKE_NUM": True, "OP": "+"}, 
+            {"TEXT": {"REGEX": "square"}}, 
+            {"TEXT": {"REGEX": "mile"}}
+        ],
+        [
+            {"TEXT" : {"REGEX": "encompass"}}, 
+            {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+            {"LIKE_NUM": True, "OP": "+"}, 
+            {"TEXT": {"REGEX": "square"}}, 
+            {"TEXT": {"REGEX": "mile"}}
+        ],
+        [
+            {"TEXT" : {"REGEX": "area"}}, 
+            {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+            {"LIKE_NUM": True, "OP": "+"}, 
+            {"TEXT": {"REGEX": "square"}}, 
+            {"TEXT": {"REGEX": "kilometer"}}
+        ],
+        [
+            {"TEXT" : {"REGEX": "area"}}, 
+            {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+            {"LIKE_NUM": True, "OP": "+"}, 
+            {"TEXT": {"REGEX": "square"}}, 
+            {"TEXT": {"REGEX": "kilometre"}}
+        ],
+        [
+            {"TEXT" : {"REGEX": "span"}}, 
+            {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+            {"LIKE_NUM": True, "OP": "+"}, 
+            {"TEXT": {"REGEX": "square"}}, 
+            {"TEXT": {"REGEX": "kilometer"}}
+        ],
+        [
+            {"TEXT" : {"REGEX": "span"}}, 
+            {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+            {"LIKE_NUM": True, "OP": "+"}, 
+            {"TEXT": {"REGEX": "square"}}, 
+            {"TEXT": {"REGEX": "kilometre"}}
+        ],
+        [
+            {"TEXT" : {"REGEX": "encompass"}}, 
+            {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+            {"LIKE_NUM": True, "OP": "+"}, 
+            {"TEXT": {"REGEX": "square"}}, 
+            {"TEXT": {"REGEX": "kilometer"}}
+        ],
+        [
+            {"TEXT" : {"REGEX": "encompass"}}, 
+            {"POS": {"IN": ["PROPN", "NOUN", "ADJ", "VERB", "PUNCT"]}, "OP": "*"}, 
+            {"LIKE_NUM": True, "OP": "+"}, 
+            {"TEXT": {"REGEX": "square"}}, 
+            {"TEXT": {"REGEX": "kilometre"}}
+        ],
     ]
     
     matcher.add("area", pattern) 
@@ -289,29 +366,59 @@ def match_sentence_processing(country: str,  regions_to_process: list, sents_are
         for token in sent:
             if token.like_num:
                 digits = ""
-                digits = "".join(token.text[i] for i in range(0, len(token.text)) if token.text[i] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
+
+                for i in range(0, len(token.text)):
+                    if token.text[i] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+                        digits = digits + token.text[i] 
                 
                 if token.head.text == "mi2" or (token.head.text == "mile"): # and sent[token.head.text] == "mile"):
-                    temp =  int(digits) * 2.589988
+                    temp = float(digits) * 2.589988
                 
                     if country_area < temp:
-                        country_area = int(temp)
+                        country_area = float(temp)
                 
-                if token.head.text == "km2" and country_area < int(digits):
-                    country_area = int(digits)      
+                if digits != "" and (token.head.text == "km2" or token.head.text == "kilometre"  or token.head.text == "kilometer") and country_area < float(digits):
+                    country_area = float(digits)      
                     
+
     for sent in sents_population_to_process:
         for token in sent:
-            if token.like_num:
-                digits = ""
-                digits = "".join(token.text[i] for i in range(0, len(token.text)) if token.text[i] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
+            
+            if token.text != "million" and token.text != "thousand":                         
+                # print(token.text)
+                if token.like_num and token.ent_type_ != "PERECENT":                    
+                    
+                    # print(token.text)
+                    digits = ""  
+                    # dot = False
+                    # n = 0
 
-                if country_population < int(digits):
-                    country_population = int(digits)        
+                    for i in range(0, len(token.text)):
+                        
+                        # if token.text[i] == ".":
+                        #     dot = True
+                        #     continue
+                        
+                        if token.text[i] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."]:
+                        # if token.text[i] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+                            digits = digits + token.text[i] 
+
+                            # if dot:
+                            #     n = n + 1
+
+                    int_digits = float(digits)
+                    # int_digits = int(digits)
+                    
+                    if token.head.text == "million":
+                        # int_digits = int_digits * (10 ** (6 - n))
+                        int_digits = int_digits * (10 ** 6)
+
+                    if country_population < int_digits:
+                        country_population = int_digits 
+                        # print(country_population)   
 
 
     return country_area, country_population
-
 
 
 def getting_regions(country: str, region_list: list):
@@ -368,6 +475,6 @@ def population_phrase_matcher(sent):
     return pop_phrase_matcher
 
 
-# main()
+main()
 
-for_tests()
+# for_tests()
