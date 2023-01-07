@@ -96,15 +96,17 @@ class NDSLexer(Lexer):
 
     #SPECIAL FUNCTIONS
     NAME['show'] = 'FUNC'
-    NAME['simulate'] = 'FUNC'
+    NAME['params'] = 'FUNC'
     NAME['size'] = 'FUNC'
     NAME['type'] = 'FUNC'
     NAME['pos'] = 'FUNC'
+
     NAME['rvs'] = 'FUNC'
     NAME['irvs'] = 'FUNC'
 
     NAME['gen_dist'] = 'FUNC'
 
+    NAME['simulate'] = 'FUNC'
     NAME['enable'] = 'FUNC'
     NAME['disable'] = 'FUNC'
 
@@ -185,7 +187,7 @@ class NDSParser(Parser):
     
     
 
-    #CODE    
+    #LINE OF CODE 
     @_('element')
     def code(self, p):
         return [p.element]
@@ -204,7 +206,7 @@ class NDSParser(Parser):
     
 
 
-    #INSIDE CODE
+    #FUNCTIONS CODE
     @_('function_code function_script')
     def function_script(self, p):
         return p.function_code + p.function_script
@@ -259,7 +261,7 @@ class NDSParser(Parser):
     
 
 
-    #FUNC PARAMETERS
+    #FUNC PARAMS
     @_('param "," params')
     def params(self, p):
         return [p.param] + p.params
@@ -282,7 +284,7 @@ class NDSParser(Parser):
     
     
 
-    #EXECUTION PARAMETERS
+    #FUNTION ARGS
     @_('arg "," args')
     def args(self, p):
         return [p.arg] + p.args
@@ -350,6 +352,18 @@ class NDSParser(Parser):
     @_('"[" list_expr "]"')
     def expr(self, p):
         return pobj(type='expr', subtype='list', value=p.list_expr)
+      
+    @_('ELEMENT')
+    def expr(self, p):
+        return pobj(type='type', value=p.ELEMENT)
+    
+    @_('EVENT')
+    def expr(self, p):
+        return pobj(type='type', value=p.EVENT)
+    
+    @_('DECISION')
+    def expr(self, p):
+        return pobj(type='type', value=p.DECISION)
     
     @_('condition')
     def expr(self, p):
@@ -359,11 +373,10 @@ class NDSParser(Parser):
     def expr(self, p):
         return p.expr
     
-    
     @_('func')
     def expr(self, p):
         return p.func
-    
+
 
 
     #ARITHMETIC

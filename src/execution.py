@@ -215,29 +215,29 @@ class Code:
                         return self.to_object(Distribution.irvs(*args, **kwargs))
                 
                 
-
-                
                 #return the list of params of a function
                 elif compiled.subtype == 'params':
                     params= self.params(compiled, inside_vars, inside)
                     if len(params) == 1:
                         p= params[0]
-                        if isinstance(p, Event):
-                            return ['dist', 'cat', 'enabled', 'tp', 'dec']
-                        elif isinstance(p, Nation):
-                            return ['provinces', 'traits']
-                        elif isinstance(p, Province):
-                            return ['extension', 'development', 'population', 'neighbors']
-                        elif isinstance(p, Sea):
-                            return ['extension', 'neighbors']
-                        elif isinstance(p, Neutral):
-                            return ['extension', 'neighbors']
-                        elif isinstance(p, Trait):
-                            return []
-                        elif isinstance(p, Category):
-                            return []
-                        elif isinstance(p, Distribution):
-                            return ['dist']
+                        if p == Event:
+                            return self.to_object(['dist: distribution', 'cat: category', 'enabled: boolean', 'dec: decision'])
+                        elif p == Nation:
+                            return self.to_object(['provinces: list[province]', 'traits: list[trait]'])
+                        elif p == Province:
+                            return self.to_object(['extension: interger', 'development: interger', 'population: interger', 'neighbors: list[province]'])
+                        elif p == Sea:
+                            return self.to_object(['extension: interger', 'neighbors: list[province]'])
+                        elif p == Neutral:
+                            return self.to_object(['extension: interger', 'neighbors: list[province]'])
+                        elif p == Trait:
+                            return self.to_object([])
+                        elif p == Category:
+                            return self.to_object([])
+                        elif p == Distribution:
+                            return self.to_object(['dist: distribution'])
+                        else:
+                            raise Exception('Error: params() only accepts elements')
                     else:
                         raise Exception('Error: params() only accepts one parameter')
                 
@@ -392,6 +392,26 @@ class Code:
                         return self.to_object(self.map.get_data(self.to_python(self.value(obj.name, inside_vars, inside)),
                                             self.to_python(obj.var)))
             
+            if obj.type == 'type':
+                if obj.value == 'event':
+                    return Event
+                elif obj.value == 'decision':
+                    return Decision
+                elif obj.value == 'distribution':
+                    return Distribution
+                elif obj.value == 'trait':
+                    return Trait
+                elif obj.value == 'nation':
+                    return Nation
+                elif obj.value == 'province':
+                    return Province
+                elif obj.value == 'sea':
+                    return Sea
+                elif obj.value == 'neutral':
+                    return Neutral
+                else:
+                    return None
+                
 
             elif obj.type == 'arithmetic':
                 left= self.value(obj.left, inside_vars, inside)
@@ -615,8 +635,8 @@ class Code:
 a= Code()
 a.compile(
     '''
+    show(params(event))
     show(1 == 4)
-
 
     category socialism()
     category capitalism()
