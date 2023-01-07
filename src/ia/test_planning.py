@@ -49,9 +49,9 @@ def goal_statep1(state,**kargs):
 
 
 
-actions=[Decision(action="increase_industrialization",preconds=precond_industrialization ,effects=effects_industrialization),
-         Decision(action="increase_average_living_standard",preconds=precond_average_living_standard ,effects=effects_average_living_standard),
-         Decision(action="increase_tourism",preconds=precond_tourism ,effects=effects_tourism)]
+actions=[ActionDecision(action="increase_industrialization",preconds=precond_industrialization ,effects=effects_industrialization),
+         ActionDecision(action="increase_average_living_standard",preconds=precond_average_living_standard ,effects=effects_average_living_standard),
+         ActionDecision(action="increase_tourism",preconds=precond_tourism ,effects=effects_tourism)]
 
 
 # actions=[Decision(action="increase_industrialization",preconds={"economic_resources":(">",1000)},effects={"economic_resources":("-",1000),"industrialization":("+",1)}),
