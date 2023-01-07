@@ -21,13 +21,13 @@ m.add_trait('Comunist')
 def mortality(map, **kwargs):
     for province in map.provincedict.values():
         province.population= province.population * 0.99
-m.add_simulation_event(name="mortality",dist=Distribution(name="uniform",dist="uniform",scale=10),cat= 'Social',enabled=True,dec=[],execution=mortality)
+m.add_simulation_event(name="mortality",dist=Distribution(name="uniform",dist="uniform",scale=100),cat= 'Social',enabled=True,dec=[],execution=mortality)
 
 def decrease_industrialization(map, **kwargs):
     for province in map.provincedict.values():
         if(province.data.get("industrialization")):
             province.data["industrialization"]-= 1
-m.add_simulation_event(name="decrease_industrialization",dist=Distribution("uniform","uniform",scale=10),cat= 'Economic',enabled=True,dec=[],execution=decrease_industrialization)
+m.add_simulation_event(name="decrease_industrialization",dist=Distribution("uniform","uniform",scale=100),cat= 'Economic',enabled=True,dec=[],execution=decrease_industrialization)
 
 
 def industrialization_increases( state,**kargs):

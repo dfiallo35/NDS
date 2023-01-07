@@ -16,13 +16,16 @@ def reaction_for_an_event(map,new_map,changes):
 
 def get_only_actions(tree):
     """Get a list of actions from the states tree of the planning"""
-    return [i["action"] if i["action"] else None for i in get_path(tree)]
+    if( not tree):
+        return []
+    dec=[i["action"] if i["action"] else None for i in get_path(tree)]
+    return [i for i in dec if i]
 
 def transform_decisions(map_decisions):
     """Transform the decisions of the map into a list of actions""" 
     decisions=[]
-    for decision in map_decisions:
-        decisions.append(ActionDecision(decision.name ,decision.preconds,decision.event))
+    for decision in map_decisions.values():
+        decisions.append(ActionDecision(action=decision.name ,preconds=decision.execution,event=decision.event))
     return decisions
 
 def get_affected_nations(map,changes):
@@ -50,4 +53,5 @@ def get_target(nation,changes):
 
 def gets_worse(field,initial_state,final_state):
     """Check if the change is a bad change for the nation"""
-    return final_state.get_nation_data(field)<initial_state.get_nation_data(field)
+    # return final_state.get_nation_data(field)<initial_state.get_nation_data(field)
+    return final_state < initial_state

@@ -121,6 +121,8 @@ def ordered_actions_priority_rec(state,h_values,ordered_actions:list):
 def get_path(state):
     """Get the path from the initial state to the state"""
     path=[]
+    if(not state):
+        return None
     while state.parent:
         path.append(state.value)
         state=state.parent
