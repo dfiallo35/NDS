@@ -179,7 +179,7 @@ class Code:
                     if not isinstance(args[0], Distribution) and not kwargs.get('dist'):
                         raise Exception('Error: rvs() only accepts distributions as first parameter')
                     else:
-                        return Distribution.rvs(*args, **kwargs)
+                        return self.to_object(Distribution.rvs(*args, **kwargs))
                 
                 elif compiled.subtype == 'irvs':
                     args, kwargs= self.params_names(compiled, inside_vars, inside)
@@ -188,7 +188,7 @@ class Code:
                     if not isinstance(args[0], Distribution) and not kwargs.get('dist'):
                         raise Exception('Error: irvs() only accepts distributions as first parameter')
                     else:
-                        return Distribution.irvs(*args, **kwargs)
+                        return self.to_object(Distribution.irvs(*args, **kwargs))
                 
                 
 
@@ -638,12 +638,11 @@ a.compile(
         }
     }
 
-    # event population_mortality(pg, socialism, true, []){
-    #     for(prov, map->provinces){
-    #         a= prov->population
-    #         prov->population: a - irvs(expon, loc: 0)
-    #     }
-    # }
+    event population_mortality(pg, socialism, true, []){
+        for(prov, map->provinces){
+            prov->population: prov->population - irvs(expon, loc: 0)
+        }
+    }
 
     simulate(100d)
 
