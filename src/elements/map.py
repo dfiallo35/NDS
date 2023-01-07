@@ -153,10 +153,11 @@ class Map:
         :param event: the event
         '''
         self.not_exist(event.name)
-        if event.name  in self.en_dis_events['enable']:
-            self.en_dis_events['enable'].remove(event.name)
-            if event.name not in self.en_dis_events['disable']:
-                self.en_dis_events['enable'].append(event.name)
+        if event.name not in self.en_dis_events['enable']:
+            self.en_dis_events['enable'].append(event.name)
+            if event.name in self.en_dis_events['disable']:
+                self.en_dis_events['disable'].remove(event.name)
+
     
     def disable(self, event: Event):
         '''
@@ -164,7 +165,10 @@ class Map:
         :param event: the event
         '''
         self.not_exist(event.name)
-        self.en_dis_events['disable'].append(event.name)
+        if event.name not in self.en_dis_events['disable']:
+            self.en_dis_events['disable'].append(event.name)
+            if event.name in self.en_dis_events['enable']:
+                self.en_dis_events['enable'].remove(event.name)
 
     def add_nation(self, name: str, provinces: list, traits: list= []):
         '''
@@ -301,11 +305,11 @@ class Map:
         name= self.element_name(name)
         self.alredy_exist(name)
         
-        event= Event(name=name, dist=None, category=None, enabled=False, type='static', execution=execution, code=code, decisions=None, params= params)
+        event= Event(name=name, dist=None, category=None, enabled=False, execution=execution, code=code, decisions=None, params= params)
         self.eventdict[name]= event
 
     #todo: types
-    def add_simulation_event(self, name: str, dist: Distribution, cat: str, enabled: bool, tp: str, dec: list, execution, code= None):
+    def add_simulation_event(self, name: str, dist: Distribution, cat: str, enabled: bool, dec: list, execution, code= None):
         '''
         Add an event to the map. If the event already exists, it will be updated
         :param event: the event
@@ -323,10 +327,10 @@ class Map:
         if not self.categorydict.get(cat):
             raise Exception(f'The category {cat} doesn\'t exist')
         
-        event= Event(name=name, dist=self.all[dist], category=self.all[cat], enabled=enabled, type=tp, execution=execution, code=code, decisions=dec, params= params)
+        event= Event(name=name, dist=self.all[dist], category=self.all[cat], enabled=enabled, execution=execution, code=code, decisions=dec, params= None)
         self.eventdict[name]= event
         
-    def add_distribution(self, name: str, dist: Distribution, **kwargs):
+    def add_distribution(self, name: str, dist: Distribution, *args, **kwargs):
         '''
         Add a distribution to the map
         :param name: the distribution name
@@ -338,7 +342,7 @@ class Map:
         self.alredy_exist(name)
         self.not_exist(dist)
 
-        dist= Distribution(name, dist, **kwargs)
+        dist= Distribution(name, dist, *args, **kwargs)
         self.distributiondict[name]= dist
 
     def add_decision(self, name: str, event: Event, cond, execution, params: list= []):

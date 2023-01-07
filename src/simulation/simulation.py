@@ -95,6 +95,10 @@ class Simulate:
     def __init__(self, map: Map, initial_events: Pqueue):
         self.event_queue = initial_events
         self.map = map
+    
+    @property
+    def en_dis(self):
+        return self.map.en_dis_events
 
     def simulate(self, end_time: int) -> None:
         '''
@@ -110,25 +114,14 @@ class Simulate:
                 if event.is_enabled and self.map.eventdict[event.name].is_enabled:
                     print(time, event)
 
-                    #execute the event and return a dictionary
-                    #the eventdict is a dictionary with: {'enable': <list of events to be added to the queue>, 'disable': <list of events to be disabled>}
-                    
                     old_map= copy(self.map)
-                    eventdict: dict= event.execute(self.map)
+                    event.execute(self.map)
 
                     #todo: log of changes
                     old_map.compare(self.map)
                     
-                    if eventdict and eventdict.get('enable'):
-                        self.enable_events(time, eventdict['enable'])
-                    if eventdict and eventdict.get('disable'):
-                        self.disable_events(eventdict['disable'])
-                    
-                    #generate the next event
                     self.generate_event(event, time)
-
-                    #the nations make decisions based on the event and the map
-                    self.decide(self.map, event, time)
+                    # self.decide(self.map, event, time)
 
 
     def generate_event(self, event: Event, time: int):
@@ -137,26 +130,16 @@ class Simulate:
         :param event: the event to be generated
         :param time: the current time of the simulation
         '''
-        if event.is_enabled:
+        if event.name in self.en_dis['enable']:
+            self.map.eventdict[event.name].enabled = True
             self.event_queue.push((time + event.next(), event))
-    
-    def enable_events(self,time: int, events: list[str]):
-        '''
-        Add a list of events to the queue given from the current event
-        :param events: the list of events to be added
-        :param time: the current time of the simulation
-        '''
-        for event in [self.map.eventdict[ev] for ev in events]:
-            event.enabled= True
-            self.generate_event(event, time)
-    
-    def disable_events(self, events: list[str]):
-        '''
-        Disable an event
-        :param event: the event to be disabled
-        '''
-        for event in [self.map.eventdict[ev] for ev in events]:
-            event.enabled= False
+            self.en_dis['enable'].remove(event.name)
+        elif event.is_enabled:
+            self.event_queue.push((time + event.next(), event))
+        elif event.name in self.en_dis['disable']:
+            self.map.eventdict[event.name].enabled = False
+            self.en_dis['disable'].remove(event.name)
+        
     
     def decide(self, map: Map, event: Event, time: int):
         '''

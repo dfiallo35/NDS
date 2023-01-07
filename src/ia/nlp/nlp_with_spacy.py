@@ -397,6 +397,8 @@ def match_sentence_processing(country: str,  regions_to_process: list, sents_are
                         if token.text[i] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."]:
                             digits = digits + token.text[i] 
 
+                    int_digits = 0
+
                     if digits != "":
                         int_digits = float(digits)
                         # int_digits = int(digits)

@@ -189,6 +189,8 @@ class Code:
                         raise Exception('Error: irvs() only accepts distributions as first parameter')
                     else:
                         return Distribution.irvs(*args, **kwargs)
+                
+                
 
                 
                 #return the list of params of a function
@@ -312,9 +314,6 @@ class Code:
             #Execute a event
             elif compiled.type == 'execution':
                 if self.events.get(self.to_python(compiled.name)):
-                    if self.events[self.to_python(compiled.name)].type != 'static':
-                        raise Exception(f'Error: event {compiled.name} is not static')
-
                     args, kwargs= self.params_names(compiled, inside_vars, inside)
                     args= self.to_python(args)
                     kwargs= self.to_python(kwargs)
@@ -620,30 +619,29 @@ class Code:
 a= Code()
 a.compile(
     '''
-    show(irvs(expon, 10, 10))
-    # category socialism()
-    # category capitalism()
+    category socialism()
+    category capitalism()
 
-    # province Havana(100, 10, 10345)    
-    # province Mayabeque(236, 10, 204)
-    # province New_York(2056, 20, 103856)
-    # province California(341, 30, 402175)
+    province Havana(100, 10, 10345)    
+    province Mayabeque(236, 10, 204)
+    province New_York(2056, 20, 103856)
+    province California(341, 30, 402175)
 
-    # nation Cuba([Havana, Mayabeque], [socialism])
-    # nation USA([New_York, California], [capitalism])
+    nation Cuba([Havana, Mayabeque], [socialism])
+    nation USA([New_York, California], [capitalism])
     
+    distribution pg(expon, scale: 4)
 
-    # event population_growth(expon, socialism, true, '', [])(){
-    #     for(prov, map->provinces){
-    #         a=prov
-    #         show('before', prov->population)
-    #         prov->population: expon->irvs(loc: prov->population)
-    #         show('after', prov->population)
-    #     }
-    # }
-    # population_growth()
+    event population_growth(pg, socialism, true, []){
+        for(prov, map->provinces){
+            show('before', prov->population)
+            prov->population: irvs(expon, loc: prov->population)
+            show('after', prov->population)
+        }
+    }
+    population_growth()
 
-    # simulate(10d)
+    simulate(10d)
 
     # nation Cuba([Mayabeque], [crazy])
     # Cuba->provinces: ++Havana
@@ -654,18 +652,18 @@ a.compile(
 
     # category socialism()
 
-    event fib <<n: number>>{
-        if(n == 0){
-            return 0
-        }
-        if(n ==1){
-            return 1
-        }
-        else{
-            return fib(n-1) + fib(n-2)
-        }
-    }
-    show(fib(10))
+    # event fib <<n: number>>{
+    #     if(n == 0){
+    #         return 0
+    #     }
+    #     if(n ==1){
+    #         return 1
+    #     }
+    #     else{
+    #         return fib(n-1) + fib(n-2)
+    #     }
+    # }
+    # show(fib(10))
 
     # decision a(n==1, fib)<< n >>
 
