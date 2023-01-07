@@ -132,14 +132,22 @@ class Simulate:
         '''
         if event.name in self.en_dis['enable']:
             self.map.eventdict[event.name].enabled = True
-            self.event_queue.push((time + event.next(), event))
+            
+            self.event_queue.push((self.new_time(event, time), event))
             self.en_dis['enable'].remove(event.name)
+        
         elif event.is_enabled:
-            self.event_queue.push((time + event.next(), event))
+            self.event_queue.push((self.new_time(event, time), event))
+        
         elif event.name in self.en_dis['disable']:
             self.map.eventdict[event.name].enabled = False
             self.en_dis['disable'].remove(event.name)
-        
+    
+    def new_time(self, event, time):
+        nt= time + event.next()
+        if nt == time:
+            nt += 1
+        return nt
     
     def decide(self, map: Map, event: Event, time: int):
         '''
@@ -153,8 +161,6 @@ class Simulate:
         decisions=self.get_evets_from_decisions(reaction_for_an_event(map, new_map,changes))
         for nation in decisions.keys():
             timed_decisions= self.get_time(time,decisions[nation],distribution="uniform")
-            if timed_decisions == time:
-                timed_decisions+=1
             for time_dec in timed_decisions:
                 self.event_queue.push(time_dec)
         # return decisions
