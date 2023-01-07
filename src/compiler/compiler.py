@@ -1,10 +1,10 @@
 from sly import Lexer, Parser
 
-
 #todo: add floordiv
 #todo: add, sub, mul, div to arrays
 class NDSLexer(Lexer):
     tokens = {'ELEMENT', 'EVENT', 'DECISION',
+            'IPLUS', 'IMINUS', 'IMULTIPLY', 'IDIVIDE', 'IPOW', 'IMOD', 'IFLOORDIV',
             'FUNC', 'RETURN',
             'NAME','NUMBER', 'STRING', 'BOOL', 'TIME', 'TYPE',
             'ASSIGN', 'ARROW', 'PARAMASSIGN', 'LF', 'RF',
@@ -19,16 +19,61 @@ class NDSLexer(Lexer):
         self.nesting_level = 0
     
     ignore = "\t "
+    ignore_comment = r'\#.*'
 
     newline = r'\n+'
     def newline(self, t):
         self.lineno += t.value.count('\n')
     
 
+    LF= r'<<'
+    RF= r'>>'
+    
+    #OPERATORS
+    EQUALS= r'=='
+    NOTEQUALS= r'!='
+    EGREATER= r'>='
+    GREATER= r'>'
+    ELESS= r'<='
+    LESS= r'<'
+    
+
+    # Special symbols
+    ASSIGN = r'='
+    PARAMASSIGN= r':'
+    ARROW = r'->'
+
+    #ELEMENTS VARS UPDATES
+    XPLUS= r'\+\+'
+    XMINUS= r'--'
+
+    #ARIHTMETIC
+    IPLUS = r'\+='
+    PLUS = r'\+'
+    IMINUS = r'-='
+    MINUS = r'-'
+    IPOW = r'\*\*='
+    POW = r'\*\*'
+    IMULTIPLY = r'\*='
+    MULTIPLY = r'\*'
+    IMOD = r'\%='
+    MOD= r'\%'
+    IFLOORDIV = r'//='
+    FLOORDIV = r'//'
+    IDIVIDE = r'/='
+    DIVIDE = r'/'
+    
+
     #VARIABLES
     NAME= r'[_]*[a-zA-Z][a-zA-Z0-9_]*'
 
-    #TIME
+    NUMBER = r'\d+(\.\d+)?'
+
+    STRING = r'\'.*?\''
+    def STRING(self, t):
+        t.value = str(t.value).strip('\'')
+        return t
+
     TIME = r'\d+[dmy]'
 
     #BOOLEANS
@@ -46,6 +91,7 @@ class NDSLexer(Lexer):
     
     NAME['event'] = 'EVENT'
     NAME['decision'] = 'DECISION'
+
     NAME['return'] = 'RETURN'
 
     #SPECIAL FUNCTIONS
@@ -56,7 +102,7 @@ class NDSLexer(Lexer):
     NAME['pos'] = 'FUNC'
     NAME['rvs'] = 'FUNC'
     NAME['irvs'] = 'FUNC'
-    #todo: gen dist
+
     NAME['gen_dist'] = 'FUNC'
 
     NAME['enable'] = 'FUNC'
@@ -82,46 +128,10 @@ class NDSLexer(Lexer):
     NAME['integer'] = 'TYPE'
     NAME['decimal'] = 'TYPE'
     NAME['string'] = 'TYPE'
-    NAME['bool'] = 'TYPE'
+    NAME['boolean'] = 'TYPE'
     NAME['list'] = 'TYPE'
     NAME['time'] = 'TYPE'
     
-    LF= r'<<'
-    RF= r'>>'
-    
-    #OPERATORS
-    EQUALS= r'=='
-    NOTEQUALS= r'!='
-    GREATER= r'>'
-    LESS= r'<'
-    EGREATER= r'>='
-    ELESS= r'<='
-
-    #CONSTANTS
-    NUMBER = r'\d+(\.\d+)?'
-    STRING = r'\'.*?\''
-    def STRING(self, t):
-        t.value = str(t.value).strip('\'')
-        return t
-
-    # Special symbols
-    ASSIGN = r'='
-    PARAMASSIGN= r':'
-    ARROW = r'->'
-
-    XPLUS= r'\+\+'
-    XMINUS= r'--'
-
-    PLUS = r'\+'
-    MINUS = r'-'
-    POW = r'\*\*'
-    MULTIPLY = r'\*'
-    MOD= r'\%'
-    FLOORDIV = r'//'
-    DIVIDE = r'/'
-
-    # Ignored pattern
-    ignore_comment = r'\#.*'
 
     def error(self, t):
         raise Exception("Illegal character '%s'" % t.value)
@@ -140,10 +150,7 @@ class pobj:
         return self.__dict__.get(key)
 
 
-#fix: end with ; or not works. Must be only with ;.
-#fix: las lineas de codigo no comienzan a machear desde script, buscan machear con todo los elementos de ela gramatica.
-#todo: precedences
-#todo: mejorar la deteccion de errores
+
 
 class NDSParser(Parser):
     tokens = NDSLexer.tokens
@@ -151,22 +158,19 @@ class NDSParser(Parser):
     
 
     precedence = (
-        ('left', 'ELEMENT', 'EVENT'),
-        ('left', 'NAME', 'NUMBER', 'STRING', 'BOOL', 'TIME'),
-        ('left', 'ASSIGN', 'PARAMASSIGN'),
-        ('left', 'ARROW'),
-        ('left', 'FUNC'),
-        ('left', 'FOR', 'WHILE', 'IF', 'ELSE'),
-
         ('left', 'PLUS', 'MINUS'),
         ('left', 'MULTIPLY', 'FLOORDIV', 'DIVIDE', 'MOD', 'POW'),
-        ('left', 'AND', 'OR', 'XOR'),
-        ('left', 'EQUALS', 'NOTEQUALS', 'GREATER', 'LESS', 'EGREATER', 'ELESS'),
 
-        ('left', 'XPLUS', 'XMINUS'),
-        ('left', 'UMINUS', 'UPLUS'),
-        ('left', 'NOT'),
-        #todo: precedences
+        ('left', 'OR', 'XOR'),
+        ('left', 'AND'),
+
+        ('left', 'EQUALS', 'NOTEQUALS'),
+        ('left', 'GREATER', 'LESS', 'EGREATER', 'ELESS'),
+
+        ('right', 'XPLUS', 'XMINUS'),
+        ('right', 'UMINUS', 'UPLUS'),
+
+        ('right', 'NOT'),
         )
 
 
@@ -190,7 +194,6 @@ class NDSParser(Parser):
     def code(self, p):
         return [p.function]
     
-    #todo: here
     @_('func')
     def code(self, p):
         return [p.func]
@@ -201,38 +204,49 @@ class NDSParser(Parser):
     
 
 
-    @_('inside_code inside_script')
-    def inside_script(self, p):
-        return p.inside_code + p.inside_script
+    #INSIDE CODE
+    @_('function_code function_script')
+    def function_script(self, p):
+        return p.function_code + p.function_script
 
     @_('')
-    def inside_script(self, p):
+    def function_script(self, p):
         return []
     
     @_('code')
-    def inside_code(self, p):
+    def function_code(self, p):
         return p.code
 
     @_('RETURN expr')
-    def inside_code(self, p):
+    def function_code(self, p):
         return [pobj(type='return', value=p.expr)]
 
     
-    #todo: add return
 
     #ELEMENTS
-    @_('ELEMENT NAME "(" exeparams ")"')
+    @_('ELEMENT NAME "(" args ")"')
     def element(self, p):
-        return pobj(type='element', subtype=p[0], name=p.NAME, params=p.exeparams)
+        return pobj(type='element', subtype=p[0], name=p.NAME, params=p.args)
+    
+    @_('EVENT NAME LF params RF "{" function_script "}"')
+    def element(self, p):
+        return pobj(type='element', subtype=p[0], name=p.NAME, args=p.params, script=p.function_script)
+    
+    @_('EVENT NAME "(" args ")" "{" function_script "}"')
+    def element(self, p):
+        return pobj(type='element', subtype=p[0], name=p.NAME, params=p.args, script=p.function_script)
+
+    @_('DECISION NAME "(" condition "," args ")" LF params RF')
+    def element(self, p):
+        return pobj(type='element', subtype=p[0], name=p.NAME, params=p.args, condition=p.condition, args=p.params)
     
 
 
+    #fix: name to expr
     #VARS
     @_('NAME ASSIGN expr')
     def var(self, p):
         return pobj(type='var', subtype= 'expr', name=p.NAME, value=p.expr)
-    
-
 
     #ELEMENTS VARS
     @_('NAME ARROW NAME PARAMASSIGN expr')
@@ -269,25 +283,25 @@ class NDSParser(Parser):
     
 
     #EXECUTION PARAMETERS
-    @_('exeparam "," exeparams')
-    def exeparams(self, p):
-        return [p.exeparam] + p.exeparams
+    @_('arg "," args')
+    def args(self, p):
+        return [p.arg] + p.args
     
-    @_('exeparam')
-    def exeparams(self, p):
-        return [p.exeparam]
+    @_('arg')
+    def args(self, p):
+        return [p.arg]
     
     @_('')
-    def exeparams(self, p):
+    def args(self, p):
         return []
     
     @_('NAME PARAMASSIGN expr')
-    def exeparam(self, p):
-        return pobj(type='exe param', subtype='assign', name=p.NAME, value=p.expr)
+    def arg(self, p):
+        return pobj(type='args', subtype='assign', name=p.NAME, value=p.expr)
     
     @_('expr')
-    def exeparam(self, p):
-        return pobj(type='exe param', value=p.expr)
+    def arg(self, p):
+        return pobj(type='args', value=p.expr)
     
     
 
@@ -367,9 +381,9 @@ class NDSParser(Parser):
     def expr(self, p):
         return pobj(type='expr', subtype='arrow', name=p.NAME0, var=p.NAME1)
     
-    @_('NAME ARROW NAME "(" exeparams ")"')
+    @_('NAME ARROW NAME "(" args ")"')
     def expr(self, p):
-        return pobj(type='expr', subtype='arrow', name=p.NAME0, var=p.NAME1, params= p.exeparams)
+        return pobj(type='expr', subtype='arrow', name=p.NAME0, var=p.NAME1, params= p.args)
 
     #LIST
     @_('expr "," list_expr')
@@ -387,54 +401,37 @@ class NDSParser(Parser):
 
 
     #FUNC
-    @_('FUNC "(" exeparams ")"')
+    @_('FUNC "(" args ")"')
     def func(self, p):
-        return pobj(type='func', subtype=p[0], params=p.exeparams)
+        return pobj(type='func', subtype=p[0], params=p.args)
     
 
 
-    #FUNCTIONS
-    @_('EVENT NAME LF params RF "{" inside_script "}"')
-    def function(self, p):
-        return pobj(type='function', subtype=p[0], name=p.NAME, args=p.params, script=p.inside_script)
-    
-    @_('EVENT NAME "(" exeparams ")" "{" inside_script "}"')
-    def function(self, p):
-        return pobj(type='function', subtype=p[0], name=p.NAME, params=p.exeparams, script=p.inside_script)
-
-
-    @_('DECISION NAME "(" func_condition "," exeparams ")" LF params RF')
-    def function(self, p):
-        return pobj(type='function', subtype=p[0], name=p.NAME, params=p.exeparams, condition=p.func_condition, args=p.params)
-
-    @_('condition')
-    def func_condition(self, p):
-        return [pobj(type='func condition', value=p.condition)]
-    
+   
 
 
     #EXECUTION
-    @_('NAME "(" exeparams ")"')
+    @_('NAME "(" args ")"')
     def func(self, p):
-        return pobj(type= 'execution', name=p.NAME, params=p.exeparams)
+        return pobj(type= 'execution', name=p.NAME, params=p.args)
 
 
     #LOOPS
-    @_('IF "(" condition ")" "{" inside_script "}" ELSE "{" inside_script "}"')
+    @_('IF "(" condition ")" "{" function_script "}" ELSE "{" function_script "}"')
     def function(self, p):
-        return pobj(type='loop', subtype='if else', condition=p.condition, script=p.inside_script0, else_script=p.inside_script1)
+        return pobj(type='loop', subtype='if else', condition=p.condition, script=p.function_script0, else_script=p.function_script1)
     
-    @_('IF "(" condition ")" "{" inside_script "}"')
+    @_('IF "(" condition ")" "{" function_script "}"')
     def function(self, p):
-        return pobj(type='loop', subtype=p[0], condition=p.condition, script=p.inside_script)
+        return pobj(type='loop', subtype=p[0], condition=p.condition, script=p.function_script)
 
-    @_('WHILE "(" condition ")" "{" inside_script "}"')
+    @_('WHILE "(" condition ")" "{" function_script "}"')
     def function(self, p):
-        return pobj(type='loop', subtype=p[0], condition=p.condition, script=p.inside_script)
+        return pobj(type='loop', subtype=p[0], condition=p.condition, script=p.function_script)
 
-    @_('FOR "(" NAME "," exeparams ")" "{" inside_script "}"')
+    @_('FOR "(" NAME "," args ")" "{" function_script "}"')
     def function(self, p):
-        return pobj(type='loop', subtype=p[0], var=p.NAME, params=p.exeparams, script=p.inside_script)
+        return pobj(type='loop', subtype=p[0], var=p.NAME, params=p.args, script=p.function_script)
 
 
     
