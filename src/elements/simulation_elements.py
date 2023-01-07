@@ -86,12 +86,11 @@ class Category(Element):
 
 
 class Event(Element):
-    def __init__(self, name: str, dist: Distribution, category: Category, execution, code=None, enabled: bool= True, type: str= None, decisions: list=[], params: list=[]):
+    def __init__(self, name: str, dist: Distribution, category: Category, execution, code=None, enabled: bool= True, decisions: list=[], params: list=[]):
         super().__init__(name)
         self.category= category
         self.distribution= dist
         self.enabled= enabled
-        self.type= type
         self.execution= execution
         self.code= code
         self.decisions= decisions
@@ -113,9 +112,6 @@ class Event(Element):
         '''
         Execute the event
         '''
-        if self.type == 'unique':
-            self.enabled= False
-
         if self.code:
             
             if not self.params:

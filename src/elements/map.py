@@ -305,11 +305,11 @@ class Map:
         name= self.element_name(name)
         self.alredy_exist(name)
         
-        event= Event(name=name, dist=None, category=None, enabled=False, type='static', execution=execution, code=code, decisions=None, params= params)
+        event= Event(name=name, dist=None, category=None, enabled=False, execution=execution, code=code, decisions=None, params= params)
         self.eventdict[name]= event
 
     #todo: types
-    def add_simulation_event(self, name: str, dist: Distribution, cat: str, enabled: bool, tp: str, dec: list, execution, code= None):
+    def add_simulation_event(self, name: str, dist: Distribution, cat: str, enabled: bool, dec: list, execution, code= None):
         '''
         Add an event to the map. If the event already exists, it will be updated
         :param event: the event
@@ -327,7 +327,7 @@ class Map:
         if not self.categorydict.get(cat):
             raise Exception(f'The category {cat} doesn\'t exist')
         
-        event= Event(name=name, dist=self.all[dist], category=self.all[cat], enabled=enabled, type=tp, execution=execution, code=code, decisions=dec, params= None)
+        event= Event(name=name, dist=self.all[dist], category=self.all[cat], enabled=enabled, execution=execution, code=code, decisions=dec, params= None)
         self.eventdict[name]= event
         
     def add_distribution(self, name: str, dist: Distribution, *args, **kwargs):

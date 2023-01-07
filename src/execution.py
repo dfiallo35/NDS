@@ -314,9 +314,6 @@ class Code:
             #Execute a event
             elif compiled.type == 'execution':
                 if self.events.get(self.to_python(compiled.name)):
-                    # if self.events[self.to_python(compiled.name)].type != 'static':
-                    #     raise Exception(f'Error: event {compiled.name} is not static')
-
                     args, kwargs= self.params_names(compiled, inside_vars, inside)
                     args= self.to_python(args)
                     kwargs= self.to_python(kwargs)
@@ -635,7 +632,7 @@ a.compile(
     
     distribution pg(expon, scale: 4)
 
-    event population_growth(pg, socialism, true, '', []){
+    event population_growth(pg, socialism, true, []){
         for(prov, map->provinces){
             show('before', prov->population)
             prov->population: irvs(expon, loc: prov->population)
