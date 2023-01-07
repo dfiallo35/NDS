@@ -26,9 +26,9 @@ def main():
     countries_area = dict()
     countries_population = dict()
     
-    country_content = get_pages(countries[6:8])
+    country_content = get_pages(countries[0:40])
 
-    for country in countries[6:8]:
+    for country in countries[0:40]:
         regions_to_process, area_to_process, population_to_process = text_processing(country, country_content[country])
 
         area, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)
@@ -154,7 +154,7 @@ def match_pop(sent, population_sents):
         span = sent[start:end]
             
         population_sents.append(span)
-        print("pop_matcher: ", span.text)
+        # print("pop_matcher: ", span.text)
 
 
 def match_area(sent, area_sents):
@@ -163,7 +163,7 @@ def match_area(sent, area_sents):
     for match_id, start, end in _area_matcher:
         span = sent[start:end]            
         area_sents.append(span)
-        print("area_matcher: ", span.text) 
+        # print("area_matcher: ", span.text) 
 
 
 def regions_extract(sent):
@@ -375,7 +375,7 @@ def match_sentence_processing(country: str,  regions_to_process: list, sents_are
                     if token.text[i] in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
                         digits = digits + token.text[i] 
                 
-                if token.head.text == "mi2" or (token.head.text == "mile"): # and sent[token.head.text] == "mile"):
+                if digits != "" and (token.head.text == "mi2" or (token.head.text == "mile")): # and sent[token.head.text] == "mile"):
                     temp = float(digits) * 2.589988
                 
                     if country_area < temp:
@@ -402,6 +402,8 @@ def match_sentence_processing(country: str,  regions_to_process: list, sents_are
                         # int_digits = int(digits)
                     
                     if token.head.text == "million":
+                        # if int_digits == 0:
+                        #     int_digits = 1
                         int_digits = int_digits * (10 ** 6)
 
                     if country_population < int_digits:
