@@ -15,9 +15,15 @@ from simulation.simulation import *
 
 #todo: params with param name
 class Code:
-    def __init__(self) -> None:
-        self.map= Map()
-        self.vars= dict()
+    def __init__(self, map: Map=None, vars: dict=None):
+        if map:
+            self.map= map
+        else:
+            self.map= Map()
+        if vars:
+            self.vars= vars
+        else:
+            self.vars= dict()
     
     @property
     def elements(self):
@@ -643,10 +649,6 @@ class Code:
 a= Code()
 a.compile(
     '''
-    for (a, 0, 10){
-        show(a);
-    }
-
     # event fib <<n: number>>{
     #     if(n == 0){
     #         return 0;
