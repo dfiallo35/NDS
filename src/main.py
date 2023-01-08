@@ -14,11 +14,6 @@ st.set_page_config(
 
 
 
-@st.cache(allow_output_mutation=True)
-def map(map: Map):
-    return map
-
-
 class CodeBlock:
     def __init__(self, key: str, code: Code):
         self.code= code
@@ -37,8 +32,9 @@ class CodeBlock:
         with self.col2:
             st.markdown('##')
             st.button('Run', key=self.key + '2', on_click=self.execute)
-            st.button('Delete', key=self.key + '3', on_click=self.delete_code_block)
-            st.button('Add', key=self.key + '4', on_click=self.add_code_block)
+            st.button('Run All', key=self.key + '3', on_click=self.run_all)
+            st.button('Delete', key=self.key + '4', on_click=self.delete_code_block)
+            st.button('Add', key=self.key + '5', on_click=self.add_code_block)
 
         st.markdown('##')
     
@@ -62,10 +58,19 @@ class CodeBlock:
                 st.text(e)
     
     def update(self):
-        for code_block in st.session_state.code_blocks:
-            if code_block.number > self.number:
-                code_block.code= copy(self.intern_code)
-    
+        for n, code_block in enumerate(st.session_state.code_blocks):
+            if code_block == self:
+                for rest in st.session_state.code_blocks[n:]:
+                    rest.code= copy(self.intern_code)
+                break
+                    
+                
+    def run_all(self):
+        for n, code_block in enumerate(st.session_state.code_blocks):
+            if code_block == self:
+                for rest in st.session_state.code_blocks[n:]:
+                    rest.execute()
+                break
 
     def add_code_block(self):
         cb= []
