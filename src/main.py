@@ -1,4 +1,3 @@
-#todo: generar ejemplo de simulacion
 import pandas as pd
 import contextlib, io
 from execution import *
@@ -99,8 +98,7 @@ class CodeBlock:
                 cb.append(code_block)
         st.session_state.code_blocks= cb
 
-#fix: no se puede ejecutar el codigo de la primera celda
-#fix: no esta copiando code
+
 class Visualizer:
     def visualize(self):
         if 'code_blocks' not in st.session_state:
