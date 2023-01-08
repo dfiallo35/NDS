@@ -34,6 +34,8 @@ class Code:
         '''
         self.execute(compile(code), inside=0)
     
+
+
     def execute(self, compiled_list, vars: dict={}, inside: int=0):
         '''
         Execute the code
@@ -51,25 +53,21 @@ class Code:
             #ELEMENTS
             #todo: verification of args
             if compiled.type == 'element':
+                self.map.alredy_exist(self.to_python(compiled.name))
+
                 if compiled.subtype == 'map':
                     raise Exception('Error: map can not be created')
-                
-                if compiled.subtype == 'event':
-                    
-                    if compiled.name not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
-                        
-                        if compiled.get('args'):
-                            self.map.add_event(self.to_python(compiled.name), execution=self.execute, code=compiled.script, params=self.extra_params(compiled.args))
-                        
-                        else:
-                            args, kwargs= self.params_names(compiled, inside_vars, inside)
-                            args= self.to_python([compiled.name, *args])
-                            kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'code': compiled.script}})
-                            self.map.add_simulation_event(*self.to_python(args), **self.to_python(kwargs))
-                        
+
+                elif compiled.subtype == 'event':
+                    if compiled.get('args'):
+                        self.map.add_event(self.to_python(compiled.name), execution=self.execute, code=compiled.script, params=self.extra_params(compiled.args))
                     else:
-                        raise Exception(f'Error: {compiled.name} is already used')
+                        args, kwargs= self.params_names(compiled, inside_vars, inside)
+                        args= self.to_python([compiled.name, *args])
+                        kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'code': compiled.script}})
+                        self.map.add_simulation_event(*self.to_python(args), **self.to_python(kwargs))
                 
+
                 elif compiled.subtype == 'decision':
                     if compiled.name not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
                         args, kwargs= self.params_names(compiled, inside_vars, inside)
@@ -79,7 +77,8 @@ class Code:
                     else:
                         raise Exception(f'Error: {compiled.name} is already used')
 
-                elif compiled.name not in self.vars and self.to_python(compiled.name) not in self.events:
+
+                else:
                     element= self.to_python(compiled.subtype)
                     args, kwargs= self.params_names(compiled, inside_vars, inside)
                     args= self.to_python([compiled.name, *args])
@@ -93,14 +92,10 @@ class Code:
                         'category': self.map.add_category,
                         'distribution': self.map.add_distribution,
                     }
-
                     if element in elements:
                         elements[element](*args, **kwargs)
                     else:
                         raise Exception('The element is not recognized')
-
-                else:
-                    raise Exception(f'Error: {compiled.name} is already used')
             
 
             #VARS
@@ -109,23 +104,26 @@ class Code:
                 if compiled.subtype == 'element':
                     if compiled.get('op'):
                         if compiled.op == '++':
-                            self.map.update(element=self.to_python(self.value(compiled.name, inside_vars, inside)), data={'add':{self.to_python(compiled.var): self.to_python(self.value(compiled.value, inside_vars, inside))}})
+                            self.map.update(element=self.to_python(self.value(compiled.name, inside_vars, inside)),
+                                        data={'add':{self.to_python(compiled.var): self.to_python(self.value(compiled.value, inside_vars, inside))}})
+                        
                         elif compiled.op == '--':
-                            self.map.update(element=self.to_python(self.value(compiled.name, inside_vars, inside)), data={'delete':{self.to_python(compiled.var): self.to_python(self.value(compiled.value, inside_vars, inside))}})
+                            self.map.update(element=self.to_python(self.value(compiled.name, inside_vars, inside)),
+                                        data={'delete':{self.to_python(compiled.var): self.to_python(self.value(compiled.value, inside_vars, inside))}})
+                    
                     else:    
-                        self.map.update(element=self.to_python(self.value(compiled.name, inside_vars, inside)), data={'update':{self.to_python(compiled.var): self.to_python(self.value(compiled.value, inside_vars, inside))}})
+                        self.map.update(element=self.to_python(self.value(compiled.name, inside_vars, inside)),
+                                    data={'update':{self.to_python(compiled.var): self.to_python(self.value(compiled.value, inside_vars, inside))}})
                 
                 elif compiled.subtype == 'expr':
-                    if self.to_python(compiled.name) not in self.elements and self.to_python(compiled.name) not in self.events:
-                        if inside:
-                            if self.vars.get(compiled.name):
-                                self.vars[compiled.name]= self.value(compiled.value, inside_vars, inside)
-                            else:
-                                inside_vars[compiled.name]= self.value(compiled.value, inside_vars, inside)
-                        else:
+                    self.map.alredy_exist(self.to_python(compiled.name))
+                    if inside:
+                        if self.vars.get(compiled.name):
                             self.vars[compiled.name]= self.value(compiled.value, inside_vars, inside)
+                        else:
+                            inside_vars[compiled.name]= self.value(compiled.value, inside_vars, inside)
                     else:
-                        raise Exception(f'Error: {compiled.name} is already used')
+                        self.vars[compiled.name]= self.value(compiled.value, inside_vars, inside)
                 
                 else:
                     raise Exception('Error: the var type is not recognized')                
@@ -134,13 +132,12 @@ class Code:
             #FUNCTIONS
             #Execute a function
             elif compiled.type == 'func':
-                #todo: add functions
 
-                #todo: show for class is str
                 if compiled.subtype == 'show':
                     params= self.params(compiled, inside_vars, inside)
                     print('>>', *params)
                 
+
                 elif compiled.subtype == 'enable':
                     params= self.params(compiled, inside_vars, inside)
                     if len(params) > 1 or len(params) == 0:
@@ -165,6 +162,7 @@ class Code:
                     if type(params[0]) == Event:
                         self.map.disable(params[0].value)
                 
+
                 elif compiled.subtype == 'type':
                     params= self.params(compiled, inside_vars, inside)
                     if len(params) == 1:
@@ -173,6 +171,7 @@ class Code:
                     else:
                         raise Exception('Error: type() only accepts one parameter')
                 
+
                 elif compiled.subtype == 'pos':
                     params= self.params(compiled, inside_vars, inside)
                     if len(params) == 2:
@@ -186,6 +185,7 @@ class Code:
                     else:
                         raise Exception('Error: pos() only accepts two parameters')
 
+
                 elif compiled.subtype == 'size':
                     params= self.params(compiled, inside_vars, inside)
                     if len(params) == 1:
@@ -196,6 +196,7 @@ class Code:
                     else:
                         raise Exception('Error: size() only accepts one parameter')
                 
+
                 elif compiled.subtype == 'rvs':
                     args, kwargs= self.params_names(compiled, inside_vars, inside)
                     args= self.to_python(args)
@@ -215,7 +216,6 @@ class Code:
                         return self.to_object(Distribution.irvs(*args, **kwargs))
                 
                 
-                #return the list of params of a function
                 elif compiled.subtype == 'params':
                     params= self.params(compiled, inside_vars, inside)
                     if len(params) == 1:
@@ -265,29 +265,38 @@ class Code:
                         if self.to_python(val) != None:
                             return val
                 
-                elif compiled.subtype == 'for':
-                    if len(compiled.params) > 2 or len(compiled.params) < 1:
-                        raise Exception('Error: for() only accepts two or one parameters')
-                    
-                    params= self.params(compiled, inside_vars, inside)
-                    if len(params) == 2:
-                        if type(self.value(params[0], inside_vars, inside)) != integer or type(self.value(params[1], inside_vars, inside)) != integer:
+                elif compiled.subtype == 'for':           
+                    if compiled.get('init') and compiled.get('end'):
+                        init= self.value(compiled.init, inside_vars, inside)
+                        end= self.value(compiled.end, inside_vars, inside)
+                        
+                        if type(init) != integer or type(end) != integer:
                             raise Exception('Error: for() only accepts integers as parameters')
 
-                        for i in range(self.to_python(self.value(params[0], inside_vars, inside)), self.to_python(self.value(params[1], inside_vars, inside)) + 1):
-                            val= self.execute(compiled.script, vars= {compiled.var: i, **inside_vars}, inside=inside+1)
+                        for i in range(self.to_python(init), self.to_python(end) + 1):
+                            val= self.execute(compiled.script,
+                                            vars= {compiled.var: i, **inside_vars},
+                                            inside=inside+1)
                             if self.to_python(val) != None:
                                 return val
+                    
                     else:
-                        if type(self.value(params[0], inside_vars, inside)) != array:
+                        param= self.value(compiled.param)
+                        if type(param) != array:
                             raise Exception('Error: for() only accepts lists as parameter')
 
-                        for i in self.to_python(self.value(params[0], inside_vars, inside)):
-                            val= self.execute(compiled.script, vars= {compiled.var: i, **inside_vars}, inside=inside+1)
+                        for i in self.to_python(param):
+                            val= self.execute(compiled.script,
+                                            vars= {compiled.var: i, **inside_vars},
+                                            inside=inside+1)
                             if self.to_python(val) != None:
                                 return val
-                
-                elif compiled.subtype == 'if':
+                else:
+                    raise Exception('Error: unknown loop')
+            
+            
+            elif compiled.type == 'conditional':
+                if compiled.subtype == 'if':
                     if self.to_python(self.value(compiled.condition, inside_vars, inside)):
                         val= self.execute(compiled.script, vars= inside_vars, inside=inside+1)
                         if self.to_python(val) != None:
@@ -302,7 +311,7 @@ class Code:
                             return val
                 
                 else:
-                    raise Exception('Error: unknown loop type')
+                    raise Exception('Error: unknown conditional')
                 
             
 
@@ -512,7 +521,6 @@ class Code:
 
         else:
             raise Exception('The object is not recognized')
-    
 
 
     def to_python(self, obj: Element):
@@ -635,65 +643,66 @@ class Code:
 a= Code()
 a.compile(
     '''
-    show(params(event))
-    show(1 == 4)
-
-    category socialism()
-    category capitalism()
-
-    province Havana(100, 10, 10345)    
-    province Mayabeque(236, 10, 204)
-    province New_York(2056, 20, 103856)
-    province California(341, 30, 402175)
-
-    nation Cuba([Havana, Mayabeque], [socialism])
-    nation USA([New_York, California], [capitalism])
-    
-    distribution pg(expon, scale: 4)
-
-    event population_growth(pg, socialism, true, []){
-        for(prov, map->provinces){
-            prov->population: irvs(expon, loc: prov->population)
-        }
+    for (a, 0, 10){
+        show(a);
     }
 
-    event population_mortality(pg, socialism, true, []){
-        for(prov, map->provinces){
-            prov->population: prov->population - irvs(expon, loc: 0)
-        }
-    }
-
-    # simulate(100d)
-
-    # nation Cuba([Mayabeque], [crazy])
-    # Cuba->provinces: ++Havana
-    # Cuba->provinces: --Mayabeque
-    # show(Cuba->provinces)
-
-    
-
-    # category socialism()
-
-    event fib <<n: number>>{
-        if(n == 0){
-            return 0
-        }
-        if(n ==1){
-            return 1
-        }
-        else{
-            return fib(n-1) + fib(n-2)
-        }
-    }
-    show(fib(10))
-
-    # decision a(n==1, fib)<< n >>
-
-    # event a (dist: expon, socialism, true, 'y', [])(n: number){
-    #     show(n)
+    # event fib <<n: number>>{
+    #     if(n == 0){
+    #         return 0;
+    #     }
+    #     if(n == 1){
+    #         return 1;
+    #     }
+    #     else{
+    #         return fib(n-1) + fib(n-2);
+    #     }
     # }
-    # b= a(10)
-    # c= 2+b
+    # show(fib(10));
+
+
+    # show(params(event));
+    # show(1 == 4);
+
+    # category socialism();
+    # category capitalism();
+
+    # province Havana(100, 10, 10345);
+    # province Mayabeque(236, 10, 204);
+    # province New_York(2056, 20, 103856);
+    # province California(341, 30, 402175);
+
+    # nation Cuba([Havana, Mayabeque], [socialism]);
+    # nation USA([New_York, California], [capitalism]);
+    
+    # distribution pg(expon, scale: 4);
+
+    # show(pos(Cuba->provinces, 0)->extension);
+    # pos(Cuba->provinces, 0) -> extension: 200;
+    # show(pos(Cuba->provinces, 0)->extension);
+
+    # event population_growth(pg, socialism, true, []){
+    #     for(prov, map->provinces){
+    #         prov->population: irvs(expon, loc: prov->population);
+    #     }
+    # }
+
+    # event population_mortality(pg, socialism, true, []){
+    #     for(prov, map->provinces){
+    #         prov->population: prov->population - irvs(expon, loc: 0);
+    #     }
+    # }
+
+    # simulate(100d);
+
+    # nation Cuba([Mayabeque], [crazy]);
+    # Cuba->provinces: ++Havana;
+    # Cuba->provinces: --Mayabeque;
+    # show(Cuba->provinces);
+
+    
+
+    # decision a(n==1, fib)<< n >>;
 
     '''
 )

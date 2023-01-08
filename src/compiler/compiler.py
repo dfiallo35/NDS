@@ -4,16 +4,21 @@ from sly import Lexer, Parser
 #todo: add, sub, mul, div to arrays
 class NDSLexer(Lexer):
     tokens = {
-            'END',
-            'ELEMENT', 'EVENT', 'DECISION',
-            'IPLUS', 'IMINUS', 'IMULTIPLY', 'IDIVIDE', 'IPOW', 'IMOD', 'IFLOORDIV',
-            'FUNC', 'RETURN',
+            'ELEMENT', 'EVENT', 'DECISION', 'FUNC', 'RETURN',
+
             'NAME','NUMBER', 'STRING', 'BOOL', 'TIME', 'TYPE',
-            'ASSIGN', 'ARROW', 'PARAMASSIGN', 'LF', 'RF',
+
+            'IPLUS', 'IMINUS', 'IMULTIPLY', 'IDIVIDE', 'IPOW', 'IMOD', 'IFLOORDIV',
+            'PLUS', 'MINUS', 'MULTIPLY', 'DIVIDE', 'POW', 'MOD', 'FLOORDIV',
+            
+            
+            'ASSIGN', 'ARROW', 'PARAMASSIGN', 'LF', 'RF', 'END',
+
             'FOR', 'WHILE', 'IF', 'ELSE',
+            
             'NOT', 'AND', 'OR', 'XOR',
             'GREATER', 'EGREATER', 'LESS', 'ELESS', 'XPLUS', 'XMINUS', 'EQUALS', 'NOTEQUALS', 
-            'PLUS', 'MINUS', 'MULTIPLY', 'DIVIDE', 'POW', 'MOD', 'FLOORDIV'
+            
     }
     
     literals = { '(', ')', '{', '}', '[', ']', ','}
@@ -208,9 +213,9 @@ class NDSParser(Parser):
     def code(self, p):
         return [p.conditional]
     
-    @_('func')
+    @_('function')
     def code(self, p):
-        return [p.func]
+        return [p.function]
     
     @_('')
     def empty(self, p):
@@ -250,7 +255,7 @@ class NDSParser(Parser):
     def element(self, p):
         return pobj(type='element', subtype=p[0], name=p.NAME, params=p.args, script=p.function_script)
 
-    @_('DECISION NAME "(" condition "," args ")" LF params RF END')
+    @_('DECISION NAME "("  "," condition "," args ")" LF params RF END')
     def element(self, p):
         return pobj(type='element', subtype=p[0], name=p.NAME, params=p.args, condition=p.condition, args=p.params)
     
@@ -276,30 +281,38 @@ class NDSParser(Parser):
     def loop(self, p):
         return pobj(type='loop', subtype=p[0], condition=p.condition, script=p.function_script)
 
-    @_('FOR "(" NAME "," args ")" "{" function_script "}"')
+    @_('FOR "(" NAME "," expr "," expr ")" "{" function_script "}"')
     def loop(self, p):
-        return pobj(type='loop', subtype=p[0], var=p.NAME, params=p.args, script=p.function_script)
+        return pobj(type='loop', subtype=p[0], var=p.NAME, init=p.expr0, end=p.expr1, script=p.function_script)
+    
+    @_('FOR "(" NAME "," expr ")" "{" function_script "}"')
+    def loop(self, p):
+        return pobj(type='loop', subtype=p[0], var=p.NAME, param=p.expr, script=p.function_script)
     
 
 
     #CONDITIONALS
     @_('IF "(" condition ")" "{" function_script "}" ELSE "{" function_script "}"')
     def conditional(self, p):
-        return pobj(type='loop', subtype='if else', condition=p.condition, script=p.function_script0, else_script=p.function_script1)
+        return pobj(type='conditional', subtype='if else', condition=p.condition, script=p.function_script0, else_script=p.function_script1)
     
     @_('IF "(" condition ")" "{" function_script "}"')
     def conditional(self, p):
-        return pobj(type='loop', subtype=p[0], condition=p.condition, script=p.function_script)
+        return pobj(type='conditional', subtype=p[0], condition=p.condition, script=p.function_script)
     
 
 
     #FUNC
-    @_('FUNC "(" args ")" END')
+    @_('func END')
+    def function(self, p):
+        return p.func
+
+    @_('FUNC "(" args ")"')
     def func(self, p):
         return pobj(type='func', subtype=p[0], params=p.args)
 
     #EXECUTION
-    @_('NAME "(" args ")" END')
+    @_('NAME "(" args ")"')
     def func(self, p):
         return pobj(type= 'execution', name=p.NAME, params=p.args)
 
@@ -472,20 +485,18 @@ def compile(code: str):
     lexer = NDSLexer()
     parser = NDSParser()
     tokens = lexer.tokenize(code)
-    # for i in tokens:
-    #     print(i)
     return parser.parse(tokens)
 
-for i in compile(
-    '''
-    a = 3;
-    b = 2;
+# for i in compile(
+#     '''
+#     a = 3;
+#     b = 2;
 
 
 
-    p=2*3;
-    '''
-):
-    print(i)
+#     p=2*3;
+#     '''
+# ):
+#     print(i)
 
 
