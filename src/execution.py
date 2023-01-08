@@ -385,7 +385,7 @@ class Code:
                                             self.to_python(obj.var),
                                             self.to_python(self.params(obj, inside_vars, inside))))
                     
-                    if obj.name == 'map':
+                    if self.value(obj.name, inside_vars, inside) == 'map':
                         return self.to_object(self.map.get_map_data(self.to_python(obj.var)))
                     
                     else:

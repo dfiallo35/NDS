@@ -251,13 +251,13 @@ class NDSParser(Parser):
         return pobj(type='var', subtype= 'expr', name=p.NAME, value=p.expr)
 
     #ELEMENTS VARS
-    @_('NAME ARROW NAME PARAMASSIGN expr')
+    @_('expr ARROW NAME PARAMASSIGN expr')
     def var(self, p):
-        return pobj(type='var', subtype='element', name=p.NAME0, var=p.NAME1, value=p.expr)
+        return pobj(type='var', subtype='element', name=p.expr0, var=p.NAME, value=p.expr1)
     
-    @_('NAME ARROW NAME PARAMASSIGN XPLUS expr', 'NAME ARROW NAME PARAMASSIGN XMINUS expr')
+    @_('expr ARROW NAME PARAMASSIGN XPLUS expr', 'NAME ARROW NAME PARAMASSIGN XMINUS expr')
     def var(self, p):
-        return pobj(type='var', subtype='element', name=p.NAME0, var=p.NAME1, value=p.expr, op=p[4])
+        return pobj(type='var', subtype='element', name=p.expr0, var=p.NAME, value=p.expr1, op=p[4])
     
 
 
@@ -390,13 +390,15 @@ class NDSParser(Parser):
         return pobj(type='uarithmetic', subtype=p[0], value=p.expr)
     
     #todo: expr to name
-    @_('NAME ARROW NAME')
+    @_('expr ARROW NAME')
     def expr(self, p):
-        return pobj(type='expr', subtype='arrow', name=p.NAME0, var=p.NAME1)
+        return pobj(type='expr', subtype='arrow', name=p.expr, var=p.NAME)
     
-    @_('NAME ARROW NAME "(" args ")"')
+    @_('expr ARROW NAME "(" args ")"')
     def expr(self, p):
-        return pobj(type='expr', subtype='arrow', name=p.NAME0, var=p.NAME1, params= p.args)
+        return pobj(type='expr', subtype='arrow', name=p.expr, var=p.NAME, params= p.args)
+
+
 
     #LIST
     @_('expr "," list_expr')
