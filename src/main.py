@@ -1,8 +1,9 @@
-#todo: generar ejemplo de simulacion
 import pandas as pd
 import contextlib, io
 from execution import *
 import time
+
+from copy import deepcopy
 
 
 import streamlit as st
@@ -17,7 +18,7 @@ st.set_page_config(
 class CodeBlock:
     def __init__(self, key: str, code: Code):
         self.code= code
-        self.intern_code= copy(self.code)
+        self.intern_code= deepcopy(self.code)
         self.key= str(key)
         
 
@@ -39,7 +40,7 @@ class CodeBlock:
         st.markdown('##')
     
     def execute(self):
-        self.intern_code= copy(self.code)
+        self.intern_code= deepcopy(self.code)
 
         try:
             f = io.StringIO()
@@ -60,8 +61,8 @@ class CodeBlock:
     def update(self):
         for n, code_block in enumerate(st.session_state.code_blocks):
             if code_block == self:
-                for rest in st.session_state.code_blocks[n:]:
-                    rest.code= copy(self.intern_code)
+                for rest in st.session_state.code_blocks[n+1:]:
+                    rest.code= deepcopy(self.intern_code)
                 break
                     
                 
@@ -77,7 +78,7 @@ class CodeBlock:
         for code_block in st.session_state.code_blocks:
             if code_block == self:
                 cb.append(code_block)
-                cb.append(CodeBlock(key=time.time(), code=copy(self.intern_code)))
+                cb.append(CodeBlock(key=time.time(), code=deepcopy(self.intern_code)))
             else:
                 cb.append(code_block)
 
@@ -96,6 +97,7 @@ class CodeBlock:
             else:
                 cb.append(code_block)
         st.session_state.code_blocks= cb
+
 
 class Visualizer:
     def visualize(self):
