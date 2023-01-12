@@ -1,0 +1,145 @@
+from sly import Lexer
+
+class NDSLexer(Lexer):
+    tokens = {
+            'ELEMENT', 'EVENT', 'DECISION', 'FUNC', 'RETURN',
+
+            'NAME','NUMBER', 'STRING', 'BOOL', 'TIME', 'TYPE',
+
+            'IPLUS', 'IMINUS', 'IMULTIPLY', 'IDIVIDE', 'IPOW', 'IMOD', 'IFLOORDIV',
+            'PLUS', 'MINUS', 'MULTIPLY', 'DIVIDE', 'POW', 'MOD', 'FLOORDIV',
+            
+            'VARASSIGN', 'ARROW', 'PARAMASSIGN', 'LF', 'RF', 'END',
+
+            'FOR', 'WHILE', 'IF', 'ELSE',
+            
+            'NOT', 'AND', 'OR', 'XOR',
+            'GREATER', 'EGREATER', 'LESS', 'ELESS', 'XPLUS', 'XMINUS', 'EQUALS', 'NOTEQUALS', 
+            
+    }
+    
+    literals = { '(', ')', '{', '}', '[', ']', ','}
+
+    def __init__(self):
+        self.nesting_level = 0
+    
+    ignore = "\t "
+    ignore_comment = r'\#.*'
+
+    newline = r'\n+'
+    def newline(self, t):
+        self.lineno += t.value.count('\n')
+    
+
+    LF= r'<<'
+    RF= r'>>'
+    
+    #OPERATORS
+    EQUALS= r'=='
+    NOTEQUALS= r'!='
+    EGREATER= r'>='
+    GREATER= r'>'
+    ELESS= r'<='
+    LESS= r'<'
+    
+
+    # Special symbols
+    VARASSIGN = r'='
+    PARAMASSIGN= r':'
+    ARROW = r'->'
+    END= r';'
+
+    #ELEMENTS VARS UPDATES
+    XPLUS= r'\+\+'
+    XMINUS= r'--'
+
+    #ARIHTMETIC
+    IPLUS = r'\+='
+    PLUS = r'\+'
+    IMINUS = r'-='
+    MINUS = r'-'
+    IPOW = r'\*\*='
+    POW = r'\*\*'
+    IMULTIPLY = r'\*='
+    MULTIPLY = r'\*'
+    IMOD = r'\%='
+    MOD= r'\%'
+    IFLOORDIV = r'//='
+    FLOORDIV = r'//'
+    IDIVIDE = r'/='
+    DIVIDE = r'/'
+    
+
+    #VARIABLES
+    NAME= r'[_]*[a-zA-Z][a-zA-Z0-9_]*'
+
+    NUMBER = r'\d+(\.\d+)?'
+
+    STRING = r'\'.*?\''
+    def STRING(self, t):
+        t.value = str(t.value).strip('\'')
+        return t
+
+    TIME = r'\d+[dmy]'
+
+    #BOOLEANS
+    NAME['true'] = 'BOOL'
+    NAME['false'] = 'BOOL'
+
+    #ELEMENTS
+    NAME['nation'] = 'ELEMENT'
+    NAME['province'] = 'ELEMENT'
+    NAME['neutral'] = 'ELEMENT'
+    NAME['sea'] = 'ELEMENT'
+    NAME['trait'] = 'ELEMENT'
+    NAME['category'] = 'ELEMENT'
+    NAME['distribution'] = 'ELEMENT'
+    
+    NAME['event'] = 'EVENT'
+    NAME['decision'] = 'DECISION'
+
+    NAME['return'] = 'RETURN'
+
+    #SPECIAL FUNCTIONS
+    NAME['show'] = 'FUNC'
+    NAME['params'] = 'FUNC'
+    NAME['size'] = 'FUNC'
+    NAME['type'] = 'FUNC'
+    NAME['pos'] = 'FUNC'
+
+    NAME['rvs'] = 'FUNC'
+    NAME['irvs'] = 'FUNC'
+
+    NAME['gen_dist'] = 'FUNC'
+
+    NAME['simulate'] = 'FUNC'
+    NAME['enable'] = 'FUNC'
+    NAME['disable'] = 'FUNC'
+
+    NAME['random'] = 'FUNC'
+    # NAME[''] = 'FUNC'
+
+    #FUNCTIONS
+    NAME['for'] = 'FOR'
+    NAME['while'] = 'WHILE'
+    NAME['if'] = 'IF'
+    NAME['else'] = 'ELSE'
+
+    #LOGIC
+    NAME['not'] = 'NOT'
+    NAME['and'] = 'AND'
+    NAME['or'] = 'OR'
+    NAME['xor'] = 'XOR'
+
+    #TYPES
+    NAME['number'] = 'TYPE'
+    NAME['integer'] = 'TYPE'
+    NAME['decimal'] = 'TYPE'
+    NAME['string'] = 'TYPE'
+    NAME['boolean'] = 'TYPE'
+    NAME['list'] = 'TYPE'
+    NAME['time'] = 'TYPE'
+    
+
+    def error(self, t):
+        raise Exception("Illegal character '%s'" % t.value[0])

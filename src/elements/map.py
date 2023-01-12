@@ -20,24 +20,22 @@ class Map:
         self.neutraldict = dict()
         self.seadict = dict()
         self.traitdict = dict()
-
         self.categorydict= dict()
         self.eventdict= dict()
         self.decisionsdict= dict()
-
         
         self.distdict= {k:Distribution(name=k, dist=v) for k,v in Distribution.distributions.items()}
         self.distributiondict= dict()
 
         self.resources= set()
 
-        # Graph of the provinces, sea and neutral neighbours
         self.province_neighbours= Graph()
 
         self.en_dis_events= {
             'enable': [],
             'disable': []
         }
+        self.log= Log(self)
     
 
     def compare(self, new):

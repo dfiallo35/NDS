@@ -116,9 +116,7 @@ class Simulate:
 
                     old_map = copy(self.map)
                     event.execute(self.map)
-
-                    #todo: log of changes
-                    old_map.compare(self.map)
+                    self.map.log.add(time, event, old_map, self.map)
                     
                     self.generate_event(event, time)
                     self.decide(self.map, event, time)

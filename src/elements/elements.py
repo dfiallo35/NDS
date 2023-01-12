@@ -29,8 +29,10 @@ class Log:
     '''
     The log of the simulation. It is used to store the data of the simulation.
     '''
-    def __init__(self) -> None:
+    def __init__(self, initial_map):
         self.log= {}
+        self.initial_map= initial_map
+        self.actual_map= initial_map
     
     def add(self, time: int, event, old_map, new_map):
         '''
@@ -40,4 +42,17 @@ class Log:
         :param old_map: the map before the event
         :param new_map: the map after the event
         '''
-        ...
+        data= old_map.compare(new_map)
+        self.actual_map= new_map
+        self.log[time]= (event, data)
+    
+    def get_day_data(self, day: int):
+        '''
+        Return the data of the day
+        :param day: the day
+        '''
+        data= {}
+        for time in self.log.keys():
+            if time == day:
+                data[time]= self.log[time]
+        return data

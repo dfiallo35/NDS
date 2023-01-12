@@ -2,28 +2,20 @@ from elements.map import Map
 from elements.compiler_objects import *
 from elements.simulation_elements import *
 
-from compiler.compiler import *
+from compiler.lexer import *
+from compiler.parser import *
+from compiler.parser_obj import *
 from simulation.simulation import *
 
 
-
-
-
-
+#todo: semantic check
 #fix: None
-#todo: generar codigo de funciones
+#check: when instance a var or a element the alredy exist
 
-#todo: params with param name
 class Code:
-    def __init__(self, map: Map=None, vars: dict=None):
-        if map:
-            self.map= map
-        else:
-            self.map= Map()
-        if vars:
-            self.vars= vars
-        else:
-            self.vars= dict()
+    def __init__(self):
+        self.map= Map()
+        self.vars= dict()
     
     @property
     def elements(self):
@@ -38,7 +30,7 @@ class Code:
         Compiles the code and then executes it
         :param code: the code to compile
         '''
-        self.execute(compile(code), inside=0)
+        self.execute(NDSParser().parse(NDSLexer().tokenize(code)), vars={}, inside=0)
     
 
 
@@ -346,7 +338,7 @@ class Code:
 
 
 
-    def value(self, obj: pobj, inside_vars: dict={}, inside: int=0):
+    def value(self, obj: ParserObj, inside_vars: dict={}, inside: int=0):
         '''
         Converts the parser object to a code object. Do arithmetics, comparisons, get vars, etc.
         :param obj: the parser object
@@ -354,7 +346,7 @@ class Code:
         :param inside: the level of inside
         :return: the code object
         '''
-        if type(obj) == pobj:
+        if type(obj) == ParserObj:
             if obj.type == 'expr':
                 if obj.subtype == 'integer':
                     return integer(obj.value)
@@ -589,13 +581,13 @@ class Code:
             raise Exception(f'Error: The object {obj} is not recognized')
 
 
-    def params(self, obj: pobj, inside_vars: dict={}, inside: int=0):
+    def params(self, obj: ParserObj, inside_vars: dict={}, inside: int=0):
         params= []
         for param in obj.params:
             params.append(self.value(param.value, inside_vars, inside))
         return params
 
-    def params_names(self, obj: pobj, inside_vars: dict={}, inside: int=0):
+    def params_names(self, obj: ParserObj, inside_vars: dict={}, inside: int=0):
         params_list= []
         params_dict= {}
         for param in obj.params:
@@ -645,71 +637,4 @@ class Code:
         '''
         return type(a) == type(b)
 
-
-a= Code()
-a.compile(
-    '''
-    # event fib <<n: number>>{
-    #     if(n == 0){
-    #         return 0;
-    #     }
-    #     if(n == 1){
-    #         return 1;
-    #     }
-    #     else{
-    #         return fib(n-1) + fib(n-2);
-    #     }
-    # }
-    # show(fib(10));
-
-
-    # show(params(event));
-    # show(1 == 4);
-
-    # category socialism();
-    # category capitalism();
-
-    # province Havana(100, 10, 10345);
-    # province Mayabeque(236, 10, 204);
-    # province New_York(2056, 20, 103856);
-    # province California(341, 30, 402175);
-
-    # nation Cuba([Havana, Mayabeque], [socialism]);
-    # nation USA([New_York, California], [capitalism]);
-    
-    # distribution pg(expon, scale: 4);
-
-    # show(pos(Cuba->provinces, 0)->extension);
-    # pos(Cuba->provinces, 0) -> extension: 200;
-    # show(pos(Cuba->provinces, 0)->extension);
-
-    # event population_growth(pg, socialism, true, []){
-    #     for(prov, map->provinces){
-    #         prov->population: irvs(expon, loc: prov->population);
-    #     }
-    # }
-
-    # event population_mortality(pg, socialism, true, []){
-    #     for(prov, map->provinces){
-    #         prov->population: prov->population - irvs(expon, loc: 0);
-    #     }
-    # }
-
-    # simulate(100d);
-
-    # nation Cuba([Mayabeque], [crazy]);
-    # Cuba->provinces: ++Havana;
-    # Cuba->provinces: --Mayabeque;
-    # show(Cuba->provinces);
-
-    
-
-    # decision a(n==1, fib)<< n >>;
-
-    '''
-)
-# print(a.map.decisions['a'].condition(1))
-# print('map', a.elements)
-# print('vars', a.vars)
-# print('events', a.events)
 
