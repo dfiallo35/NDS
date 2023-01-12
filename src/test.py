@@ -33,7 +33,7 @@ m.add_simulation_event(name="decrease_industrialization",dist=Distribution("unif
 def industrialization_increases( state,**kargs):
     new_state=deepcopy(state)
     new_state.change_data("economic_resources",-1000) 
-    new_state.change_data("industrialization",1)
+    new_state.change_data("industrialization",3)
     return new_state
 m.add_simulation_event(name="industrialization_increases",dist=Distribution("uniform","uniform"),cat= 'Economic',enabled=False,dec=[],execution=industrialization_increases)
 precond_industrialization =lambda state, **kwargs: state.get_nation_data("economic_resources")>1000
@@ -70,7 +70,7 @@ for nation in m.nationdict.values():
 
 def Simulation_test():
     print('init',[i.population for i in list(m.provincedict.values())])
-    a= Simulate(m, Pqueue(m.event_enabled_list)).simulate(100)
+    a= Simulate(m, Pqueue(m.event_enabled_list)).simulate(10)
 
     print('end', [i.population for i in list(m.provincedict.values())])
 
