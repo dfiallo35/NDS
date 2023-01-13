@@ -21,9 +21,9 @@ SLY utiliza una técnica de análisis conocida como análisis LR o análisis shi
 
 Al igual que con otros tipos de gramáticas LR, un analizador o gramática LALR es bastante eficiente para encontrar el único análisis de abajo hacia arriba correcto en un solo escaneo de izquierda a derecha sobre el flujo de entrada, porque no necesita usar el retroceso. El analizador siempre utiliza una búsqueda anticipada, representando LALR(1) una búsqueda anticipada de un token. Este parser presenta el inconveniente de que, como consecuencia de la técnica shift-reduce, no puede garantizar el análisis correcto en gramáticas ambiguas, siendo LR más poderoso en este aspecto.
 
-Las producciones se encuentran en parser.py y las acciones que se realizan para cada producción se encuentran en execution.py.
+Las producciones se encuentran en `parser.py` y las acciones que se realizan para cada producción se encuentran en `execution.py`.
 
-Todos los detalles acerca de las reglas de gramática utilizada se puede ver en parser.out, además de visualizar cada uno de los estados de la ejecución actual.
+Todos los detalles acerca de las reglas de gramática utilizada se puede ver en `parser.out`, además de visualizar cada uno de los estados de la ejecución actual.
 
 
 El flujo que sigue el compilador es, pasar por el lexer para tokenizar el script con las clase `NDSLexer` que se ecuentra en `lexer.py`, luego pasa a parsear el código con `NDSParser` en `parser.py` el cual nos devuelve el AST del código, el cual se da como una lista de `ParserObj`. Ya con el AST se para a `execution.py` donde primero se hace un chequeo sintáctico para luego ejecutar el código.
@@ -36,7 +36,7 @@ El flujo que sigue el compilador es, pasar por el lexer para tokenizar el script
 - `element`: elementos que se usarán en la simulación, y se encuentran presentes en el mapa: `nation`, `province`, `sea`, `neutral`, `trait`, `decision`, `distribution`, `category`, `event`.
 - `interger`: número entero.
 - `decimal`: número flotante.
-- `boolean`: buleano, puede ser `true` o `false`.
+- `boolean`: booleano, puede ser `true` o `false`.
 - `string`: cadena de texto.
 - `list`: lista de elementos.
 - `time`: tiempo el cual puede ser en años, meses o días(y, m, d respectivamente), se usa para definir los tiempos en la simulación.
@@ -71,7 +71,7 @@ El flujo que sigue el compilador es, pasar por el lexer para tokenizar el script
 
 
 
-<h5> Ejemplos de código</h5>
+<h4> Ejemplos de código</h4>
 
 ```
 category socialism();
