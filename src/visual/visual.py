@@ -19,7 +19,8 @@ class CodeBlock:
         
 
     def run(self):
-        self.col1, self.col2= st.columns([10,1])
+        
+        self.col1, self.col2, self.col3= st.columns([12, 1, 1])
         
         with self.col1:
             self.script= st.text_area(f'code', key=self.key + '1',
@@ -35,8 +36,15 @@ class CodeBlock:
             st.markdown('##')
             st.button('Run', key=self.key + '2', on_click=self.execute)
             st.button('Run All', key=self.key + '3', on_click=self.run_all)
-            st.button('Delete', key=self.key + '4', on_click=self.delete_code_block)
+        
+        with self.col3:
+            st.markdown('##')
             st.button('Add', key=self.key + '5', on_click=self.add_code_block)
+            st.button('Delete', key=self.key + '4', on_click=self.delete_code_block)
+        
+        # with self.col2 and self.col3:
+        
+        #     st.file_uploader('Upload file', key=self.key + '6', )
 
         st.markdown('##')
     
@@ -85,7 +93,8 @@ class CodeBlock:
 
         st.session_state.code_blocks= cb
     
-    
+    # def open_file(self):
+
 
     def delete_code_block(self):
         if len(st.session_state.code_blocks) == 1:
@@ -106,7 +115,7 @@ class Visualizer:
         st.set_page_config(
             page_title="NDS",
             layout="wide",
-            initial_sidebar_state="expanded",
+            initial_sidebar_state="collapsed",
         )
 
         with open('visual\\style.css') as f:
