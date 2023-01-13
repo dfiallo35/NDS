@@ -24,7 +24,7 @@ Al igual que con otros tipos de analizadores LR, un analizador LALR es bastante 
 
 El analizador LALR(1) es menos poderoso que el analizador LR(1) y más poderoso que el analizador SLR(1), aunque todos usan las mismas reglas de producción. La simplificación que introduce el analizador LALR consiste en fusionar reglas que tienen conjuntos de elementos del núcleo idénticos, porque durante el proceso de construcción del estado LR(0) no se conocen las búsquedas anticipadas. Esto reduce el poder del analizador porque no conocer los símbolos de anticipación puede confundir al analizador en cuanto a qué regla gramatical elegir a continuación, lo que genera conflictos de reducción/reducción. Todos los conflictos que surgen al aplicar un analizador LALR(1) a una gramática LR(1) inequívoca son conflictos de reducción/reducción. El analizador SLR(1) realiza más fusiones, lo que introduce conflictos adicionales.
 
-La gramática utilizada se puede ver en parser.out.
+Todos los detalles acerca de la gramática utilizada se puede ver en parser.out, además de 
 
 <h4> Generación de código</h4>
 
