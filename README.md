@@ -8,25 +8,22 @@ Se podrán recopilar datos sobre los cambios territoriales, el desarrollo, la po
 
 <h2> DSL </h2>
 
-Para facilitar la creación de Eventos, Mapas y otros elementos fundamentales de la simulación se implementó un Lenguaje de Dominio Específico que además de permitir la creación de forma sencilla de una simulación desde cero, creando cada uno de sus objetos y procesos, tiene la característica de que es Turing-Completo, por lo que cualquier programa es implementable con código del DSL.
+Para facilitar la creación de escenarios para la simulación se implementó un Lenguaje de Dominio Específico que además de permitir la creación de forma sencilla de una simulación desde cero, creando cada uno de sus objetos y procesos, tiene la característica de que es Turing-Completo, por lo que cualquier programa es implementable con código del DSL.
 
-<h4> Arquitectura del compilador </h4>
-
-
+<h4> Arquitectura del compilador y gramática</h4>
 
 
-<h4> Parser y Gramática</h4>
+Para la lexemización, tokenización y parser se utilizaron los tokens definidos en lexer.py y la biblioteca de python SLY. Esta es una biblioteca para escribir analizadores y compiladores. Se basa libremente en las herramientas tradicionales de construcción de compiladores lex(tokenizar) y yacc (yet another compiler-compiler).
 
-Para la obtención del AST se utilizó el parser LALR(1) implementado en la biblioteca de python SLY.  Esta es una biblioteca para escribir analizadores y compiladores. Se basa libremente en las herramientas tradicionales de construcción de compiladores lex y yacc (yet another compiler-compiler) e implementa el mismo algoritmo de análisis sintáctico LALR(1).
-Un analizador LALR (Look-Ahead LR)  es una versión simplificada de un analizador LR canónico, para analizar un texto de acuerdo con un conjunto de reglas de producción especificadas por una gramática formal para un lenguaje.
+Para la obtención del AST se utilizó el algoritmo de análisis sintáctico (parser) LALR(1) implementado en SLY. Un analizador LALR (Look-Ahead LR)  es una versión simplificada de un analizador LR canónico, para analizar un texto de acuerdo con un conjunto de reglas de producción especificadas por una gramática formal para un lenguaje.
 
-Al igual que con otros tipos de analizadores LR, un analizador LALR es bastante eficiente para encontrar el único análisis de abajo hacia arriba correcto en un solo escaneo de izquierda a derecha sobre el flujo de entrada, porque no necesita usar el retroceso. Al ser un analizador de búsqueda anticipada por definición, siempre utiliza una búsqueda anticipada, siendo LALR(1) el caso más común, lo que representa una búsqueda anticipada de un token.
+SLY utiliza una técnica de análisis conocida como análisis LR o análisis shift-reduce. El análisis LR es una técnica de abajo hacia arriba que intenta reconocer el lado derecho de varias reglas gramaticales. Cada vez que se encuentra un lado derecho válido en la entrada, se activa el método de acción apropiado y los símbolos gramaticales del lado derecho se reemplazan por el símbolo gramatical del lado izquierdo.
 
-El analizador LALR(1) es menos poderoso que el analizador LR(1) y más poderoso que el analizador SLR(1), aunque todos usan las mismas reglas de producción. La simplificación que introduce el analizador LALR consiste en fusionar reglas que tienen conjuntos de elementos del núcleo idénticos, porque durante el proceso de construcción del estado LR(0) no se conocen las búsquedas anticipadas. Esto reduce el poder del analizador porque no conocer los símbolos de anticipación puede confundir al analizador en cuanto a qué regla gramatical elegir a continuación, lo que genera conflictos de reducción/reducción. Todos los conflictos que surgen al aplicar un analizador LALR(1) a una gramática LR(1) inequívoca son conflictos de reducción/reducción. El analizador SLR(1) realiza más fusiones, lo que introduce conflictos adicionales.
+Al igual que con otros tipos de gramáticas LR, un analizador o gramática LALR es bastante eficiente para encontrar el único análisis de abajo hacia arriba correcto en un solo escaneo de izquierda a derecha sobre el flujo de entrada, porque no necesita usar el retroceso. El analizador siempre utiliza una búsqueda anticipada, representando LALR(1) una búsqueda anticipada de un token. Este parser presenta el inconveniente de que, como consecuencia de la técnica shift-reduce, no puede garantizar el análisis correcto en gramáticas ambiguas, siendo LR más poderoso en este aspecto.
 
-Todos los detalles acerca de la gramática utilizada se puede ver en parser.out, además de 
+Las producciones se encuentran en parser.py y las acciones que se realizan para cada producción se encuentran en execution.py.
 
-<h4> Generación de código</h4>
+Todos los detalles acerca de las reglas de gramática utilizada se puede ver en parser.out, además de visualizar cada uno de los estados de la ejecución actual.
 
 
 <h4> Diseño del Lenguaje</h4>
