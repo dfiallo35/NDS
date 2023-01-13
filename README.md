@@ -33,7 +33,7 @@ Todos los detalles acerca de las reglas de gramática utilizada se puede ver en 
 - `element`: elementos que se usarán en la simulación, y se encuentran presentes en el mapa: `nation`, `province`, `sea`, `neutral`, `trait`, `decision`, `distribution`, `category`, `event`.
 - `interger`: número entero.
 - `decimal`: número flotante.
-- `boolean`: buleano, puede ser `true` o `false`.
+- `boolean`: booleano, puede ser `true` o `false`.
 - `string`: cadena de texto.
 - `list`: lista de elementos.
 - `time`: tiempo el cual puede ser en años, meses o días(y, m, d respectivamente), se usa para definir los tiempos en la simulación.
@@ -68,7 +68,7 @@ Todos los detalles acerca de las reglas de gramática utilizada se puede ver en 
 
 
 
-<h5> Ejemplos de código</h5>
+<h4> Ejemplos de código</h4>
 
 ```
 category socialism();
