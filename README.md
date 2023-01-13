@@ -31,8 +31,80 @@ Todos los detalles acerca de la gramática utilizada se puede ver en parser.out,
 
 <h4> Diseño del Lenguaje</h4>
 
+<h5> Tipos </h5>
+
+- `element`: elementos que se usarán en la simulación, y se encuentran presentes en el mapa: `nation`, `province`, `sea`, `neutral`, `trait`, `decision`, `distribution`, `category`, `event`.
+- `interger`: número entero.
+- `decimal`: número flotante.
+- `boolean`: buleano, puede ser `true` o `false`.
+- `string`: cadena de texto.
+- `list`: lista de elementos.
+- `time`: tiempo el cual puede ser en años, meses o días(y, m, d respectivamente), se usa para definir los tiempos en la simulación.
+
+
+<h5> Sintaxis </h5>
+
+- Sintaxsis similar a Python en cuanto a las funcionalidades y dinamismo.
+- Instrucciones separadas por `;`.
+- Los bloques de código de los lops, condicionales y eventos se encierran en `{}`.
+- Para el caso de los argumentos de las funciones o eventos se usa `()`.
+- Mientras que los parametros se encierran en `<< >>`.
+- Parametros y argumentos separados por `,`.
+- Admite aritméticas como `+`, `-`, `/`, `//`, `*`, `**`, `%`.
+- Uso de operadores `==`, `!=`, `>=`, `>`, `<=`, `<`.
+- Uso de operadores lógicos `not`, `and`, `or`, `xor`.
+- Para asignar las variables o hacer cambios en los valores de los `elements` se usa `=`.
+- Para acceder a los valores de los elementos se usa `->`.
+- Se puede asignar el tipo de los argumentos o el nombre de los parámetros usando  `:`.
+
+
+<h5> Loops </h5>
+
+- `repeat`: ciclo for desde unicio hasta un final, ambos indicados.
+- `foreach`: ciclo for iterando en una lista.
+- `while`: ciclo while
+
+
+<h5> CONDITIONALS </h5>
+
+- Clásicos `if` y `else`.
+
+
+
 <h5> Ejemplos de código</h5>
 
+```
+category socialism();
+category capitalism();
+
+province Havana(100, 10, 10345, []);
+province Mayabeque(236, 10, 204, []);
+province New_York(2056, 20, 103856, []);
+province California(341, 30, 402175, []);
+
+nation Cuba([Havana, Mayabeque], [socialism]);
+nation USA([New_York, California], [capitalism]);
+
+distribution pg(expon, scale: 4);
+
+show(pos(Cuba->provinces, 0)->extension);
+pos(Cuba->provinces, 0) -> extension= 200;
+show(pos(Cuba->provinces, 0)->extension);
+
+event population_growth(pg, socialism, true, []){
+    foreach <<prov>> (map->provinces){
+        prov->population= irvs(expon, loc: prov->population);
+    }
+}
+
+event population_mortality(pg, socialism, true, []){
+    foreach <<prov>> (map->provinces){
+        prov->population= prov->population - irvs(expon, loc: 0);
+    }
+}
+
+simulate( 100d );
+```
 
 <h4> Ejecución del programa</h4>
 
