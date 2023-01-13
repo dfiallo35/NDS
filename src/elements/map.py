@@ -465,7 +465,12 @@ class Map:
         else:
             raise Exception(f'The element {element} doesn\'t have the attribute {data}')
                 
-
+    def map_data(self, data: str):
+        properties= {name:val for (name, val) in gm(Map, lambda x: isinstance(x, property))}
+        if data in properties:
+            return properties[data].fget(self)
+        else:
+            raise Exception(f'The map doesn\'t have the attribute {data}')
 
     def nation_neighbours(self, nation: str):
         """

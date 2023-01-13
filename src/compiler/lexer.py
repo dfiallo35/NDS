@@ -79,7 +79,6 @@ class NDSLexer(Lexer):
     NAME['false'] = 'BOOL'
 
     #ELEMENTS
-    NAME['map'] = 'ELEMENT'
     NAME['nation'] = 'ELEMENT'
     NAME['province'] = 'ELEMENT'
     NAME['neutral'] = 'ELEMENT'

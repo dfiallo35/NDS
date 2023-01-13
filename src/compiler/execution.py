@@ -83,15 +83,11 @@ class Code:
         for line in code:
 
             #ELEMENTS
-            #todo: verification of args
             if line.type == 'element':
                 self.map.alredy_exist(self.to_python(line.name))
+
                 if line.name in self.vars or line.name in inside_vars:
                     raise Exception(f'The element {line.name} already exist')
-                
-                #check
-                if line.subtype == 'map':
-                    raise Exception('Error: map can not be created')
 
                 elif line.subtype == 'event':
                     if line.get('args'):
@@ -170,43 +166,31 @@ class Code:
                 if line.subtype == 'show':
                     params= self.params(line, inside_vars, inside)
                     print('>>', *params)
-                
 
 
                 elif line.subtype == 'type':
                     params= self.params(line, inside_vars, inside)
-                    if not len(params) == 1:
-                        raise Exception('Error: type() only accepts one parameter')
-
                     #check: params of value
-                    return self.to_object(type(self.value(params[0], inside_vars, inside)).__name__)
-                        
+                    return self.to_object(type(self.value(params[0], inside_vars, inside)).__name__)    
                 
 
                 elif line.subtype == 'pos':
                     params= self.params(line, inside_vars, inside)
-                    if not len(params) == 2:
-                        raise Exception('Error: pos() only accepts two parameters')
                     if not type(params[0]) == array:
                         raise Exception('Error: pos() only accepts lists as first parameter')
                     if not type(params[1]) == integer:
                         raise Exception('Error: pos() only accepts integers as second parameter')
                         
-                    return self.to_object(params[0].value[params[1].value])
-                        
+                    return self.to_object(params[0].value[params[1].value])  
 
 
                 elif line.subtype == 'size':
                     params= self.params(line, inside_vars, inside)
-                    if not len(params) == 1:
-                        raise Exception('Error: size() only accepts one parameter')
                     if not type(self.to_python(params[0])) == list:
                         raise Exception('Error: size() only accepts lists')
 
                     return self.to_object(len(params[0]))
                         
-                        
-                
 
                 elif line.subtype == 'rvs':
                     args, kwargs= self.params_names(line, inside_vars, inside)
@@ -229,8 +213,6 @@ class Code:
                 
                 elif line.subtype == 'simulate':
                     params= self.params(line, inside_vars, inside)
-                    if not len(params) == 1:
-                        raise Exception('Error: simulate() only accepts one parameter')
                     if not type(params[0]) == time:
                         raise Exception('Error: simulate() only accepts time')
                     
@@ -341,10 +323,6 @@ class Code:
                             self.map.disable(i.value)
                     if type(params[0]) == Event:
                         self.map.disable(params[0].value)
-            
-
-            # elif line.type == 'func condition':
-            #     return self.to_python(self.value(line.value, inside_vars, inside))
 
 
             else:
@@ -407,9 +385,9 @@ class Code:
                                             self.to_python(obj.var),
                                             self.to_python(self.params(obj, inside_vars, inside))))
                     
-                    if self.value(obj.name, inside_vars, inside) == 'map':
-                        return self.to_object(self.map.get_map_data(self.to_python(obj.var)))
-                    
+                    if isinstance(self.value(obj.name, inside_vars, inside), Map):
+                        return self.to_object(self.map.map_data(self.to_python(obj.var)))
+
                     else:
                         return self.to_object(self.map.get_data(self.to_python(self.value(obj.name, inside_vars, inside)),
                                             self.to_python(obj.var)))
