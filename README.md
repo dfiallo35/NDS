@@ -26,6 +26,9 @@ Las producciones se encuentran en parser.py y las acciones que se realizan para 
 Todos los detalles acerca de las reglas de gramática utilizada se puede ver en parser.out, además de visualizar cada uno de los estados de la ejecución actual.
 
 
+El flujo que sigue el compilador es, pasar por el lexer para tokenizar el script con las clase `NDSLexer` que se ecuentra en `lexer.py`, luego pasa a parsear el código con `NDSParser` en `parser.py` el cual nos devuelve el AST del código, el cual se da como una lista de `ParserObj`. Ya con el AST se para a `execution.py` donde primero se hace un chequeo sintáctico para luego ejecutar el código.
+
+
 <h4> Diseño del Lenguaje</h4>
 
 <h5> Tipos </h5>
