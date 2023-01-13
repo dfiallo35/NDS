@@ -62,7 +62,7 @@ Todos los detalles acerca de las reglas de gramática utilizada se puede ver en 
 - `while`: ciclo while
 
 
-<h5> CONDITIONALS </h5>
+<h5> Condicionales </h5>
 
 - Clásicos `if` y `else`.
 
@@ -105,8 +105,7 @@ simulate( 100d );
 
 <h4> Ejecución del programa</h4>
 
-
-
+Para ejecutar el código, primero debe instalar las dependencias de Python que se encuentran en los requirements.txt con `pip install -r requirements.txt`. Luego ejecuta `streamlit run main.py` con el terminal en la dirección de la carpeta src, en caso de estar en otra dirección debes incluir la dirección en el comando `streamlit run <dirección>main.py`, luego la interfaz visual se muestra en el navegador predeterminado.
 
 
 
