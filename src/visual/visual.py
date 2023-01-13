@@ -1,13 +1,11 @@
-import pandas as pd
+# import pandas as pd
 import contextlib, io
 from compiler.execution import *
 import time
 
 from copy import deepcopy
 
-
 import streamlit as st
-
 
 
 
@@ -111,7 +109,6 @@ class CodeBlock:
 
 class Visualizer:
     def visualize(self):
-
         st.set_page_config(
             page_title="NDS",
             layout="wide",

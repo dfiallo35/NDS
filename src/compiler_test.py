@@ -31,7 +31,7 @@ a.compile(
 
     nation Cuba([Havana, Mayabeque], [socialism]);
     nation USA([New_York, California], [capitalism]);
-    
+
     distribution pg(expon, scale: 4);
 
     show(pos(Cuba->provinces, 0)->extension);

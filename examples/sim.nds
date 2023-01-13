@@ -1,0 +1,30 @@
+category socialism();
+category capitalism();
+
+province Havana(100, 10, 10345, []);
+province Mayabeque(236, 10, 204, []);
+province New_York(2056, 20, 103856, []);
+province California(341, 30, 402175, []);
+
+nation Cuba([Havana, Mayabeque], [socialism]);
+nation USA([New_York, California], [capitalism]);
+
+distribution pg(expon, scale: 4);
+
+show(pos(Cuba->provinces, 0)->extension);
+pos(Cuba->provinces, 0) -> extension= 200;
+show(pos(Cuba->provinces, 0)->extension);
+
+event population_growth(pg, socialism, true, []){
+    foreach <<prov>> (map->provinces){
+        prov->population= irvs(expon, loc: prov->population);
+    }
+}
+
+event population_mortality(pg, socialism, true, []){
+    foreach <<prov>> (map->provinces){
+        prov->population= prov->population - irvs(expon, loc: 0);
+    }
+}
+
+simulate( 100d );

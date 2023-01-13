@@ -293,35 +293,37 @@ class Code:
                 else:
                     raise Exception(f'Error: event {line.name} does not exist')
             
+
             elif line.type == 'out':
                 if line.subtype == 'return':
                     return self.value(line.value, inside_vars, inside)
                 
-                #check: params
                 elif line.subtype == 'enable':
-                    params= self.params(line, inside_vars, inside)
-                    if len(params) > 1 or len(params) == 0:
-                        raise Exception('Error: enable() only accepts one parameter')
-                    if type(params[0]) == array:
-                        for i in params[0].value:
+                    param= self.value(line.value, inside_vars, inside)
+
+                    if type(param) == array:
+                        for i in params:
                             if type(i) != Event:
-                                raise Exception('Error: enable() only accepts events')
-                            self.map.enable(i.value)
-                    if type(params[0]) == Event:
-                        self.map.enable(params[0].value)
+                                raise Exception('Error: enable only accepts events')
+                            self.map.enable(i)
+                    elif type(param) == Event:
+                        self.map.enable(param)
+                    
+                    else:
+                        raise Exception('Error: enable only accepts events')
                 
-                #check: params
                 elif line.subtype == 'disable':
-                    params= self.params(line, inside_vars, inside)
-                    if len(params) > 1 or len(params) == 0:
-                        raise Exception('Error: disable() only accepts one parameter')
-                    if type(params[0]) == array:
-                        for i in params[0].value:
+                    param= self.value(line.value, inside_vars, inside)
+                    if type(param) == array:
+                        for i in params:
                             if type(i) != Event:
-                                raise Exception('Error: disable() only accepts events')
-                            self.map.disable(i.value)
-                    if type(params[0]) == Event:
-                        self.map.disable(params[0].value)
+                                raise Exception('Error: disable only accepts events')
+                            self.map.disable(i)
+                    elif type(param) == Event:
+                        self.map.disable(param)
+                    
+                    else:
+                        raise Exception('Error: disable only accepts events')
 
 
             else:
@@ -391,7 +393,7 @@ class Code:
                         return self.to_object(self.map.get_data(self.to_python(self.value(obj.name, inside_vars, inside)),
                                             self.to_python(obj.var)))
             
-
+            #check
             if obj.type == 'type':
                 if obj.value == 'event':
                     return Event
@@ -508,9 +510,6 @@ class Code:
 
         elif self.elements.get(obj):
             return self.elements[obj]
-        
-        elif isinstance(obj, Map):
-            return obj
 
         else:
             raise Exception('The object is not recognized')

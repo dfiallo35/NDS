@@ -98,7 +98,6 @@ class NDSLexer(Lexer):
 
     #SPECIAL FUNCTIONS
     NAME['show'] = 'FUNC'
-    NAME['params'] = 'FUNC'
     NAME['size'] = 'FUNC'
     NAME['type'] = 'FUNC'
     NAME['pos'] = 'FUNC'
@@ -106,16 +105,19 @@ class NDSLexer(Lexer):
     NAME['rvs'] = 'FUNC'
     NAME['irvs'] = 'FUNC'
 
+    #check
     NAME['gen_dist'] = 'FUNC'
     NAME['simulate'] = 'FUNC'
 
     NAME['random'] = 'FUNC'
     # NAME[''] = 'FUNC'
 
-    #FUNCTIONS
+    #LOOPS
     NAME['foreach'] = 'FOREACH'
     NAME['repeat'] = 'REPEAT'
     NAME['while'] = 'WHILE'
+
+    
     NAME['if'] = 'IF'
     NAME['else'] = 'ELSE'
 

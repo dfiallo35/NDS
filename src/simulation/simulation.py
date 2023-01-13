@@ -134,12 +134,14 @@ class Simulate:
             self.event_queue.push((self.new_time(event, time), event))
             self.en_dis['enable'].remove(event.name)
         
-        elif event.is_enabled:
-            self.event_queue.push((self.new_time(event, time), event))
-        
         elif event.name in self.en_dis['disable']:
             self.map.eventdict[event.name].enabled = False
             self.en_dis['disable'].remove(event.name)
+        
+        elif event.is_enabled:
+            self.event_queue.push((self.new_time(event, time), event))
+        
+        
     
     def new_time(self, event, time):
         nt= time + event.next()
