@@ -12,8 +12,7 @@ Para facilitar la creación de escenarios para la simulación se implementó un 
 
 <h4> Arquitectura del compilador y gramática</h4>
 
-
-Para la lexemización, tokenización y parser se utilizaron los tokens definidos en lexer.py y la biblioteca de python SLY. Esta es una biblioteca para escribir analizadores y compiladores. Se basa libremente en las herramientas tradicionales de construcción de compiladores lex(tokenizar) y yacc (yet another compiler-compiler).
+Para la lexemización, tokenización y parser se utilizaron los tokens definidos en `lexer.py` y la biblioteca de python `SLY`. Esta es una biblioteca para escribir analizadores y compiladores. Se basa libremente en las herramientas tradicionales de construcción de compiladores lex(tokenizar) y yacc (yet another compiler-compiler).
 
 Para la obtención del AST se utilizó el algoritmo de análisis sintáctico (parser) LALR(1) implementado en SLY. Un analizador LALR (Look-Ahead LR)  es una versión simplificada de un analizador LR canónico, para analizar un texto de acuerdo con un conjunto de reglas de producción especificadas por una gramática formal para un lenguaje.
 
@@ -21,13 +20,9 @@ SLY utiliza una técnica de análisis conocida como análisis LR o análisis shi
 
 Al igual que con otros tipos de gramáticas LR, un analizador o gramática LALR es bastante eficiente para encontrar el único análisis de abajo hacia arriba correcto en un solo escaneo de izquierda a derecha sobre el flujo de entrada, porque no necesita usar el retroceso. El analizador siempre utiliza una búsqueda anticipada, representando LALR(1) una búsqueda anticipada de un token. Este parser presenta el inconveniente de que, como consecuencia de la técnica shift-reduce, no puede garantizar el análisis correcto en gramáticas ambiguas, siendo LR más poderoso en este aspecto.
 
-Las producciones se encuentran en `parser.py` y las acciones que se realizan para cada producción se encuentran en `execution.py`.
+El flujo que sigue el compilador es: pasar por el lexer para tokenizar el script con las clase `NDSLexer` que se ecuentra en `lexer.py`, luego pasa a parsear el código con `NDSParser` en `parser.py` el cual nos devuelve el AST del código, el cual se da como una lista de `ParserObj`. Ya con el AST se para a `execution.py` donde primero se hace un chequeo semántico donde en caso de errores lanza excepción para luego pasar a la ejecución de cada fragmento del código que se genera a partir del AST.
 
 Todos los detalles acerca de las reglas de gramática utilizada se puede ver en `parser.out`, además de visualizar cada uno de los estados de la ejecución actual.
-
-
-El flujo que sigue el compilador es, pasar por el lexer para tokenizar el script con las clase `NDSLexer` que se ecuentra en `lexer.py`, luego pasa a parsear el código con `NDSParser` en `parser.py` el cual nos devuelve el AST del código, el cual se da como una lista de `ParserObj`. Ya con el AST se para a `execution.py` donde primero se hace un chequeo sintáctico para luego ejecutar el código.
-
 
 <h4> Diseño del Lenguaje</h4>
 
@@ -106,7 +101,7 @@ event population_mortality(pg, socialism, true, []){
 simulate( 100d );
 ```
 
-<h4> Ejecución del programa</h4>
+<h2> Ejecución del programa</h2>
 
 Para ejecutar el código, primero debe instalar las dependencias de Python que se encuentran en los requirements.txt con `pip install -r requirements.txt`. Luego ejecuta `streamlit run main.py` con el terminal en la dirección de la carpeta src, en caso de estar en otra dirección debes incluir la dirección en el comando `streamlit run <dirección>main.py`, luego la interfaz visual se muestra en el navegador predeterminado.
 
