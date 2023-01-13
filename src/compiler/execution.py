@@ -215,7 +215,6 @@ class Code:
                     params= self.params(line, inside_vars, inside)
                     if not type(params[0]) == time:
                         raise Exception('Error: simulate() only accepts time')
-                    
                     sim= Simulate(self.map, Pqueue(self.map.event_list))
                     sim.simulate(self.to_python(params[0]))
                         

@@ -47,14 +47,6 @@ class object:
     
     def __invert__(self):
         return boolean(not self.val)
-    
-
-class null(object):
-    def __init__(self):
-        super().__init__(None)
-    
-    def __str__(self):
-        return 'null'
 
 
 class number(object):

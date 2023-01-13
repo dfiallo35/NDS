@@ -63,6 +63,8 @@ class NDSLexer(Lexer):
     
 
     #VARIABLES
+    TIME = r'\d+[dmy]'
+    
     NAME= r'[_]*[a-zA-Z][a-zA-Z0-9_]*'
 
     NUMBER = r'\d+(\.\d+)?'
@@ -72,7 +74,7 @@ class NDSLexer(Lexer):
         t.value = str(t.value).strip('\'')
         return t
 
-    TIME = r'\d+[dmy]'
+    
 
     #BOOLEANS
     NAME['true'] = 'BOOL'
