@@ -1,8 +1,3 @@
-
-from pathlib import Path
-import sys
-sys.path.append(str(Path(__file__).resolve().parents[1]))
-
 from elements.elements import Element
 from elements.map import *
 from ia.planning_reacts import reaction_for_an_event
@@ -82,15 +77,6 @@ class Pqueue:
 
 
 
-
-#todo: events add events to the queue(param enent_queue in execute or return events in list)
-
-#todo: add decisions to simulation
-#todo: time in Time not int
-
-#todo: decide without event
-
-#check: add and disable events
 class Simulate:
     def __init__(self, map: Map, initial_events: Pqueue):
         self.event_queue = initial_events

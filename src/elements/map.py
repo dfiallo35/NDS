@@ -7,7 +7,7 @@ from networkx import Graph
 from inspect import getmembers as gm
 
 
-#todo: borrar elementos del mapa
+
 class Map:
     def __init__(self) -> None:
         self.nationdict = dict()
@@ -99,7 +99,7 @@ class Map:
     def distributions(self) -> dict:
         return self.distributiondict
     
-    #todo: change names
+
     @property
     def decisions(self) -> dict:
         return self.decisionsdict
@@ -289,7 +289,7 @@ class Map:
             self.categorydict[category]= Category(category)
             self.categorydict[category].add_decision(decision)
     
-    #todo: controle types
+    
     def add_event(self, name: str, execution, code= None, params: list=[]):
         '''
         Add an event to the map. If the event already exists, it will be updated
@@ -301,7 +301,7 @@ class Map:
         event= Event(name=name, dist=None, category=None, enabled=False, execution=execution, code=code, decisions=None, params= params)
         self.eventdict[name]= event
 
-    #todo: types
+    
     def add_simulation_event(self, name: str, dist: Distribution, cat: str, enabled: bool, dec: list, execution, code= None):
         '''
         Add an event to the map. If the event already exists, it will be updated

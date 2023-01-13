@@ -102,7 +102,7 @@ class NDSParser(Parser):
     def element(self, p):
         return ParserObj(type='element', subtype=p[0], name=p.NAME, params=p.args, script=p.function_script)
 
-    #check
+    
     @_('DECISION NAME "(" expr "," args ")" LF params RF END')
     def element(self, p):
         return ParserObj(type='element', subtype=p[0], name=p.NAME, params=p.args, condition=p.expr, args=p.params)

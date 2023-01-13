@@ -20,7 +20,7 @@ class Nation(MapElement):
         self.contains = provinces
         self.traitsvar = traits
 
-    #todo: set for all provinces
+
     def extension_get(self) -> float:
         extension = 0
         for prov in self.contains.values():
@@ -68,7 +68,7 @@ class Nation(MapElement):
     
     provinces= property(provinces_get, provinces_set, provinces_del)
 
-    #todo: traits dict
+    
     def traits_get(self):
         return self.traitsvar
     

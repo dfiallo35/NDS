@@ -44,7 +44,7 @@ class Code:
                     'trait': 0,
                     'category': 0,
                     'event': 4,
-                    'decision': 2,
+                    # 'decision': 2,
                 }
                 elements_min= {
                     'distribution': 1,
@@ -170,7 +170,6 @@ class Code:
 
                 elif line.subtype == 'type':
                     params= self.params(line, inside_vars, inside)
-                    #check: params of value
                     return self.to_object(type(self.value(params[0], inside_vars, inside)).__name__)    
                 
 
@@ -393,7 +392,6 @@ class Code:
                         return self.to_object(self.map.get_data(self.to_python(self.value(obj.name, inside_vars, inside)),
                                             self.to_python(obj.var)))
             
-            #check
             if obj.type == 'type':
                 if obj.value == 'event':
                     return Event

@@ -1,13 +1,4 @@
-
-
-#todo: definir bien el uso de las distribuciones.
-from pathlib import Path
-import sys
-sys.path.append(str(Path(__file__).resolve().parents[1]))
 from elements.simulation_elements import *
-
-
-#todo: define other distributions
 
 class Exponential(Distribution):
     def __init__(self, scale:int=1):
