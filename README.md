@@ -8,7 +8,7 @@ Se podrán recopilar datos sobre los cambios territoriales, el desarrollo, la po
 
 <h2> DSL </h2>
 
-Para facilitar la creación de Eventos, Mapas y otros elementos fundamentales de la simulación se implementó un Lenguaje de Dominio Específico que además de permitir la creación de forma sencilla de una simulación desde cero, creando cada uno de sus objetos y procesos, tiene la característica de que es Turing-Completo, por lo que cualquier programa es implementable con código del DSL.
+Para facilitar la creación de escenarios para la simulación se implementó un Lenguaje de Dominio Específico que además de permitir la creación de forma sencilla de una simulación desde cero, creando cada uno de sus objetos y procesos, tiene la característica de que es Turing-Completo, por lo que cualquier programa es implementable con código del DSL.
 
 <h4> Arquitectura del compilador y gramática</h4>
 
