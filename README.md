@@ -21,9 +21,9 @@ SLY utiliza una técnica de análisis conocida como análisis LR o análisis shi
 
 Al igual que con otros tipos de gramáticas LR, un analizador o gramática LALR es bastante eficiente para encontrar el único análisis de abajo hacia arriba correcto en un solo escaneo de izquierda a derecha sobre el flujo de entrada, porque no necesita usar el retroceso. El analizador siempre utiliza una búsqueda anticipada, representando LALR(1) una búsqueda anticipada de un token. Este parser presenta el inconveniente de que, como consecuencia de la técnica shift-reduce, no puede garantizar el análisis correcto en gramáticas ambiguas, siendo LR más poderoso en este aspecto.
 
-Las producciones se encuentran en parser.py y las acciones que se realizan para cada producción se encuentran en execution.py.
+Las producciones se encuentran en `parser.py` y las acciones que se realizan para cada producción se encuentran en `execution.py`.
 
-Todos los detalles acerca de las reglas de gramática utilizada se puede ver en parser.out, además de visualizar cada uno de los estados de la ejecución actual.
+Todos los detalles acerca de las reglas de gramática utilizada se puede ver en `parser.out`, además de visualizar cada uno de los estados de la ejecución actual.
 
 
 <h4> Diseño del Lenguaje</h4>
