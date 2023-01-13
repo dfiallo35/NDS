@@ -13,8 +13,7 @@ Para facilitar la creación de Eventos, Mapas y otros elementos fundamentales de
 <h4> Arquitectura del compilador y gramática</h4>
 
 
-
-Para la lexemización, tokenización y parser se utilizó la biblioteca de python SLY. Esta es una biblioteca para escribir analizadores y compiladores. Se basa libremente en las herramientas tradicionales de construcción de compiladores lex y yacc (yet another compiler-compiler).
+Para la lexemización, tokenización y parser se utilizaron los tokens definidos en lexer.py y la biblioteca de python SLY. Esta es una biblioteca para escribir analizadores y compiladores. Se basa libremente en las herramientas tradicionales de construcción de compiladores lex(tokenizar) y yacc (yet another compiler-compiler).
 
 Para la obtención del AST se utilizó el algoritmo de análisis sintáctico (parser) LALR(1) implementado en SLY. Un analizador LALR (Look-Ahead LR)  es una versión simplificada de un analizador LR canónico, para analizar un texto de acuerdo con un conjunto de reglas de producción especificadas por una gramática formal para un lenguaje.
 
@@ -22,12 +21,9 @@ SLY utiliza una técnica de análisis conocida como análisis LR o análisis shi
 
 Al igual que con otros tipos de gramáticas LR, un analizador o gramática LALR es bastante eficiente para encontrar el único análisis de abajo hacia arriba correcto en un solo escaneo de izquierda a derecha sobre el flujo de entrada, porque no necesita usar el retroceso. El analizador siempre utiliza una búsqueda anticipada, representando LALR(1) una búsqueda anticipada de un token. Este parser presenta el inconveniente de que, como consecuencia de la técnica shift-reduce, no puede garantizar el análisis correcto en gramáticas ambiguas, siendo LR más poderoso en este aspecto.
 
-Las producciones se encuentran en parser.py y las acciones que se realizan para cada producción  se encuentran en execution.py.
+Las producciones se encuentran en parser.py y las acciones que se realizan para cada producción se encuentran en execution.py.
 
 Todos los detalles acerca de las reglas de gramática utilizada se puede ver en parser.out, además de visualizar cada uno de los estados de la ejecución actual.
-
-
-
 
 
 <h4> Diseño del Lenguaje</h4>
