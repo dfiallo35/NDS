@@ -8,9 +8,6 @@ from compiler.parser_obj import *
 from simulation.simulation import *
 
 
-#todo: semantic check
-#fix: None
-#check: when instance a var or a element the alredy exist
 
 class Code:
     def __init__(self):
@@ -30,14 +27,51 @@ class Code:
         Compiles the code and then executes it
         :param code: the code to compile
         '''
-        self.execute(NDSParser().parse(NDSLexer().tokenize(code)), vars={}, inside=0)
+        parsed_code= NDSParser().parse(NDSLexer().tokenize(code))
+        self.semantic_check(parsed_code)
+        self.execute(parsed_code, vars={}, inside=0)
+    
+
+    def semantic_check(self, code):
+        for line in code:
+            #elements
+            if line.type == 'element':
+                elements= {
+                    'nation': 2,
+                    'province': 4,
+                    'sea': 2,
+                    'neutral': 2,
+                    'trait': 0,
+                    'category': 0,
+                    'event': 4,
+                    'decision': 2,
+                }
+                elements_min= {
+                    'distribution': 1,
+                }
+                if line.get('params') and elements_min.get(line.subtype) and len(line.params) < elements_min[line.subtype]:
+                    raise Exception(f'Error: The element {line.subtype} needs at least {elements_min[line.subtype]} parameters')
+
+                elif line.get('params') and elements.get(line.subtype) and len(line.params) != elements[line.subtype]:
+                    raise Exception(f'Error: The element {line.subtype} needs {elements[line.subtype]} parameters')
+
+
+            if line.type == 'func':
+                funcs= {
+                    'type': 1,
+                    'pos': 2,
+                    'size': 1,
+                    'simulate': 1,
+                }
+                if line.get('params') and funcs.get(line.subtype) and len(line.params) != funcs[line.subtype]:
+                    raise Exception(f'Error: The function {line.subtype} needs {funcs[line.subtype]} parameters')
     
 
 
-    def execute(self, compiled_list, vars: dict={}, inside: int=0):
+    def execute(self, code, vars: dict={}, inside: int=0):
         '''
         Execute the code
-        :param compiled_list: the compiled code
+        :param code: the compiled code
         :param vars: internal variables
         :param inside: the level of inside. To control the vars and recursion
         '''
@@ -46,40 +80,40 @@ class Code:
         inside_vars= {**{k:self.to_object(v) for k,v in vars.items()}}
 
         #Iterate over the compiled code
-        for compiled in compiled_list:
+        for line in code:
 
             #ELEMENTS
             #todo: verification of args
-            if compiled.type == 'element':
-                self.map.alredy_exist(self.to_python(compiled.name))
-
-                if compiled.subtype == 'map':
+            if line.type == 'element':
+                self.map.alredy_exist(self.to_python(line.name))
+                if line.name in self.vars or line.name in inside_vars:
+                    raise Exception(f'The element {line.name} already exist')
+                
+                #check
+                if line.subtype == 'map':
                     raise Exception('Error: map can not be created')
 
-                elif compiled.subtype == 'event':
-                    if compiled.get('args'):
-                        self.map.add_event(self.to_python(compiled.name), execution=self.execute, code=compiled.script, params=self.extra_params(compiled.args))
+                elif line.subtype == 'event':
+                    if line.get('args'):
+                        self.map.add_event(self.to_python(line.name), execution=self.execute, code=line.script, params=self.extra_params(line.args))
                     else:
-                        args, kwargs= self.params_names(compiled, inside_vars, inside)
-                        args= self.to_python([compiled.name, *args])
-                        kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'code': compiled.script}})
+                        args, kwargs= self.params_names(line, inside_vars, inside)
+                        args= self.to_python([line.name, *args])
+                        kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'code': line.script}})
                         self.map.add_simulation_event(*self.to_python(args), **self.to_python(kwargs))
                 
 
-                elif compiled.subtype == 'decision':
-                    if compiled.name not in self.elements and compiled.name not in self.vars and compiled.name not in inside_vars:
-                        args, kwargs= self.params_names(compiled, inside_vars, inside)
-                        args= self.to_python([compiled.name, *args])
-                        kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'cond': compiled.condition, 'params': self.extra_params(compiled.args)}})
-                        self.map.add_decision(*self.to_python(args), **self.to_python(kwargs))
-                    else:
-                        raise Exception(f'Error: {compiled.name} is already used')
+                elif line.subtype == 'decision':
+                    args, kwargs= self.params_names(line, inside_vars, inside)
+                    args= self.to_python([line.name, *args])
+                    kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'cond': line.condition, 'params': self.extra_params(line.args)}})
+                    self.map.add_decision(*self.to_python(args), **self.to_python(kwargs))
 
 
                 else:
-                    element= self.to_python(compiled.subtype)
-                    args, kwargs= self.params_names(compiled, inside_vars, inside)
-                    args= self.to_python([compiled.name, *args])
+                    element= self.to_python(line.subtype)
+                    args, kwargs= self.params_names(line, inside_vars, inside)
+                    args= self.to_python([line.name, *args])
                     kwargs= self.to_python(kwargs)
                     elements={
                         'nation': self.map.add_nation,
@@ -98,30 +132,32 @@ class Code:
 
             #VARS
             #Create a new var. For inside_vars, the vars are created in the moment of the execution
-            elif compiled.type == 'var':
-                if compiled.subtype == 'element':
-                    if compiled.get('op'):
-                        if compiled.op == '++':
-                            self.map.update(element=self.to_python(self.value(compiled.name, inside_vars, inside)),
-                                        data={'add':{self.to_python(compiled.var): self.to_python(self.value(compiled.value, inside_vars, inside))}})
+            elif line.type == 'var':
+                if line.subtype == 'element':
+
+                    if line.get('op'):
+                        if line.op == '++':
+                            self.map.update(element=self.to_python(self.value(line.name, inside_vars, inside)),
+                                        data={'add':{self.to_python(line.var): self.to_python(self.value(line.value, inside_vars, inside))}})
                         
-                        elif compiled.op == '--':
-                            self.map.update(element=self.to_python(self.value(compiled.name, inside_vars, inside)),
-                                        data={'delete':{self.to_python(compiled.var): self.to_python(self.value(compiled.value, inside_vars, inside))}})
+                        elif line.op == '--':
+                            self.map.update(element=self.to_python(self.value(line.name, inside_vars, inside)),
+                                        data={'delete':{self.to_python(line.var): self.to_python(self.value(line.value, inside_vars, inside))}})
                     
                     else:    
-                        self.map.update(element=self.to_python(self.value(compiled.name, inside_vars, inside)),
-                                    data={'update':{self.to_python(compiled.var): self.to_python(self.value(compiled.value, inside_vars, inside))}})
+                        self.map.update(element=self.to_python(self.value(line.name, inside_vars, inside)),
+                                    data={'update':{self.to_python(line.var): self.to_python(self.value(line.value, inside_vars, inside))}})
                 
-                elif compiled.subtype == 'expr':
-                    self.map.alredy_exist(self.to_python(compiled.name))
+                elif line.subtype == 'expr':
+                    self.map.alredy_exist(self.to_python(line.name))
+
                     if inside:
-                        if self.vars.get(compiled.name):
-                            self.vars[compiled.name]= self.value(compiled.value, inside_vars, inside)
+                        if self.vars.get(line.name):
+                            self.vars[line.name]= self.value(line.value, inside_vars, inside)
                         else:
-                            inside_vars[compiled.name]= self.value(compiled.value, inside_vars, inside)
+                            inside_vars[line.name]= self.value(line.value, inside_vars, inside)
                     else:
-                        self.vars[compiled.name]= self.value(compiled.value, inside_vars, inside)
+                        self.vars[line.name]= self.value(line.value, inside_vars, inside)
                 
                 else:
                     raise Exception('Error: the var type is not recognized')                
@@ -129,74 +165,51 @@ class Code:
 
             #FUNCTIONS
             #Execute a function
-            elif compiled.type == 'func':
+            elif line.type == 'func':
 
-                if compiled.subtype == 'show':
-                    params= self.params(compiled, inside_vars, inside)
+                if line.subtype == 'show':
+                    params= self.params(line, inside_vars, inside)
                     print('>>', *params)
                 
 
-                elif compiled.subtype == 'enable':
-                    params= self.params(compiled, inside_vars, inside)
-                    if len(params) > 1 or len(params) == 0:
-                        raise Exception('Error: enable() only accepts one parameter')
-                    if type(params[0]) == array:
-                        for i in params[0].value:
-                            if type(i) != Event:
-                                raise Exception('Error: enable() only accepts events')
-                            self.map.enable(i.value)
-                    if type(params[0]) == Event:
-                        self.map.enable(params[0].value)
-                
-                elif compiled.subtype == 'disable':
-                    params= self.params(compiled, inside_vars, inside)
-                    if len(params) > 1 or len(params) == 0:
-                        raise Exception('Error: disable() only accepts one parameter')
-                    if type(params[0]) == array:
-                        for i in params[0].value:
-                            if type(i) != Event:
-                                raise Exception('Error: disable() only accepts events')
-                            self.map.disable(i.value)
-                    if type(params[0]) == Event:
-                        self.map.disable(params[0].value)
-                
 
-                elif compiled.subtype == 'type':
-                    params= self.params(compiled, inside_vars, inside)
-                    if len(params) == 1:
-                        #check: params of value
-                        return self.to_object(type(self.value(params[0], inside_vars, inside)).__name__)
-                    else:
+                elif line.subtype == 'type':
+                    params= self.params(line, inside_vars, inside)
+                    if not len(params) == 1:
                         raise Exception('Error: type() only accepts one parameter')
+
+                    #check: params of value
+                    return self.to_object(type(self.value(params[0], inside_vars, inside)).__name__)
+                        
                 
 
-                elif compiled.subtype == 'pos':
-                    params= self.params(compiled, inside_vars, inside)
-                    if len(params) == 2:
-                        if type(params[0]) == array:
-                            if type(params[1]) == integer:
-                                return self.to_object(params[0].value[params[1].value])
-                            else:
-                                raise Exception('Error: pos() only accepts integers as second parameter')
-                        else:
-                            raise Exception('Error: pos() only accepts lists as first parameter')
-                    else:
+                elif line.subtype == 'pos':
+                    params= self.params(line, inside_vars, inside)
+                    if not len(params) == 2:
                         raise Exception('Error: pos() only accepts two parameters')
+                    if not type(params[0]) == array:
+                        raise Exception('Error: pos() only accepts lists as first parameter')
+                    if not type(params[1]) == integer:
+                        raise Exception('Error: pos() only accepts integers as second parameter')
+                        
+                    return self.to_object(params[0].value[params[1].value])
+                        
 
 
-                elif compiled.subtype == 'size':
-                    params= self.params(compiled, inside_vars, inside)
-                    if len(params) == 1:
-                        if type(self.to_python(params[0])) == list:
-                            return self.to_object(len(params[0]))
-                        else:
-                            raise Exception('Error: size() only accepts lists')
-                    else:
+                elif line.subtype == 'size':
+                    params= self.params(line, inside_vars, inside)
+                    if not len(params) == 1:
                         raise Exception('Error: size() only accepts one parameter')
+                    if not type(self.to_python(params[0])) == list:
+                        raise Exception('Error: size() only accepts lists')
+
+                    return self.to_object(len(params[0]))
+                        
+                        
                 
 
-                elif compiled.subtype == 'rvs':
-                    args, kwargs= self.params_names(compiled, inside_vars, inside)
+                elif line.subtype == 'rvs':
+                    args, kwargs= self.params_names(line, inside_vars, inside)
                     args= self.to_python(args)
                     kwargs= self.to_python(kwargs)
                     if not isinstance(args[0], Distribution) and not kwargs.get('dist'):
@@ -204,8 +217,8 @@ class Code:
                     else:
                         return self.to_object(Distribution.rvs(*args, **kwargs))
                 
-                elif compiled.subtype == 'irvs':
-                    args, kwargs= self.params_names(compiled, inside_vars, inside)
+                elif line.subtype == 'irvs':
+                    args, kwargs= self.params_names(line, inside_vars, inside)
                     args= self.to_python(args)
                     kwargs= self.to_python(kwargs)
                     if not isinstance(args[0], Distribution) and not kwargs.get('dist'):
@@ -214,97 +227,69 @@ class Code:
                         return self.to_object(Distribution.irvs(*args, **kwargs))
                 
                 
-                elif compiled.subtype == 'params':
-                    params= self.params(compiled, inside_vars, inside)
-                    if len(params) == 1:
-                        p= params[0]
-                        if p == Event:
-                            return self.to_object(['dist: distribution', 'cat: category', 'enabled: boolean', 'dec: decision'])
-                        elif p == Nation:
-                            return self.to_object(['provinces: list[province]', 'traits: list[trait]'])
-                        elif p == Province:
-                            return self.to_object(['extension: interger', 'development: interger', 'population: interger', 'neighbors: list[province]'])
-                        elif p == Sea:
-                            return self.to_object(['extension: interger', 'neighbors: list[province]'])
-                        elif p == Neutral:
-                            return self.to_object(['extension: interger', 'neighbors: list[province]'])
-                        elif p == Trait:
-                            return self.to_object([])
-                        elif p == Category:
-                            return self.to_object([])
-                        elif p == Distribution:
-                            return self.to_object(['dist: distribution'])
-                        else:
-                            raise Exception('Error: params() only accepts elements')
-                    else:
-                        raise Exception('Error: params() only accepts one parameter')
-                
-                
-                elif compiled.subtype == 'simulate':
-                    #todo: init events
-                    params= self.params(compiled, inside_vars, inside)
-                    if len(params) == 1:
-                        if type(params[0]) == time:
-                            sim= Simulate(self.map, Pqueue(self.map.event_list))
-                            sim.simulate(self.to_python(params[0]))
-                        else:
-                            raise Exception('Error: simulate() only accepts time')
-                    else:
+                elif line.subtype == 'simulate':
+                    params= self.params(line, inside_vars, inside)
+                    if not len(params) == 1:
                         raise Exception('Error: simulate() only accepts one parameter')
+                    if not type(params[0]) == time:
+                        raise Exception('Error: simulate() only accepts time')
+                    
+                    sim= Simulate(self.map, Pqueue(self.map.event_list))
+                    sim.simulate(self.to_python(params[0]))
+                        
                 
             
             #LOOPS
             #Execute a loop
-            elif compiled.type == 'loop':
-
-                if compiled.subtype == 'while':
-                    while self.to_python(self.value(compiled.condition, inside_vars, inside)):
-                        val= self.execute(compiled.script, vars= inside_vars, inside=inside+1)
+            elif line.type == 'loop':
+                if line.subtype == 'while':
+                    while self.to_python(self.value(line.condition, inside_vars, inside)):
+                        val= self.execute(line.script, vars= inside_vars, inside=inside+1)
                         if self.to_python(val) != None:
                             return val
                 
-                elif compiled.subtype == 'for':           
-                    if compiled.get('init') and compiled.get('end'):
-                        init= self.value(compiled.init, inside_vars, inside)
-                        end= self.value(compiled.end, inside_vars, inside)
-                        
-                        if type(init) != integer or type(end) != integer:
-                            raise Exception('Error: for() only accepts integers as parameters')
-
-                        for i in range(self.to_python(init), self.to_python(end) + 1):
-                            val= self.execute(compiled.script,
-                                            vars= {compiled.var: i, **inside_vars},
-                                            inside=inside+1)
-                            if self.to_python(val) != None:
-                                return val
+                elif line.subtype == 'repeat':           
+                    init= self.value(line.init, inside_vars, inside)
+                    end= self.value(line.end, inside_vars, inside)
                     
-                    else:
-                        param= self.value(compiled.param)
-                        if type(param) != array:
-                            raise Exception('Error: for() only accepts lists as parameter')
+                    if type(init) != integer or type(end) != integer:
+                        raise Exception('Error: for() only accepts integers as parameters')
 
-                        for i in self.to_python(param):
-                            val= self.execute(compiled.script,
-                                            vars= {compiled.var: i, **inside_vars},
-                                            inside=inside+1)
-                            if self.to_python(val) != None:
-                                return val
+                    for i in range(self.to_python(init), self.to_python(end) + 1):
+                        val= self.execute(line.script,
+                                        vars= {line.var: i, **inside_vars},
+                                        inside=inside+1)
+                        if self.to_python(val) != None:
+                            return val
+                
+                elif line.subtype == 'foreach':   
+                    param= self.value(line.param)
+                    if type(param) != array:
+                        raise Exception('Error: for() only accepts lists as parameter')
+
+                    for i in self.to_python(param):
+                        val= self.execute(line.script,
+                                        vars= {line.var: i, **inside_vars},
+                                        inside=inside+1)
+                        if self.to_python(val) != None:
+                            return val
+
                 else:
                     raise Exception('Error: unknown loop')
             
             
-            elif compiled.type == 'conditional':
-                if compiled.subtype == 'if':
-                    if self.to_python(self.value(compiled.condition, inside_vars, inside)):
-                        val= self.execute(compiled.script, vars= inside_vars, inside=inside+1)
+            elif line.type == 'conditional':
+                if line.subtype == 'if':
+                    if self.to_python(self.value(line.condition, inside_vars, inside)):
+                        val= self.execute(line.script, vars= inside_vars, inside=inside+1)
                         if self.to_python(val) != None:
                             return val
                 
-                elif compiled.subtype == 'if else':
-                    if self.to_python(self.value(compiled.condition, inside_vars, inside)):
-                        val= self.execute(compiled.script, vars= inside_vars, inside=inside+1)   
+                elif line.subtype == 'if else':
+                    if self.to_python(self.value(line.condition, inside_vars, inside)):
+                        val= self.execute(line.script, vars= inside_vars, inside=inside+1)   
                     else:
-                        val= self.execute(compiled.else_script, vars= inside_vars, inside=inside+1)
+                        val= self.execute(line.else_script, vars= inside_vars, inside=inside+1)
                     if self.to_python(val) != None:
                             return val
                 
@@ -315,23 +300,52 @@ class Code:
 
             #EXECUTION
             #Execute a event
-            elif compiled.type == 'execution':
-                if self.events.get(self.to_python(compiled.name)):
-                    args, kwargs= self.params_names(compiled, inside_vars, inside)
+            elif line.type == 'execution':
+                if self.events.get(self.to_python(line.name)):
+                    args, kwargs= self.params_names(line, inside_vars, inside)
                     args= self.to_python(args)
                     kwargs= self.to_python(kwargs)
-                    ex= self.to_object(self.events[compiled.name].execute(*args, **kwargs))
+                    ex= self.to_object(self.events[line.name].execute(*args, **kwargs))
                     if self.to_python(ex) != None:
                         return ex
                     
                 else:
-                    raise Exception(f'Error: event {compiled.name} does not exist')
+                    raise Exception(f'Error: event {line.name} does not exist')
             
-            elif compiled.type == 'return':
-                return self.value(compiled.value, inside_vars, inside)
+            elif line.type == 'out':
+                if line.subtype == 'return':
+                    return self.value(line.value, inside_vars, inside)
+                
+                #check: params
+                elif line.subtype == 'enable':
+                    params= self.params(line, inside_vars, inside)
+                    if len(params) > 1 or len(params) == 0:
+                        raise Exception('Error: enable() only accepts one parameter')
+                    if type(params[0]) == array:
+                        for i in params[0].value:
+                            if type(i) != Event:
+                                raise Exception('Error: enable() only accepts events')
+                            self.map.enable(i.value)
+                    if type(params[0]) == Event:
+                        self.map.enable(params[0].value)
+                
+                #check: params
+                elif line.subtype == 'disable':
+                    params= self.params(line, inside_vars, inside)
+                    if len(params) > 1 or len(params) == 0:
+                        raise Exception('Error: disable() only accepts one parameter')
+                    if type(params[0]) == array:
+                        for i in params[0].value:
+                            if type(i) != Event:
+                                raise Exception('Error: disable() only accepts events')
+                            self.map.disable(i.value)
+                    if type(params[0]) == Event:
+                        self.map.disable(params[0].value)
             
-            elif compiled.type == 'func condition':
-                return self.to_python(self.value(compiled.value, inside_vars, inside))
+
+            # elif line.type == 'func condition':
+            #     return self.to_python(self.value(line.value, inside_vars, inside))
+
 
             else:
                 raise Exception('Error: unknown type')
@@ -386,6 +400,7 @@ class Code:
                     else:
                         raise Exception(f'Name {obj.value} not found')
 
+
                 elif obj.subtype == 'arrow':
                     if obj.get('params'):
                         return self.to_object(self.map.get_data(self.to_python(self.value(obj.name, inside_vars, inside)),
@@ -399,6 +414,7 @@ class Code:
                         return self.to_object(self.map.get_data(self.to_python(self.value(obj.name, inside_vars, inside)),
                                             self.to_python(obj.var)))
             
+
             if obj.type == 'type':
                 if obj.value == 'event':
                     return Event
@@ -491,10 +507,11 @@ class Code:
                     raise Exception(f'Error: "{obj.subtype}" not supported between instances of "{left.type}" and "{right.type}"')
             
 
-            elif obj.type == 'scondition':
+            elif obj.type == 'ucondition':
                 if obj.subtype == 'not':
                     return ~self.value(obj.value, inside_vars, inside)
             
+
             elif obj.type == 'func' or obj.type == 'execution':
                 return self.execute([obj], inside_vars, inside+1)
 
@@ -502,6 +519,7 @@ class Code:
             else:
                 raise Exception(f'Error: {obj.type} is not a valid type')
         
+
         elif isinstance(obj, object):
             return obj
         

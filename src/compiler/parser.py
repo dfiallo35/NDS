@@ -77,7 +77,15 @@ class NDSParser(Parser):
 
     @_('RETURN expr END')
     def function_code(self, p):
-        return [ParserObj(type='return', value=p.expr)]
+        return [ParserObj(type='out', subtype='return', value=p.expr)]
+    
+    @_('ENABLE expr END')
+    def function_code(self, p):
+        return [ParserObj(type='out', subtype='enable', value=p.expr)]
+    
+    @_('DISABLE expr END')
+    def function_code(self, p):
+        return [ParserObj(type='out', subtype='disable', value=p.expr)]
 
     
 
@@ -94,9 +102,10 @@ class NDSParser(Parser):
     def element(self, p):
         return ParserObj(type='element', subtype=p[0], name=p.NAME, params=p.args, script=p.function_script)
 
-    @_('DECISION NAME "("  "," condition "," args ")" LF params RF END')
+    #check
+    @_('DECISION NAME "(" expr "," args ")" LF params RF END')
     def element(self, p):
-        return ParserObj(type='element', subtype=p[0], name=p.NAME, params=p.args, condition=p.condition, args=p.params)
+        return ParserObj(type='element', subtype=p[0], name=p.NAME, params=p.args, condition=p.expr, args=p.params)
     
 
 
@@ -116,28 +125,28 @@ class NDSParser(Parser):
 
 
     #LOOPS
-    @_('WHILE "(" condition ")" "{" function_script "}"')
+    @_('WHILE expr "{" function_script "}"')
     def loop(self, p):
-        return ParserObj(type='loop', subtype=p[0], condition=p.condition, script=p.function_script)
+        return ParserObj(type='loop', subtype=p[0], condition=p.expr, script=p.function_script)
 
-    @_('FOR "(" NAME "," expr "," expr ")" "{" function_script "}"')
+    @_('REPEAT LF NAME RF "(" expr "," expr ")" "{" function_script "}"')
     def loop(self, p):
         return ParserObj(type='loop', subtype=p[0], var=p.NAME, init=p.expr0, end=p.expr1, script=p.function_script)
     
-    @_('FOR "(" NAME "," expr ")" "{" function_script "}"')
+    @_('FOREACH LF NAME RF "(" expr ")" "{" function_script "}"')
     def loop(self, p):
         return ParserObj(type='loop', subtype=p[0], var=p.NAME, param=p.expr, script=p.function_script)
     
 
 
     #CONDITIONALS
-    @_('IF "(" condition ")" "{" function_script "}" ELSE "{" function_script "}"')
+    @_('IF expr "{" function_script "}" ELSE "{" function_script "}"')
     def conditional(self, p):
-        return ParserObj(type='conditional', subtype='if else', condition=p.condition, script=p.function_script0, else_script=p.function_script1)
+        return ParserObj(type='conditional', subtype='if else', condition=p.expr, script=p.function_script0, else_script=p.function_script1)
     
-    @_('IF "(" condition ")" "{" function_script "}"')
+    @_('IF expr "{" function_script "}"')
     def conditional(self, p):
-        return ParserObj(type='conditional', subtype=p[0], condition=p.condition, script=p.function_script)
+        return ParserObj(type='conditional', subtype=p[0], condition=p.expr, script=p.function_script)
     
 
 
@@ -210,7 +219,7 @@ class NDSParser(Parser):
     
     @_('NOT expr')
     def condition(self, p):
-        return ParserObj(type='scondition', subtype=p[0], value=p.expr)
+        return ParserObj(type='ucondition', subtype=p[0], value=p.expr)
     
 
     #COMPARATIONS
@@ -281,7 +290,8 @@ class NDSParser(Parser):
     
     @_('PLUS expr %prec UPLUS', 'MINUS expr %prec UMINUS')
     def expr(self, p):
-        return ParserObj(type='uarithmetic', subtype=p[0], value=p.expr) 
+        return ParserObj(type='uarithmetic', subtype=p[0], value=p.expr)
+
 
 
     #LIST

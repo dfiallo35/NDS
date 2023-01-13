@@ -2,16 +2,15 @@ from sly import Lexer
 
 class NDSLexer(Lexer):
     tokens = {
-            'ELEMENT', 'EVENT', 'DECISION', 'FUNC', 'RETURN',
+            'ELEMENT', 'EVENT', 'DECISION', 'FUNC', 'RETURN', 'ENABLE', 'DISABLE',
 
             'NAME','NUMBER', 'STRING', 'BOOL', 'TIME', 'TYPE',
 
-            'IPLUS', 'IMINUS', 'IMULTIPLY', 'IDIVIDE', 'IPOW', 'IMOD', 'IFLOORDIV',
             'PLUS', 'MINUS', 'MULTIPLY', 'DIVIDE', 'POW', 'MOD', 'FLOORDIV',
             
             'VARASSIGN', 'ARROW', 'PARAMASSIGN', 'LF', 'RF', 'END',
 
-            'FOR', 'WHILE', 'IF', 'ELSE',
+            'FOREACH', 'REPEAT', 'WHILE', 'IF', 'ELSE',
             
             'NOT', 'AND', 'OR', 'XOR',
             'GREATER', 'EGREATER', 'LESS', 'ELESS', 'XPLUS', 'XMINUS', 'EQUALS', 'NOTEQUALS', 
@@ -54,19 +53,12 @@ class NDSLexer(Lexer):
     XMINUS= r'--'
 
     #ARIHTMETIC
-    IPLUS = r'\+='
     PLUS = r'\+'
-    IMINUS = r'-='
     MINUS = r'-'
-    IPOW = r'\*\*='
     POW = r'\*\*'
-    IMULTIPLY = r'\*='
     MULTIPLY = r'\*'
-    IMOD = r'\%='
     MOD= r'\%'
-    IFLOORDIV = r'//='
     FLOORDIV = r'//'
-    IDIVIDE = r'/='
     DIVIDE = r'/'
     
 
@@ -87,6 +79,7 @@ class NDSLexer(Lexer):
     NAME['false'] = 'BOOL'
 
     #ELEMENTS
+    NAME['map'] = 'ELEMENT'
     NAME['nation'] = 'ELEMENT'
     NAME['province'] = 'ELEMENT'
     NAME['neutral'] = 'ELEMENT'
@@ -99,6 +92,8 @@ class NDSLexer(Lexer):
     NAME['decision'] = 'DECISION'
 
     NAME['return'] = 'RETURN'
+    NAME['enable'] = 'ENABLE'
+    NAME['disable'] = 'DISABLE'
 
     #SPECIAL FUNCTIONS
     NAME['show'] = 'FUNC'
@@ -111,16 +106,14 @@ class NDSLexer(Lexer):
     NAME['irvs'] = 'FUNC'
 
     NAME['gen_dist'] = 'FUNC'
-
     NAME['simulate'] = 'FUNC'
-    NAME['enable'] = 'FUNC'
-    NAME['disable'] = 'FUNC'
 
     NAME['random'] = 'FUNC'
     # NAME[''] = 'FUNC'
 
     #FUNCTIONS
-    NAME['for'] = 'FOR'
+    NAME['foreach'] = 'FOREACH'
+    NAME['repeat'] = 'REPEAT'
     NAME['while'] = 'WHILE'
     NAME['if'] = 'IF'
     NAME['else'] = 'ELSE'

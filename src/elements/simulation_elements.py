@@ -115,7 +115,7 @@ class Event(Element):
         if self.code:
             
             if not self.params:
-                self.execution(compiled_list=self.code, inside=1)
+                self.execution(code=self.code, inside=1)
             
             else:
                 for i in kwargs:
@@ -124,7 +124,7 @@ class Event(Element):
                     else:
                         self.params.remove(i)
                 params= {**{k:v for k,v in zip(self.params, args)}, **kwargs}
-                return self.execution(compiled_list=self.code, inside=1, vars= params)
+                return self.execution(code=self.code, inside=1, vars= params)
         else:
             return self.execution(*args, **kwargs)
 
@@ -159,7 +159,7 @@ class Decision(Element):
                 else:
                     self.params.remove(i)
             params= {**{k:v for k,v in zip(self.params, args)}, **kwargs}
-            return self.execution(compiled_list=[self.cond], inside=1, vars= params)
+            return self.execution(code=[self.cond], inside=1, vars= params)
         else:
             return self.execution(*args, **kwargs)
 
