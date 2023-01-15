@@ -70,7 +70,7 @@ for nation in m.nationdict.values():
 
 def Simulation_test():
     print('init',[i.population for i in list(m.provincedict.values())])
-    a= Simulate(m, Pqueue(m.event_enabled_list)).simulate(10)
+    a= Simulate(m, Pqueue(m.event_enabled_list)).simulate(100)
 
     print('end', [i.population for i in list(m.provincedict.values())])
 
