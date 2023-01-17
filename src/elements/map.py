@@ -155,15 +155,16 @@ class Map:
 
         for data in kwargs:
             if data not in self.dataset:
-                self.add_data_to_nations(data)
-                
+                self.dataset.add(data)
         
         nat= Nation(name, population, extension, traits, *args, **kwargs)
         self.nationdict[name]= nat
         self.neighbours_graph.add_node(name)
         self.add_edges(name, neighbours)
+        self.add_data_to_nations()
 
-    def add_data_to_nations(self, data: str):
+
+    def add_data_to_nations(self):
         '''
         Add data to a nation
         :param nation: the nation
@@ -171,9 +172,9 @@ class Map:
         :param value: the value
         '''
         for nat in self.nationdict.values():
-            nat: Nation= nat
-            if not nat.__dict__.get(data+'var'):
-                nat.add_data(data, None)
+            for data in self.data:
+                if not nat.__dict__.get(data+'var'):
+                    nat.add_data(data, None)
 
     def add_sea(self, name: str, extension: float, neighbours: list= []):
         '''

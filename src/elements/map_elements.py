@@ -26,12 +26,13 @@ class Nation(MapElement):
 
 
     def add_data(self, data: str, value: int):
+        data_name= data+'var'
         def gett(self):
-            return self.__dict__[data+'var']
+            return self.__dict__[data_name]
         def sett(self, x):
-            self.__dict__[data+'var']= x
+            self.__dict__[data_name]= x
 
-        self.__dict__[data+'var']= value
+        self.__dict__[data_name]= value
         setattr(self.__class__, data, property(fget= gett, fset= sett))
 
 
