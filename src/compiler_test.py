@@ -4,59 +4,33 @@ from compiler.execution import *
 a= Code()
 a.compile(
     '''
-    # function s<< a>>{
-    #     show(a);
-    # }
-    # s(1, 3);
-
     category socialism();
     category capitalism();
-    
-    
 
-    province Havana(100, 10, 10345, []);
-    province Mayabeque(236, 10, 204, []);
-    province New_York(2056, 20, 103856, []);
-    province California(341, 30, 402175, []);
-
-    nation Cuba([Havana, Mayabeque], [socialism]);
-    nation USA([New_York, California], [capitalism]);
+    nation Cuba(10, 100, [], [], pollo: 10);
+    nation USA(10, 100, [], []);
 
     distribution pg(expon, scale: 4);
-
-    show(pos(Cuba->provinces, 0)->extension);
-    pos(Cuba->provinces, 0) -> extension= 200;
-    show(pos(Cuba->provinces, 0)->extension);
 
     decision event a (socialism)<<n>>{
         show(n);
     }
 
     simulation event population_growth(pg, socialism, true, []){
-        foreach <<prov>> (map->provinces){
-            prov->population= irvs(expon, loc: prov->population);
+        foreach <<nat>> (map->nations){
+            nat->population= irvs(expon, loc: nat->population);
         }
     }
 
     simulation event population_mortality(pg, socialism, true, []){
-        foreach <<prov>> (map->provinces){
-            prov->population= prov->population - irvs(expon, loc: 0);
+        foreach <<nat>> (map->nations){
+            nat->population= nat->population - irvs(expon, loc: 0);
         }
     }
 
-    # simulate( 100d );
-
-    # nation Cuba([Mayabeque], [crazy]);
-    # Cuba->provinces= ++Havana;
-    # Cuba->provinces= --Mayabeque;
-    # show(Cuba->provinces);
-
+    simulate(100d);
 
     # decision a(n==1, a)<< n >>;
 
     '''
 )
-# print(a.map.decisions['a'].condition(1))
-# print('map', a.elements)
-# print('vars', a.vars)
-# print('events', a.events)
