@@ -41,10 +41,10 @@ Todos los detalles acerca de las reglas de gramática utilizada se puede ver en 
 
 - Sintaxsis similar a Python en cuanto a las funcionalidades y dinamismo.
 - Instrucciones separadas por `;`.
-- Los bloques de código de los lops, condicionales y eventos se encierran en `{}`.
+- Los bloques de código de los loops, condicionales y eventos se encierran en `{}`.
 - Para el caso de los argumentos de las funciones o eventos se usa `()`.
-- Mientras que los parametros se encierran en `<< >>`.
-- Parametros y argumentos separados por `,`.
+- Parámetros y argumentos separados por `,`.
+- Mientras que los parámetros se encierran en `<< >>`.
 - Admite aritméticas como `+`, `-`, `/`, `//`, `*`, `**`, `%`.
 - Uso de operadores `==`, `!=`, `>=`, `>`, `<=`, `<`.
 - Uso de operadores lógicos `not`, `and`, `or`, `xor`.
@@ -55,7 +55,7 @@ Todos los detalles acerca de las reglas de gramática utilizada se puede ver en 
 
 <h5> Loops </h5>
 
-- `repeat`: ciclo for desde unicio hasta un final, ambos indicados.
+- `repeat`: ciclo for desde un inicio hasta un final, ambos indicados.
 - `foreach`: ciclo for iterando en una lista.
 - `while`: ciclo while
 
