@@ -118,7 +118,10 @@ class Simulate:
         :param event: the event to be generated
         :param time: the current time of the simulation
         '''
-        if event.name in self.en_dis['enable']:
+        if event.name in self.map.decision_eventdict:
+            pass
+
+        elif event.name in self.en_dis['enable']:
             self.map.eventdict[event.name].enabled = True
             
             self.event_queue.push((self.new_time(event, time), event))
