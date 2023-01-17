@@ -157,6 +157,7 @@ class Simulate:
             nation_decs=self.get_time(time,decisions[nation],distribution="uniform")
             for time_dec in nation_decs:
                 # time_dec[1]=time_dec[1].get_event(nation)
+                print("planning",time_dec[0],time_dec[1].name,nation)
                 self.event_queue.push(time_dec)
         
 

@@ -31,6 +31,8 @@ def transform_decisions(map_decisions):
 def get_affected_nations(map,changes):
     """From map changes, returns a list of nations that were affected"""
     nations=[]
+    if not changes:
+        return []
     for nation in map.nationdict.values():
         if nation.name in changes["changed"]:
             nations.append(nation)
