@@ -31,38 +31,49 @@ class Code:
         self.semantic_check(parsed_code)
         self.execute(parsed_code, vars={}, inside=0)
     
-
+    #fix
     def semantic_check(self, code):
+        elements= {
+            'nation': {'args':2},
+            'province': {'args':4},
+            'sea': {'args':2},
+            'neutral': {'args':2},
+            'trait': {'args':0},
+            'category': {'args':0},
+            'dec event': {'params':1, 'args':1},
+            'sim event': {'args':4},
+            # 'decision': 2,
+            'distribution': {'min':1},
+        }
+
+        #fix
+        funcs= {
+            'type': 1,
+            'pos': 2,
+            'size': 1,
+            'simulate': 1,
+        }
+
         for line in code:
             #elements
             if line.type == 'element':
-                elements= {
-                    'nation': 2,
-                    'province': 4,
-                    'sea': 2,
-                    'neutral': 2,
-                    'trait': 0,
-                    'category': 0,
-                    'event': 4,
-                    # 'decision': 2,
-                }
-                elements_min= {
-                    'distribution': 1,
-                }
-                if line.get('params') and elements_min.get(line.subtype) and len(line.params) < elements_min[line.subtype]:
-                    raise Exception(f'Error: The element {line.subtype} needs at least {elements_min[line.subtype]} parameters')
+                if elements.get(line.subtype):
+                    if elements[line.subtype].get('min') and len(line.args) < elements[line.subtype]['min']:
+                        el= elements[line.subtype]['min']
+                        raise Exception(f'Error: The element {line.subtype} needs at least {el} parameters')
 
-                elif line.get('params') and elements.get(line.subtype) and len(line.params) != elements[line.subtype]:
-                    raise Exception(f'Error: The element {line.subtype} needs {elements[line.subtype]} parameters')
+                    if elements[line.subtype].get('args') and len(line.args) != elements[line.subtype]['args']:
+                        el= elements[line.subtype]['args']
+                        raise Exception(f'Error: The element {line.subtype} needs {el} arguments')
+                    
+                    if elements[line.subtype].get('params') and len(line.params) != elements[line.subtype]['params']:
+                        el= elements[line.subtype]['params']
+                        raise Exception(f'Error: The element {line.subtype} needs {el} parameters')
+                
 
 
             if line.type == 'func':
-                funcs= {
-                    'type': 1,
-                    'pos': 2,
-                    'size': 1,
-                    'simulate': 1,
-                }
+                
                 if line.get('params') and funcs.get(line.subtype) and len(line.params) != funcs[line.subtype]:
                     raise Exception(f'Error: The function {line.subtype} needs {funcs[line.subtype]} parameters')
     
@@ -89,26 +100,34 @@ class Code:
                 if line.name in self.vars or line.name in inside_vars:
                     raise Exception(f'The element {line.name} already exist')
 
-                elif line.subtype == 'event':
-                    if line.get('args'):
-                        self.map.add_event(self.to_python(line.name), execution=self.execute, code=line.script, params=self.extra_params(line.args))
-                    else:
-                        args, kwargs= self.params_names(line, inside_vars, inside)
-                        args= self.to_python([line.name, *args])
-                        kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'code': line.script}})
-                        self.map.add_simulation_event(*self.to_python(args), **self.to_python(kwargs))
+                elif line.subtype == 'dec event':
+                    params= self.extra_params(line.params)
+                    args, kwargs= self.args_names(line, inside_vars, inside)
+                    if args:
+                        self.map.add_decision_event(self.to_python(line.name), cat=args[0], execution=self.execute, code=line.script, params=params)
+                    elif kwargs:
+                        self.map.add_decision_event(self.to_python(line.name), cat=kwargs['cat'], execution=self.execute, code=line.script, params=params)
                 
+                elif line.subtype == 'function':
+                    self.map.add_function(self.to_python(line.name), execution=self.execute, code=line.script, params=self.extra_params(line.params))
+
+                elif line.subtype == 'sim event':
+                    args, kwargs= self.args_names(line, inside_vars, inside)
+                    args= self.to_python([line.name, *args])
+                    kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'code': line.script}})
+                    self.map.add_simulation_event(*self.to_python(args), **self.to_python(kwargs))
+
 
                 elif line.subtype == 'decision':
-                    args, kwargs= self.params_names(line, inside_vars, inside)
+                    args, kwargs= self.args_names(line, inside_vars, inside)
                     args= self.to_python([line.name, *args])
-                    kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'cond': line.condition, 'params': self.extra_params(line.args)}})
+                    kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'cond': line.condition, 'params': self.extra_params(line.params)}})
                     self.map.add_decision(*self.to_python(args), **self.to_python(kwargs))
 
 
                 else:
                     element= self.to_python(line.subtype)
-                    args, kwargs= self.params_names(line, inside_vars, inside)
+                    args, kwargs= self.args_names(line, inside_vars, inside)
                     args= self.to_python([line.name, *args])
                     kwargs= self.to_python(kwargs)
                     elements={
@@ -159,22 +178,25 @@ class Code:
                     raise Exception('Error: the var type is not recognized')                
             
 
+            elif line.type == 'function':
+                self.execute([line.value], inside_vars, inside+1)
+
             #FUNCTIONS
             #Execute a function
             elif line.type == 'func':
 
                 if line.subtype == 'show':
-                    params= self.params(line, inside_vars, inside)
+                    params= self.args(line, inside_vars, inside)
                     print('>>', *params)
 
 
                 elif line.subtype == 'type':
-                    params= self.params(line, inside_vars, inside)
+                    params= self.args(line, inside_vars, inside)
                     return self.to_object(type(self.value(params[0], inside_vars, inside)).__name__)    
                 
 
                 elif line.subtype == 'pos':
-                    params= self.params(line, inside_vars, inside)
+                    params= self.args(line, inside_vars, inside)
                     if not type(params[0]) == array:
                         raise Exception('Error: pos() only accepts lists as first parameter')
                     if not type(params[1]) == integer:
@@ -184,7 +206,7 @@ class Code:
 
 
                 elif line.subtype == 'size':
-                    params= self.params(line, inside_vars, inside)
+                    params= self.args(line, inside_vars, inside)
                     if not type(self.to_python(params[0])) == list:
                         raise Exception('Error: size() only accepts lists')
 
@@ -192,7 +214,7 @@ class Code:
                         
 
                 elif line.subtype == 'rvs':
-                    args, kwargs= self.params_names(line, inside_vars, inside)
+                    args, kwargs= self.args_names(line, inside_vars, inside)
                     args= self.to_python(args)
                     kwargs= self.to_python(kwargs)
                     if not isinstance(args[0], Distribution) and not kwargs.get('dist'):
@@ -201,7 +223,7 @@ class Code:
                         return self.to_object(Distribution.rvs(*args, **kwargs))
                 
                 elif line.subtype == 'irvs':
-                    args, kwargs= self.params_names(line, inside_vars, inside)
+                    args, kwargs= self.args_names(line, inside_vars, inside)
                     args= self.to_python(args)
                     kwargs= self.to_python(kwargs)
                     if not isinstance(args[0], Distribution) and not kwargs.get('dist'):
@@ -211,7 +233,7 @@ class Code:
                 
                 
                 elif line.subtype == 'simulate':
-                    params= self.params(line, inside_vars, inside)
+                    params= self.args(line, inside_vars, inside)
                     if not type(params[0]) == time:
                         raise Exception('Error: simulate() only accepts time')
                     sim= Simulate(self.map, Pqueue(self.map.event_list))
@@ -282,7 +304,7 @@ class Code:
             #Execute a event
             elif line.type == 'execution':
                 if self.events.get(self.to_python(line.name)):
-                    args, kwargs= self.params_names(line, inside_vars, inside)
+                    args, kwargs= self.args_names(line, inside_vars, inside)
                     args= self.to_python(args)
                     kwargs= self.to_python(kwargs)
                     ex= self.to_object(self.events[line.name].execute(*args, **kwargs))
@@ -378,12 +400,12 @@ class Code:
                     else:
                         raise Exception(f'Name {obj.value} not found')
 
-
+                #fix
                 elif obj.subtype == 'arrow':
                     if obj.get('params'):
                         return self.to_object(self.map.get_data(self.to_python(self.value(obj.name, inside_vars, inside)),
                                             self.to_python(obj.var),
-                                            self.to_python(self.params(obj, inside_vars, inside))))
+                                            self.to_python(self.args(obj, inside_vars, inside))))
                     
                     if isinstance(self.value(obj.name, inside_vars, inside), Map):
                         return self.to_object(self.map.map_data(self.to_python(obj.var)))
@@ -553,7 +575,11 @@ class Code:
         :param obj: The object to convert
         :return The object converted
         '''
-        if type(obj) == list:
+        if type(obj) == str and obj in self.vars:
+            return self.vars[obj]
+        elif type(obj) == str and obj in self.elements:
+            return self.elements[obj]
+        elif type(obj) == list:
             return array(obj)
         elif type(obj) == str:
             return string(obj)
@@ -573,16 +599,16 @@ class Code:
             raise Exception(f'Error: The object {obj} is not recognized')
 
 
-    def params(self, obj: ParserObj, inside_vars: dict={}, inside: int=0):
+    def args(self, obj: ParserObj, inside_vars: dict={}, inside: int=0):
         params= []
-        for param in obj.params:
+        for param in obj.args:
             params.append(self.value(param.value, inside_vars, inside))
         return params
 
-    def params_names(self, obj: ParserObj, inside_vars: dict={}, inside: int=0):
+    def args_names(self, obj: ParserObj, inside_vars: dict={}, inside: int=0):
         params_list= []
         params_dict= {}
-        for param in obj.params:
+        for param in obj.args:
             if param.get('name'):
                 params_dict[param.name]= self.value(param.value, inside_vars, inside)
             else:

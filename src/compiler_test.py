@@ -4,25 +4,15 @@ from compiler.execution import *
 a= Code()
 a.compile(
     '''
-    event fib <<n: number>>{
-        if n == 0{
-            return 0;
-        }
-        if n == 1{
-            return 1;
-        }
-        else{
-            return fib(n-1) + fib(n-2);
-        }
-    }
-    show(fib(10));
-
-
-    # show(params(event));
-    # show(1 == 4);
+    # function s<< a>>{
+    #     show(a);
+    # }
+    # s(1, 3);
 
     category socialism();
     category capitalism();
+    
+    
 
     province Havana(100, 10, 10345, []);
     province Mayabeque(236, 10, 204, []);
@@ -38,28 +28,31 @@ a.compile(
     pos(Cuba->provinces, 0) -> extension= 200;
     show(pos(Cuba->provinces, 0)->extension);
 
-    event population_growth(pg, socialism, true, []){
+    decision event a (socialism)<<n>>{
+        show(n);
+    }
+
+    simulation event population_growth(pg, socialism, true, []){
         foreach <<prov>> (map->provinces){
             prov->population= irvs(expon, loc: prov->population);
         }
     }
 
-    event population_mortality(pg, socialism, true, []){
+    simulation event population_mortality(pg, socialism, true, []){
         foreach <<prov>> (map->provinces){
             prov->population= prov->population - irvs(expon, loc: 0);
         }
     }
 
-    simulate( 100d );
+    # simulate( 100d );
 
     # nation Cuba([Mayabeque], [crazy]);
     # Cuba->provinces= ++Havana;
     # Cuba->provinces= --Mayabeque;
     # show(Cuba->provinces);
 
-    
 
-    # decision a(n==1, fib)<< n >>;
+    # decision a(n==1, a)<< n >>;
 
     '''
 )

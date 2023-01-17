@@ -2,7 +2,7 @@ from sly import Lexer
 
 class NDSLexer(Lexer):
     tokens = {
-            'ELEMENT', 'EVENT', 'DECISION', 'FUNC', 'RETURN', 'ENABLE', 'DISABLE',
+            'ELEMENT', 'EVENT', 'DECISION', 'SIMULATION', 'FUNCTION', 'FUNC', 'RETURN', 'ENABLE', 'DISABLE',
 
             'NAME','NUMBER', 'STRING', 'BOOL', 'TIME', 'TYPE',
 
@@ -14,7 +14,6 @@ class NDSLexer(Lexer):
             
             'NOT', 'AND', 'OR', 'XOR',
             'GREATER', 'EGREATER', 'LESS', 'ELESS', 'XPLUS', 'XMINUS', 'EQUALS', 'NOTEQUALS', 
-            
     }
     
     literals = { '(', ')', '{', '}', '[', ']', ','}
@@ -91,6 +90,8 @@ class NDSLexer(Lexer):
     
     NAME['event'] = 'EVENT'
     NAME['decision'] = 'DECISION'
+    NAME['simulation'] = 'SIMULATION'
+    NAME['function'] = 'FUNCTION'
 
     NAME['return'] = 'RETURN'
     NAME['enable'] = 'ENABLE'
@@ -117,7 +118,7 @@ class NDSLexer(Lexer):
     NAME['repeat'] = 'REPEAT'
     NAME['while'] = 'WHILE'
 
-    
+
     NAME['if'] = 'IF'
     NAME['else'] = 'ELSE'
 

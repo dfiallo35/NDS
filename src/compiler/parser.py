@@ -92,20 +92,25 @@ class NDSParser(Parser):
     #ELEMENTS
     @_('ELEMENT NAME "(" args ")" END')
     def element(self, p):
-        return ParserObj(type='element', subtype=p[0], name=p.NAME, params=p.args)
+        return ParserObj(type='element', subtype=p[0], name=p.NAME, args=p.args)
+
     
-    @_('EVENT NAME LF params RF "{" function_script "}"')
+    @_('FUNCTION NAME LF params RF "{" function_script "}"')
     def element(self, p):
-        return ParserObj(type='element', subtype=p[0], name=p.NAME, args=p.params, script=p.function_script)
+        return ParserObj(type='element', subtype='function', name=p.NAME, params=p.params, script=p.function_script)
     
-    @_('EVENT NAME "(" args ")" "{" function_script "}"')
+    @_('DECISION EVENT NAME "(" args ")" LF params RF "{" function_script "}"')
     def element(self, p):
-        return ParserObj(type='element', subtype=p[0], name=p.NAME, params=p.args, script=p.function_script)
+        return ParserObj(type='element', subtype='dec event', name=p.NAME, args=p.args, params=p.params, script=p.function_script)
+    
+    @_('SIMULATION EVENT NAME "(" args ")" "{" function_script "}"')
+    def element(self, p):
+        return ParserObj(type='element', subtype='sim event', name=p.NAME, args=p.args, script=p.function_script)
 
     
     @_('DECISION NAME "(" expr "," args ")" LF params RF END')
     def element(self, p):
-        return ParserObj(type='element', subtype=p[0], name=p.NAME, params=p.args, condition=p.expr, args=p.params)
+        return ParserObj(type='element', subtype=p[0], name=p.NAME, args=p.args, condition=p.expr, params=p.params)
     
 
 
@@ -153,16 +158,16 @@ class NDSParser(Parser):
     #FUNC
     @_('func END')
     def function(self, p):
-        return p.func
+        return ParserObj(type='function', subtype=p[0], value=p.func)
 
     @_('FUNC "(" args ")"')
     def func(self, p):
-        return ParserObj(type='func', subtype=p[0], params=p.args)
+        return ParserObj(type='func', subtype=p[0], args=p.args)
 
     #EXECUTION
     @_('NAME "(" args ")"')
     def func(self, p):
-        return ParserObj(type= 'execution', name=p.NAME, params=p.args)
+        return ParserObj(type= 'execution', name=p.NAME, args=p.args)
 
 
 
@@ -319,3 +324,5 @@ class NDSParser(Parser):
             raise Exception("Syntax error at token %s in line %s" % (p.value, p.lineno))
         else:
             raise Exception("Syntax error at EOF")
+
+

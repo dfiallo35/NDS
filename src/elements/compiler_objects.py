@@ -161,8 +161,6 @@ class integer(number):
     def __init__(self, val) -> None:
         super().__init__(val)
 
-    #return the type with type()
-
 
 
 class decimal(number):

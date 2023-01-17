@@ -15,7 +15,11 @@ class Map:
         self.neutraldict = dict()
         self.seadict = dict()
         self.traitdict = dict()
+        
         self.categorydict= dict()
+        self.simulation_eventdict= dict()
+        self.decision_eventdict= dict()
+        self.functiondict= dict()
         self.eventdict= dict()
         self.decisionsdict= dict()
         
@@ -91,9 +95,10 @@ class Map:
     def categories(self) -> dict:
         return self.categorydict
     
+    #fix
     @property
     def events(self) -> dict:
-        return self.eventdict
+        return {**self.decision_eventdict, **self.simulation_eventdict, **self.functiondict}
     
     @property
     def distributions(self) -> dict:
@@ -113,8 +118,9 @@ class Map:
     def all(self) -> dict:
         return {**self.nationdict, **self.provincedict, **self.neutraldict,
                 **self.seadict, **self.traitdict, **self.categorydict,
-                **self.eventdict, **self.decisionsdict, **self.distdict,
-                **self.distributiondict}
+                **self.simulation_eventdict, **self.decision_eventdict,
+                **self.decisionsdict, **self.distdict,
+                **self.distributiondict, **self.functiondict}
     
     @property
     def nation_province(self) -> dict[list]:
@@ -124,6 +130,7 @@ class Map:
         """
         return {name: [province for province in nation.contains] for name, nation in self.nationdict.items()}
 
+    #fix
     @property
     def event_list(self):
         '''
@@ -290,7 +297,14 @@ class Map:
             self.categorydict[category].add_decision(decision)
     
     
-    def add_event(self, name: str, execution, code= None, params: list=[]):
+    def add_function(self, name: str, execution, code= None, params: list=[]):
+        name= self.element_name(name)
+        self.alredy_exist(name)
+
+        f= Function(name=name, execution=execution, code=code, params= params)
+        self.functiondict[name]= f
+
+    def add_decision_event(self, name: str, cat: str, execution, code= None, params: list=[]):
         '''
         Add an event to the map. If the event already exists, it will be updated
         :param event: the event
@@ -298,8 +312,8 @@ class Map:
         name= self.element_name(name)
         self.alredy_exist(name)
         
-        event= Event(name=name, dist=None, category=None, enabled=False, execution=execution, code=code, decisions=None, params= params)
-        self.eventdict[name]= event
+        event= DecisionEvent(name=name, category=cat, execution=execution, code=code, params= params)
+        self.decision_eventdict[name]= event
 
     
     def add_simulation_event(self, name: str, dist: Distribution, cat: str, enabled: bool, dec: list, execution, code= None):
@@ -320,8 +334,8 @@ class Map:
         if not self.categorydict.get(cat):
             raise Exception(f'The category {cat} doesn\'t exist')
         
-        event= Event(name=name, dist=self.all[dist], category=self.all[cat], enabled=enabled, execution=execution, code=code, decisions=dec, params= None)
-        self.eventdict[name]= event
+        event= SimulationEvent(name=name, dist=self.all[dist], category=self.all[cat], enabled=enabled, execution=execution, code=code, decisions=dec)
+        self.simulation_eventdict[name]= event
         
     def add_distribution(self, name: str, dist: Distribution, *args, **kwargs):
         '''

@@ -81,18 +81,62 @@ class Category(Element):
     def __str__(self) -> str:
         return f'{self.name}'
 
-
 class Event(Element):
-    def __init__(self, name: str, dist: Distribution, category: Category, execution, code=None, enabled: bool= True, decisions: list=[], params: list=[]):
+    def __init__(self, name: str, execution, code=None):
         super().__init__(name)
+        self.execution= execution
+        self.code= code
+
+    def __str__(self) -> str:
+        return f'{self.name}'
+
+    def execute(self, *args, **kwargs):
+        '''
+        Execute the event
+        '''
+        if not self.code:
+            return self.execution(*args, **kwargs)
+        
+        else:
+            self.execution(code=self.code, inside=1)
+
+
+class Function(Event):
+    def __init__(self, name: str, execution, code=None, params: list=[]):
+        super().__init__(name, execution, code)
+        self.execution= execution
+        self.code= code
+        self.params= params
+
+    
+    
+    def __str__(self) -> str:
+        return f'{self.name}'
+
+    def execute(self, *args, **kwargs):
+        '''
+        Execute the event
+        '''
+        if not self.code:
+            return self.execution(*args, **kwargs)
+        
+        else:
+            for i in kwargs:
+                if i not in self.params:
+                    raise ValueError(f'Error: {i} is not in the arguments')
+                else:
+                    self.params.remove(i)
+            params= {**{k:v for k,v in zip(self.params, args)}, **kwargs}
+            return self.execution(code=self.code, inside=1, vars= params)
+
+
+class SimulationEvent(Event):
+    def __init__(self, name: str, dist: Distribution, category: Category, execution, code=None, enabled: bool= True, decisions: list=[]):
+        super().__init__(name, execution, code)
         self.category= category
         self.distribution= dist
         self.enabled= enabled
-        self.execution= execution
-        self.code= code
         self.decisions= decisions
-        
-        self.params= params
 
     
     @property
@@ -105,35 +149,43 @@ class Event(Element):
     def __str__(self) -> str:
         return f'{self.name}'
 
-    def execute(self, *args, **kwargs):
-        '''
-        Execute the event
-        '''
-        if self.code:
-            
-            if not self.params:
-                self.execution(code=self.code, inside=1)
-            
-            else:
-                for i in kwargs:
-                    if i not in self.params:
-                        raise ValueError(f'Error: {i} is not in the arguments')
-                    else:
-                        self.params.remove(i)
-                params= {**{k:v for k,v in zip(self.params, args)}, **kwargs}
-                return self.execution(code=self.code, inside=1, vars= params)
-        else:
-            return self.execution(*args, **kwargs)
-
 
     def next(self) -> float:
         '''
         Returns the time of the next execution of the event
         '''
         return self.distribution.randvar()
+
+
+
+class DecisionEvent(Event):
+    def __init__(self, name: str, category: Category, execution, code=None, params: list=[]):
+        super().__init__(name, execution, code)
+        self.category= category
+        self.params= params
+
+        self.nation= None
     
     def __str__(self) -> str:
         return f'{self.name}'
+
+    def execute(self, *args, **kwargs):
+        '''
+        Execute the event
+        '''
+        if not self.nation:
+            raise ValueError('Error: Nation not defined')
+        params= {self.params: self.nation}
+        self.execution(vars= params,code=self.code, inside=1)
+    
+    def add_nation(self, nation):
+        self.nation= nation
+    
+    def get_event(self, nation):
+        event: DecisionEvent= copy(self)
+        event.add_nation(nation)
+        return event
+
 
 
 class Decision(Element):
