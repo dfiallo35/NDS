@@ -16,7 +16,6 @@ class PlanningDecisions(PlanningProblem):
             h_values[action]=1
         return h_values
 
-
     def is_goal_state(self,state):
         """Check if the state is a goal state."""
         return self.goal_state(state)
@@ -34,6 +33,7 @@ class ActionDecision(Action):
 
     def apply_action(self, state):     
         """return the new state after apply it an action"""   
-        return self.effects(state)
+        self.effects(state)
+        return state
 
 

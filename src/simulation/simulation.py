@@ -149,9 +149,10 @@ class Simulate:
         timed_decisions={}
         for nation in decisions.keys():
             timed_decisions[nation]= self.get_time(time,decisions[nation],distribution="uniform")
-        for time_dec in timed_decisions[nation]:
-            print("timedec",time_dec)
-            self.event_queue.push(time_dec)
+        # print("time-decisions",timed_decisions)
+            for time_dec in timed_decisions[nation]:
+                print("timedec",time_dec[0],time_dec[1].name)
+                self.event_queue.push(time_dec)
 
     
     def get_time(self,initial_time,decisions,distribution="uniform",scale=10):
