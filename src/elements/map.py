@@ -11,8 +11,6 @@ from inspect import getmembers as gm
 class Map:
     def __init__(self) -> None:
         self.nationdict = dict()
-        self.provincedict = dict()
-        self.neutraldict = dict()
         self.seadict = dict()
         self.traitdict = dict()
         
@@ -25,9 +23,9 @@ class Map:
         self.distdict= {k:Distribution(name=k, dist=v) for k,v in Distribution.distributions.items()}
         self.distributiondict= dict()
 
-        self.resources= set()
+        self.dataset= set()
 
-        self.province_neighbours= Graph()
+        self.neighbours_graph= Graph()
 
         self.en_dis_events= {
             'enable': [],
@@ -42,12 +40,15 @@ class Map:
         :param other: the other map
         :return: True if the maps are the same
         '''
+        if type(self) != type(new):
+            raise Exception(f'Error: "{self.name}" and "{new.name}" are not of the same type')
+        
         new_nations= copy(new.nationdict)
         changes= {
-                    'changed': {},
-                    'new': [],
-                    'lost': []
-                }
+                'changed': {},
+                'new': [],
+                'lost': []
+        }
         for nation in self.nationdict.values():
             if new.nationdict.get(nation.name):
                 new_nations.pop(nation.name)
@@ -68,19 +69,11 @@ class Map:
         Get the map elements
         :return: the map elements
         """
-        return {**self.nationdict, **self.provincedict, **self.neutraldict, **self.seadict}
+        return {**self.nationdict, **self.seadict}
     
     @property
     def nations(self) -> dict:
         return self.nationdict
-    
-    @property
-    def provinces(self) -> dict:
-        return self.provincedict
-    
-    @property
-    def neutrals(self) -> dict:
-        return self.neutraldict
     
     @property
     def seas(self) -> dict:
@@ -108,27 +101,17 @@ class Map:
     def decisions(self) -> dict:
         return self.decisionsdict
     
-    # @property
-    # def resources(self) -> set:
-    #     return self.resources
+    @property
+    def data(self) -> set:
+        return self.dataset
 
 
     @property
     def all(self) -> dict:
-        return {**self.nationdict, **self.provincedict, **self.neutraldict,
+        return {**self.nationdict, **self.distributiondict, **self.functiondict,
                 **self.seadict, **self.traitdict, **self.categorydict,
                 **self.simulation_eventdict, **self.decision_eventdict,
-                **self.decisionsdict, **self.distdict,
-                **self.distributiondict, **self.functiondict}
-    
-    @property
-    def nation_province(self) -> dict[list]:
-        """
-        Get the nation provinces
-        :return: the nation provinces
-        """
-        return {name: [province for province in nation.contains] for name, nation in self.nationdict.items()}
-
+                **self.decisionsdict, **self.distdict}
     
     @property
     def event_enabled_list(self):
@@ -161,55 +144,36 @@ class Map:
             if event.name in self.en_dis_events['enable']:
                 self.en_dis_events['enable'].remove(event.name)
 
-    def add_nation(self, name: str, provinces: list, traits: list= []):
+    def add_nation(self, name: str, population: int, extension: int, traits: list= [], neighbours: list= [], *args, **kwargs):
         '''
         Add a nation to the map
         :param name: the nation name
-        :param provinces: contains the provinces of the nation
-        :param traits: the nation traits
         '''
         name= self.element_name(name)
-        provinces= self.element_name(provinces)
         traits= self.element_name(traits)
-
         self.alredy_exist(name)
-        self.not_exist_list(provinces)
 
-        for nat in self.nationdict.values():
-            for prov in nat.provinces:
-                if prov in provinces:
-                    raise Exception(f'Province {prov} already in nation {nat.name}')
-
-        province_instances= dict()
-        for prov in provinces:
-            province_instances[prov]= self.provincedict[prov]
+        for data in kwargs:
+            if data not in self.dataset:
+                self.add_data_to_nations(data)
+                
         
-        nat= Nation(name, province_instances, traits)
+        nat= Nation(name, population, extension, traits, *args, **kwargs)
         self.nationdict[name]= nat
+        self.neighbours_graph.add_node(name)
+        self.add_edges(name, neighbours)
 
-
-    def add_province(self, name: str, extension: float, development: int, population: int, neighbours: list= [], **kwargs):
+    def add_data_to_nations(self, data: str):
         '''
-        Add a province to the map
-        :param name: the province name
-        :param extension: the province extension
-        :param developmen: the province development
-        :param population: the province population
-        :param neighbours: the province neighbours
+        Add data to a nation
+        :param nation: the nation
+        :param data: the data
+        :param value: the value
         '''
-        name= self.element_name(name)
-        neighbours= self.element_name(neighbours)
-
-        self.alredy_exist(name)
-        self.not_exist_list(neighbours)
-
-        for i in kwargs:
-            self.resources.add(i)
-        prov= Province(name, extension, development, population, **kwargs)
-        self.provincedict[name]= prov
-        self.province_neighbours.add_node(name)
-        self.__add_edges(name, neighbours)
-
+        for nat in self.nationdict.values():
+            nat: Nation= nat
+            if not nat.__dict__.get(data+'var'):
+                nat.add_data(data, None)
 
     def add_sea(self, name: str, extension: float, neighbours: list= []):
         '''
@@ -226,27 +190,9 @@ class Map:
 
         sea= Sea(name, extension, neighbours)
         self.seadict[name]= sea
-        self.province_neighbours.add_node(name)
-        self.__add_edges(name, neighbours)
+        self.neighbours_graph.add_node(name)
+        self.add_edges(name, neighbours)
 
-
-    def add_neutral(self, name: str, extension: float, neighbours: list= []):
-        '''
-        Add a neutral to the map
-        :param name: the neutral name
-        :param extension: the neutral extension
-        :param neighbours: the neutral neighbours
-        '''
-        name= self.element_name(name)
-        neighbours= self.element_name(neighbours)
-
-        self.alredy_exist(name)
-        self.not_exist_list(neighbours)
-
-        neutral= Neutral(name, extension, neighbours)
-        self.provincedict[name]= neutral
-        self.province_neighbours.add_node(name)
-        self.__add_edges(name, neighbours)
     
     def add_trait(self, name: str):
         '''
@@ -472,6 +418,7 @@ class Map:
         else:
             raise Exception(f'The map doesn\'t have the attribute {data}')
 
+    #fix
     def nation_neighbours(self, nation: str):
         """
         Get the nation neighbours
@@ -483,7 +430,7 @@ class Map:
 
         neighbours = []
         for province in self.nationdict[nation].contains:
-            neighbours.extend(self.province_neighbours[province])
+            neighbours.extend(self.neighbours_graph[province])
         neighbours = list(set(neighbours))
 
         nation_neighbours = []
@@ -518,15 +465,16 @@ class Map:
         else:
             return self.get_element_name(element)
 
-    def __add_edges(self, province: str, neighbours: list):
+
+    def add_edges(self, province: str, neighbours: list):
         """
         Add edges to the element
         :param element: the element
         :param neighbour: the neighbour list
         """
         for neighbour in neighbours:
-            if neighbour in self.provincedict or neighbour in self.neutraldict or neighbour in self.seadict:
-                self.province_neighbours.add_edge(province, neighbour)
+            if neighbour in self.seas or neighbour in self.nations:
+                self.neighbours_graph.add_edge(province, neighbour)
             else:
                 raise Exception("Map element not found")
 

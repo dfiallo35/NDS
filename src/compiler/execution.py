@@ -34,10 +34,8 @@ class Code:
     #fix
     def semantic_check(self, code):
         elements= {
-            'nation': {'args':2},
-            'province': {'args':4},
+            'nation': {'min':4},
             'sea': {'args':2},
-            'neutral': {'args':2},
             'trait': {'args':0},
             'category': {'args':0},
             'dec event': {'params':1, 'args':1},
@@ -132,9 +130,7 @@ class Code:
                     kwargs= self.to_python(kwargs)
                     elements={
                         'nation': self.map.add_nation,
-                        'province': self.map.add_province,
                         'sea': self.map.add_sea,
-                        'neutral': self.map.add_neutral,
                         'trait': self.map.add_trait,
                         'category': self.map.add_category,
                         'distribution': self.map.add_distribution,
@@ -428,12 +424,8 @@ class Code:
                     return Trait
                 elif obj.value == 'nation':
                     return Nation
-                elif obj.value == 'province':
-                    return Province
                 elif obj.value == 'sea':
                     return Sea
-                elif obj.value == 'neutral':
-                    return Neutral
                 else:
                     return None
                 

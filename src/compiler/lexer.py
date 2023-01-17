@@ -82,8 +82,6 @@ class NDSLexer(Lexer):
 
     #ELEMENTS
     NAME['nation'] = 'ELEMENT'
-    NAME['province'] = 'ELEMENT'
-    NAME['neutral'] = 'ELEMENT'
     NAME['sea'] = 'ELEMENT'
     NAME['trait'] = 'ELEMENT'
     NAME['category'] = 'ELEMENT'
