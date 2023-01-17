@@ -182,8 +182,12 @@ class DecisionEvent(Event):
         '''
         if not self.nation:
             raise ValueError('Error: Nation not defined')
-        params= {self.params[0]: self.nation}
-        self.execution(vars= params,code=self.code, inside=1)
+        
+        if not self.code:
+            self.execution(self.nation)
+        else: 
+            params= {self.params[0]: self.nation}
+            self.execution(vars=params,code=self.code, inside=1)
     
     def add_nation(self, nation):
         self.nation= nation
