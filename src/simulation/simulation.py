@@ -109,7 +109,7 @@ class Simulate:
                     self.map.log.add(time, event, old_map, self.map)
                     
                     self.generate_event(event, time)
-                    # self.decide(self.map, event, time)
+                    self.decide(self.map, event, time)
 
 
     def generate_event(self, event: Event, time: int):
