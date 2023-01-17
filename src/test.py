@@ -79,24 +79,24 @@ m.add_simulation_event(name="decrease_industrialization",dist=Distribution("unif
 
 def industrialization_increases( state,**kargs):
     state.change_data("economic_resources",-1000) 
-    state.change_data("industrialization",3)
-m.add_decision_event(name="industrialization_increases",cat= 'Economic',execution=industrialization_increases)
+    state.change_data("industrialization",10)
+m.add_decision_event(name="industrialization_increases",cat= 'Economic',execution=industrialization_increases,params=["a"])
 precond_industrialization =lambda state, **kwargs: state.get_nation_data("economic_resources")>1000
 m.add_decision(name="industrialization_increases_dec",event=m.events["industrialization_increases"],cond=None,execution=precond_industrialization)
 
 
 def average_living_standard_increases( state,**kargs):
-    state.change_data("economic_resources",-20000)
-    state.change_data("average_living_standard",1)
-m.add_decision_event(name="average_living_standard_increases",cat= 'Social',execution=average_living_standard_increases)
+    state.change_data("economic_resources",-2000000000000000000000000000000)
+    state.change_data("average_living_standard",3)
+m.add_decision_event(name="average_living_standard_increases",cat= 'Social',execution=average_living_standard_increases,params=["a"])
 precond_average_living_standard=lambda state, **kwargs: state.get_nation_data("economic_resources")>20000
 m.add_decision(name="average_living_standard_increases_dec",event=m.events["average_living_standard_increases"],cond=None,execution=precond_average_living_standard)
 
 
 def tourism_increases( state,**kargs):
-    state.change_data("economic_resources",-5000)
-    state.change_data("tourism",1)
-m.add_decision_event(name="tourism_increases",cat= 'Economic',execution=tourism_increases)
+    state.change_data("economic_resources",-500000000000000000000000000)
+    state.change_data("tourism",3)
+m.add_decision_event(name="tourism_increases",cat= 'Economic',execution=tourism_increases,params=["a"])
 precond_tourism=lambda state, **kwargs: state.get_nation_data("economic_resources")>5000
 m.add_decision(name="tourism_increases_dec",event=m.events["tourism_increases"],cond=None,execution=precond_tourism)
 
