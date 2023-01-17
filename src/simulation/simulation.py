@@ -150,13 +150,22 @@ class Simulate:
         changes=map.compare(new_map)        
         decisions=self.get_events_from_decisions(reaction_for_an_event(map, new_map,changes))
 
-        timed_decisions={}
         for nation in decisions.keys():
-            timed_decisions[nation]= self.get_time(time,decisions[nation],distribution="uniform")
-        # print("time-decisions",timed_decisions)
-            for time_dec in timed_decisions[nation]:
-                print("timedec",time_dec[0],time_dec[1].name)
+            nation_decs=self.get_time(time,decisions[nation],distribution="uniform")
+            for time_dec in nation_decs:
+                # time_dec[1]=time_dec[1].get_event(nation)
                 self.event_queue.push(time_dec)
+        
+
+        # timed_decisions={}
+        # for nation in decisions.keys():
+        #     timed_decisions[nation]= self.get_time(time,decisions[nation],distribution="uniform")
+        # #todo aqui agregar la nacion adentro del evento, para que sepa a que nacion pertenece y crear el tiempo en que debe ocurrir
+
+        # print("time-decisions",timed_decisions)
+            # for time_dec in timed_decisions[nation]:
+            #     print("timedec",time_dec[0],time_dec[1].name)
+            #     self.event_queue.push(time_dec)
 
     
     def get_time(self,initial_time,decisions,distribution="uniform",scale=10):
@@ -174,8 +183,9 @@ class Simulate:
         for nation in decisions.keys():
             events[nation]=[]
             for decision in decisions[nation]:
-                decision.event.enabled=True
-                events[nation].append(decision.event)
+                # decision.event.enabled=True
+                # event=decision.event.get_event(nation)
+                events[nation].append(decision.event.get_event(nation))
         return events
 
 
