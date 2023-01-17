@@ -110,8 +110,6 @@ class NDSLexer(Lexer):
     #check
     NAME['gen_dist'] = 'FUNC'
     NAME['simulate'] = 'FUNC'
-
-    NAME['random'] = 'FUNC'
     # NAME[''] = 'FUNC'
 
     #LOOPS

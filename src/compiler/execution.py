@@ -231,6 +231,9 @@ class Code:
                     else:
                         return self.to_object(Distribution.irvs(*args, **kwargs))
                 
+                elif line.subtype == 'gen_dist':
+                    ...
+                
                 
                 elif line.subtype == 'simulate':
                     params= self.args(line, inside_vars, inside)
