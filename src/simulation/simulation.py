@@ -85,6 +85,10 @@ class Simulate:
     @property
     def en_dis(self):
         return self.map.en_dis_events
+    
+    @property
+    def events(self):
+        return self.map.events
 
     def simulate(self, end_time: int) -> None:
         '''
@@ -97,7 +101,7 @@ class Simulate:
                 break
 
             for time, event in self.event_queue.pop():
-                if event.is_enabled and self.map.eventdict[event.name].is_enabled:
+                if event.is_enabled and self.events[event.name].is_enabled:
                     print(time, event)
 
                     old_map = copy(self.map)
@@ -105,7 +109,7 @@ class Simulate:
                     self.map.log.add(time, event, old_map, self.map)
                     
                     self.generate_event(event, time)
-                    self.decide(self.map, event, time)
+                    # self.decide(self.map, event, time)
 
 
     def generate_event(self, event: Event, time: int):

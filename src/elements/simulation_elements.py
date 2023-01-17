@@ -163,8 +163,15 @@ class DecisionEvent(Event):
         super().__init__(name, execution, code)
         self.category= category
         self.params= params
-
+        self.enabled= True
         self.nation= None
+    
+    @property
+    def is_enabled(self) -> bool:
+        '''
+        Returns if the event is enabled
+        '''
+        return self.enabled
     
     def __str__(self) -> str:
         return f'{self.name}'

@@ -130,14 +130,6 @@ class Map:
         """
         return {name: [province for province in nation.contains] for name, nation in self.nationdict.items()}
 
-    #fix
-    @property
-    def event_list(self):
-        '''
-        Get the events list
-        :return: the events list
-        '''
-        return self.eventdict.values()
     
     @property
     def event_enabled_list(self):
@@ -145,7 +137,7 @@ class Map:
         Get the enabled events list
         :return: the enabled events list
         '''
-        return [event for event in self.event_list if event.enabled]
+        return [event for event in self.simulation_eventdict.values() if event.enabled]
 
     def enable(self, event: Event):
         '''
