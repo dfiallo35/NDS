@@ -20,7 +20,6 @@ class Map:
         self.simulation_eventdict= dict()
         self.decision_eventdict= dict()
         self.functiondict= dict()
-        self.eventdict= dict()
         self.decisionsdict= dict()
         
         self.distdict= {k:Distribution(name=k, dist=v) for k,v in Distribution.distributions.items()}
