@@ -13,6 +13,7 @@ class NDSLexer(Lexer):
             'FOREACH', 'REPEAT', 'WHILE', 'IF', 'ELSE',
             
             'NOT', 'AND', 'OR', 'XOR',
+            
             'GREATER', 'EGREATER', 'LESS', 'ELESS', 'XPLUS', 'XMINUS', 'EQUALS', 'NOTEQUALS', 
     }
     

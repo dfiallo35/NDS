@@ -105,7 +105,7 @@ class Simulate:
                     self.map.log.add(time, event, old_map, self.map)
                     
                     self.generate_event(event, time)
-                    # self.decide(self.map, event, time)
+                    self.decide(self.map, event, time)
 
 
     def generate_event(self, event: Event, time: int):
@@ -145,25 +145,20 @@ class Simulate:
         event.execute(new_map)
         changes=map.compare(new_map)        
         decisions=self.get_events_from_decisions(reaction_for_an_event(map, new_map,changes))
-        # print("decisions to take for event ",event.name, [decision.name for decision in (decisions[nation] for nation in decisions.keys())])
-        # print("decisions to take for event ")
-        # for nation in decisions.keys():
-        #     for decision in decisions[nation]:
-        #         print(nation,decision.name)
+
         timed_decisions={}
         for nation in decisions.keys():
             timed_decisions[nation]= self.get_time(time,decisions[nation],distribution="uniform")
-        for time_dec in timed_decisions[nation]:
-            print("timedec",time_dec)
-            self.event_queue.push(time_dec)
-        # return decisions
+        # print("time-decisions",timed_decisions)
+            for time_dec in timed_decisions[nation]:
+                print("timedec",time_dec[0],time_dec[1].name)
+                self.event_queue.push(time_dec)
 
     
     def get_time(self,initial_time,decisions,distribution="uniform",scale=10):
         """Get the time of the event and return a list of tuples with the time and the event""" 
         distribution=Distribution(distribution,distribution)        
         timed_decisions=[]
-        # print("decisions in get_time",decisions)
         for decision in decisions:
             initial_time = int(initial_time + distribution.rvs() * scale)
             timed_decisions.append((initial_time, decision))            
@@ -176,10 +171,7 @@ class Simulate:
             events[nation]=[]
             for decision in decisions[nation]:
                 decision.event.enabled=True
-                # decisions[i]=decision.event
                 events[nation].append(decision.event)
-                # events[nation]=[decision.event for decision in decisions[nation]]#decisions[nation]
-        # return events
         return events
 
 
