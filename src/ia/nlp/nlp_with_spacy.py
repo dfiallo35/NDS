@@ -14,6 +14,28 @@ nlp = spacy.load("en_core_web_sm")
 
 # Initialize
 def main():
+    """
+    LLama a get_nations.get_all_countries() que retirn una lista de 191 paises
+    y un diccionario que tiene como llaves a los paises y como valores el índice
+    de desarrollo humano de estos
+
+    Por cada país en la lista llama a text_processing para analizar el contenido de 
+    su página de wikipedia y luego a match_sentence_processing para analizar lo que 
+    coincida con el área y la población del país  
+
+    Retorna dos diccionarios: countries_area con el área del país encontrada y 
+    countries_population con la población encontrada
+    ____________
+
+    Call get_nations.get_all_countries() that returns a list with 191 countries and
+    a dictionary with key as countries and values as their hdi
+
+    For every country in list calls to text_processing to analize its wikipedia page content
+
+    Returns two dictionaries: countries_area that saves for every country the area found in the 
+    wikipedia page content and countries_population that saves the population 
+    """
+
     # len(countries) = 191
     # the list 'countries' has the countries ordered by the hdi index rank
     # in 'country_hdi' is a dictionary with keys as countries and value as its hdi index
@@ -26,9 +48,9 @@ def main():
     countries_area = dict()
     countries_population = dict()
     
-    country_content = get_pages(countries)
+    country_content = get_pages(countries[60:80])
 
-    for country in countries:
+    for country in countries[60:80]:
         regions_to_process, area_to_process, population_to_process = text_processing(country, country_content[country])
 
         area, population = match_sentence_processing(country,  regions_to_process, area_to_process, population_to_process)
@@ -81,6 +103,18 @@ def for_tests():
 
 # OK
 def get_pages(countries: list):
+    """
+    Dada una lista de paises obtiene el contenido de su página de wikipedia
+
+    Retorna un dccionario con llaves como paises y valores como un string 
+    con el contenido
+    ______
+
+    Given a list of countries gets their wikipedia paage country
+    
+    return a dictionary with keys as countries and values as a string with the content 
+    """
+
     country_content = dict()
 
     # for country in countries[0:4]:
@@ -98,6 +132,14 @@ def get_pages(countries: list):
 
 
 def clean(doc):
+    """
+    Dado un documento de spacy elimina stopwords, lo "lemmatiza" y quita tokens vacíos
+    ________
+
+    Given an spacy doc removes stopwords, lemmatize and remomves empty tokens
+
+    returns the new text
+    """
     tokens = []
 
     # remove stopwords
@@ -114,6 +156,17 @@ def clean(doc):
 
 # OK
 def sent_tokenize(text: str):
+    """
+    Dado un string guarda su contenido en un documento spacy 
+
+    Retorna una lista de las oraciones de este docuemnto
+    ______
+
+    Given a string safes its content as a spacy doc and split it in sentences
+
+    return the list of sentences 
+    """
+
     raw_doc = nlp(text)
 
     clean_text = clean(raw_doc)
@@ -126,6 +179,13 @@ def sent_tokenize(text: str):
 
 
 def text_processing(country: str, content: str):  
+    """
+    Given a string tokenize its sentences and for every one of this search for matches 
+    with area and population content
+
+    return list with parts of sentences that matched
+    """
+
     sentences = sent_tokenize(content)
 
     list_regions = []
@@ -148,6 +208,10 @@ def text_processing(country: str, content: str):
 
 
 def match_pop(sent, population_sents):
+    """
+    Given a sentence search for matches about population content
+    """
+
     pop_matcher = population_matcher(sent)
 
     for match_id, start, end in pop_matcher:
@@ -157,7 +221,11 @@ def match_pop(sent, population_sents):
         # print("pop_matcher: ", span.text)
 
 
-def match_area(sent, area_sents):
+def match_area(sent, area_sents):    
+    """
+    Given a sentence search for matches about area content
+    """
+
     _area_matcher = area_matcher(sent)
 
     for match_id, start, end in _area_matcher:
@@ -167,6 +235,10 @@ def match_area(sent, area_sents):
 
 
 def regions_extract(sent):
+    """
+    Given a sentence returns the entities that are identified as localtions or geo-political entities
+    """
+
     list_regions = []
 
     for entity in sent.ents:
@@ -177,6 +249,10 @@ def regions_extract(sent):
 
 
 def population_matcher(sent):
+    """
+    Creates patterns to search matches in populations content
+    """
+
     matcher = Matcher(nlp.vocab)
     
     pattern = [
@@ -234,6 +310,10 @@ def population_matcher(sent):
 
 
 def area_matcher(sent):
+    """
+    Creates patterns to search matches in area content
+    """
+
     matcher = Matcher(nlp.vocab)
 
     pattern = [
@@ -363,6 +443,11 @@ def area_matcher(sent):
 
 
 def match_sentence_processing(country: str,  regions_to_process: list, sents_area_to_process, sents_population_to_process):
+    """
+    Given part of sentences that macthed with population and area content 
+    return the max value found within those matched in each case: population and area
+    """
+
     country_area = 0
     country_population = 0
 

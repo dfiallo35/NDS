@@ -2,6 +2,11 @@ import pandas as pd
 import requests
 from bs4 import *
 
+import sqlite3
+
+conn = sqlite3.connect('db.db')
+c = conn.cursor()
+
 
 def get_all_countries():
     """
@@ -28,6 +33,31 @@ def get_all_countries():
     # list_countries_hdi = df[df.columns[1]].values.tolist()
 
     # print(df)
+
+
+    # adding columns
+    df['Area'] = 0
+    df['Population'] = 0
+
+
+    population = get_population(list_of_countries)
+
+    # print(population, '....', len(population))
+
+    # for item in population:
+    #     if item[0] not in list_of_countries:
+    #         population.pop(item[0])
+
+    # print("-----")
+
+    # print(population, '....', len(population))
+
+    # for database
+    c.execute('CREATE TABLE IF NOT EXISTS countries (country_id integer, name text, area integer, population integer, hdi real) ')
+    conn.commit()
+    
+    # df.to_sql(name='hdi', con=conn, if_exists='replace')
+
 
     rc = df.to_records(index=False)
     rc_list = list(rc)
