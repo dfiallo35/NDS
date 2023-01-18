@@ -67,29 +67,36 @@ class Nation(MapElement):
 
     #fix
     def get_nation_data(self, data_name: str):
-        data= 0
-        for prov in self.contains.values():
-            if prov.data.get(data_name):
-                data+= prov.data[data_name]
-        return data
+        return self.data[data_name]
 
     def get_nation_all_data(self):
         """returns a dictionary with all the data(resources) of the nation"""
-        all_data = {}
-        for prov in self.contains.values():
-            for data_name in prov.data.keys():
-                if all_data.get(data_name):
-                    all_data[data_name]+= prov.data[data_name]
-                else:
-                    all_data[data_name]= prov.data[data_name]
-        return all_data
+        return self.data
+    
+    # def get_nation_data(self, data_name: str):
+    #     data= 0
+    #     for prov in self.contains.values():
+    #         if prov.data.get(data_name):
+    #             data+= prov.data[data_name]
+    #     return data
 
-    def change_data(self, data_name: str, value: int):
-        """distributes a change in the country's data(resources) equally among all its provinces"""
-        total_data=self.get_nation_data(data_name)
-        for prov in self.contains.values():
-            if prov.data.get(data_name):
-                prov.data[data_name]+= prov.data[data_name]*value/total_data
+    # def get_nation_all_data(self):
+    #     """returns a dictionary with all the data(resources) of the nation"""
+    #     all_data = {}
+    #     for prov in self.contains.values():
+    #         for data_name in prov.data.keys():
+    #             if all_data.get(data_name):
+    #                 all_data[data_name]+= prov.data[data_name]
+    #             else:
+    #                 all_data[data_name]= prov.data[data_name]
+    #     return all_data
+
+    # def change_data(self, data_name: str, value: int):
+    #     """distributes a change in the country's data(resources) equally among all its provinces"""
+    #     total_data=self.get_nation_data(data_name)
+    #     for prov in self.contains.values():
+    #         if prov.data.get(data_name):
+    #             prov.data[data_name]+= prov.data[data_name]*value/total_data
         
     def __str__(self):
         return f'{self.name}'

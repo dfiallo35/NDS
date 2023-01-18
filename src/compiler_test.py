@@ -4,25 +4,35 @@ from compiler.execution import *
 a= Code()
 a.compile(
     '''
-    category socialism();
-    category capitalism();
+    category social();
+    category economic();
 
-    nation Cuba(10, 100, [], [], pollo: 10);
-    nation USA(10, 100, [], []);
+    nation Cuba(10, 100, [], [], industrialization: 10,economic_resources:30000);
+    nation USA(10, 100, [], [],industrialization: 10,economic_resources:30000);
 
     distribution pg(expon, scale: 4);
 
-    decision event a (socialism)<<n>>{
-        show(n);
+    decision event industrialization_increases(economic)<<n>>{
+        n->economic_resources=n->economic_resources-5000;
+        n->industrialization=n->industrialization*0.9;
     }
 
-    simulation event population_growth(pg, socialism, true, []){
+    decision industrialization_increases_dec(n->economic_resources>=5000, industrialization_increases)<< n >>;
+
+    simulation event population_growth(pg, social, true, []){
         foreach <<nat>> (map->nations){
             nat->population= irvs(expon, loc: nat->population);
         }
     }
 
-    simulation event population_mortality(pg, socialism, true, []){
+    simulation event decrease_industrialization(pg,economic,true,[]){
+        foreach <<nat>> (map->nations){
+            nat->industrialization=nat->industrialization*0.9;
+        }
+    }
+
+
+    simulation event population_mortality(pg, social, true, []){
         foreach <<nat>> (map->nations){
             nat->population= nat->population - irvs(expon, loc: 0);
         }
@@ -30,7 +40,6 @@ a.compile(
 
     simulate(100d);
 
-    # decision a(n==1, a)<< n >>;
 
     '''
 )
