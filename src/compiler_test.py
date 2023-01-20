@@ -8,7 +8,7 @@ a.compile(
     category economic();
 
     nation Cuba(10, 100, [], [], industrialization: 10 , economic_resources:30000);
-    nation USA(10, 100, [], [],industrialization: 10 , economic_resources:30000);
+    nation USA(10, 100, [], [], industrialization: 10 , economic_resources:30000);
 
     distribution pg(expon, scale: 4);
 
