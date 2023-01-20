@@ -101,10 +101,13 @@ event population_mortality(pg, socialism, true, []){
 simulate( 100d );
 ```
 
-<h2> Ejecución del programa</h2>
+<h3> Ejecución del programa</h3>
 
 Para ejecutar el código, primero debe instalar las dependencias de Python que se encuentran en los requirements.txt con `pip install -r requirements.txt`. Luego ejecuta `streamlit run main.py` con el terminal en la dirección de la carpeta src, en caso de estar en otra dirección debes incluir la dirección en el comando `streamlit run <dirección>main.py`, luego la interfaz visual se muestra en el navegador predeterminado.
 
+<h2> Simulación</h2>
 
 
 
+
+<h2> Inteligencia Artificial</h2>

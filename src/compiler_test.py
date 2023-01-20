@@ -7,8 +7,8 @@ a.compile(
     category social();
     category economic();
 
-    nation Cuba(10, 100, [], [], industrialization: 10,economic_resources:30000);
-    nation USA(10, 100, [], [],industrialization: 10,economic_resources:30000);
+    nation Cuba(10, 100, [], [], industrialization: 10 , economic_resources:30000);
+    nation USA(10, 100, [], [],industrialization: 10 , economic_resources:30000);
 
     distribution pg(expon, scale: 4);
 
@@ -30,7 +30,6 @@ a.compile(
             nat->industrialization=nat->industrialization*0.9;
         }
     }
-
 
     simulation event population_mortality(pg, social, true, []){
         foreach <<nat>> (map->nations){
