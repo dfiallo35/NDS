@@ -342,7 +342,7 @@ class Map:
             else:
                 raise Exception(f'The property {key} doesn\'t exist')
 
-    
+    #check same tipe
     def data_update(self, element: str, data: dict):
         """
         Change the data of an element
@@ -354,23 +354,24 @@ class Map:
 
         properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
         for key in data:
-            if key in properties:
-                if type(data[key]) == type(properties[key].fget(self.all[element])):
-                    if type(data[key]) == list:
-                        for i in data[key]:
-                            if i in self.all:
-                                properties[key].fset(self.all[element], self.all[i])
-                            else:
-                                properties[key].fset(self.all[element], i)
-                    else:
-                        if data[key] in self.all:
-                            properties[key].fset(self.all[element], self.all[data[key]])
-                        else:
-                            properties[key].fset(self.all[element], data[key])
-                else:
-                    raise Exception(f'Error: the type of the property {key} is not {type(data[key])}')
-            else:
+            if key not in properties:
                 raise Exception(f'The element {element} doesn\'t have the attribute {key}')
+            
+            # if not type(data[key]) == type(properties[key].fget(self.all[element])):
+            #     raise Exception(f'Error: the type of the property {key} is not {type(data[key])}')
+            
+            if type(data[key]) == list:
+                for i in data[key]:
+                    if i in self.all:
+                        properties[key].fset(self.all[element], self.all[i])
+                    else:
+                        properties[key].fset(self.all[element], i)
+            else:
+                if data[key] in self.all:
+                    properties[key].fset(self.all[element], self.all[data[key]])
+                else:
+                    properties[key].fset(self.all[element], data[key])  
+                
 
     def data_delete(self, element: str, data: dict):
         """
