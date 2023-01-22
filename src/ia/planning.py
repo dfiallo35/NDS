@@ -88,9 +88,9 @@ def bfsearch(problem:PlanningProblem):
             return None
         state = queue.pop()
         if(problem.is_goal_state(state.value["state"])):
-                return state      
+                return state
         if state.value["state"] not in visited:
-            visited.add(state.value["state"])          
+            visited.add(state.value["state"])        
             h_values = problem.heuristic_function(state.value["state"],problem.actions)#dict with every action and the valued calculated by the heuristic function
             actions_to_do_ordered=ordered_actions_priority(state.value["state"],h_values)
             for action in actions_to_do_ordered:

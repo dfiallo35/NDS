@@ -22,9 +22,7 @@ def decrease_industrialization(map, **kwargs):
     for nation in map.nationdict.values():
         if(nation.data.get("industrialization")):
             nation.data["industrialization"]*=0.9
-m.add_simulation_event(name="decrease_industrialization",dist=Distribution("expon","expon",scale=10000),cat= 'Economic',enabled=True,dec=[],execution=decrease_industrialization)
-
-
+m.add_simulation_event(name="decrease_industrialization",dist=Distribution("expon","expon",scale=10, size=100),cat= 'Economic',enabled=True,dec=[],execution=decrease_industrialization)
 
 def bloqueo_effect(map, **kwargs):
     for nation in map.nationdict.values():

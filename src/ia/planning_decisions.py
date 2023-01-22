@@ -25,18 +25,15 @@ class ActionDecision(Action):
     def __init__(self, action, preconds, event):
         super().__init__(action, preconds, event.execute)
         self.event=event
-        # self.effects=event.execute
 
     def check_preconds(self,state):
         """Check if the preconditions are true"""      
         return self.preconds(state)
 
     def apply_action(self, state):     
-        """return the new state after apply it an action"""   
-        # print(state, self.action)
+        """return the new state after apply it an action""" 
         self.event.add_nation(state)
         self.event.execute()
-        # self.effects()
         return state
 
 
