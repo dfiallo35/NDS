@@ -6,7 +6,7 @@ from compiler.lexer import *
 from compiler.parser import *
 from compiler.parser_obj import *
 from simulation.simulation import *
-from ia.expert_system.expert_system import *
+# from ia.expert_system.expert_system import *
 
 
 
@@ -250,20 +250,20 @@ class Code:
                 
 
                 #Expert System
-                elif line.subtype == 'info':
-                    params= self.args(line, inside_vars, inside)
+                # elif line.subtype == 'info':
+                #     params= self.args(line, inside_vars, inside)
 
-                    engine= ExpertSystem()
-                    engine.reset()
+                #     engine= ExpertSystem()
+                #     engine.reset()
 
-                    if len(params) == 1:
-                        engine.declare(Info(nation=self.to_python(params[0])))
-                    elif len(params) == 2:
-                        ...
-                    elif len(params) == 3:
-                        ...
-                    c= engine.run()
-                    print('>>', engine.data)
+                #     if len(params) == 1:
+                #         engine.declare(Info(nation=self.to_python(params[0])))
+                #     elif len(params) == 2:
+                #         ...
+                #     elif len(params) == 3:
+                #         ...
+                #     c= engine.run()
+                #     print('>>', engine.data)
                         
                 
             
