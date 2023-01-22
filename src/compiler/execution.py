@@ -6,6 +6,7 @@ from compiler.lexer import *
 from compiler.parser import *
 from compiler.parser_obj import *
 from simulation.simulation import *
+from ia.expert_system.expert_system import *
 
 
 
@@ -46,14 +47,14 @@ class Code:
 
         #fix
         funcs= {
-            'type': 1,
-            'pos': 2,
-            'size': 1,
-            'simulate': 1,
+            'type': {'args':1},
+            'pos': {'args':2},
+            'size': {'args':1},
+            'simulate': {'args':1},
+            'info': {'min': 1, 'max': 3},
         }
 
         for line in code:
-            #elements
             if line.type == 'element':
                 if elements.get(line.subtype):
                     if elements[line.subtype].get('min') and len(line.args) < elements[line.subtype]['min']:
@@ -67,13 +68,20 @@ class Code:
                     if elements[line.subtype].get('params') and len(line.params) != elements[line.subtype]['params']:
                         el= elements[line.subtype]['params']
                         raise Exception(f'Error: The element {line.subtype} needs {el} parameters')
-                
+            
+            if line.type == 'func':                
+                if funcs.get(line.subtype):
+                    if funcs[line.subtype].get('min') and len(line.args) < funcs[line.subtype]['min']:
+                        f= funcs[line.subtype]['min']
+                        raise Exception(f'Error: The element {line.subtype} needs at least {f} parameters')
 
-
-            if line.type == 'func':
-                
-                if line.get('params') and funcs.get(line.subtype) and len(line.params) != funcs[line.subtype]:
-                    raise Exception(f'Error: The function {line.subtype} needs {funcs[line.subtype]} parameters')
+                    if funcs[line.subtype].get('args') and len(line.args) != funcs[line.subtype]['args']:
+                        f= funcs[line.subtype]['args']
+                        raise Exception(f'Error: The element {line.subtype} needs {f} arguments')
+                    
+                    if funcs[line.subtype].get('max') and len(line.params) > funcs[line.subtype]['max']:
+                        f= funcs[line.subtype]['max']
+                        raise Exception(f'Error: The element {line.subtype} accepts at most {f} parameters')
     
 
 
@@ -119,7 +127,7 @@ class Code:
                 elif line.subtype == 'decision':
                     args, kwargs= self.args_names(line, inside_vars, inside)
                     args= self.to_python([line.name, *args])
-                    kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'cond': line.condition, 'params': self.extra_params(line.params)}})
+                    kwargs= self.to_python({**kwargs, **{'execution': self.execute, 'cond': ParserObj(type='cond', cond=line.condition), 'params': self.extra_params(line.params)}})
                     self.map.add_decision(*self.to_python(args), **self.to_python(kwargs))
 
 
@@ -128,6 +136,7 @@ class Code:
                     args, kwargs= self.args_names(line, inside_vars, inside)
                     args= self.to_python([line.name, *args])
                     kwargs= self.to_python(kwargs)
+
                     elements={
                         'nation': self.map.add_nation,
                         'sea': self.map.add_sea,
@@ -222,6 +231,7 @@ class Code:
                     args, kwargs= self.args_names(line, inside_vars, inside)
                     args= self.to_python(args)
                     kwargs= self.to_python(kwargs)
+
                     if not isinstance(args[0], Distribution) and not kwargs.get('dist'):
                         raise Exception('Error: irvs() only accepts distributions as first parameter')
                     else:
@@ -237,6 +247,23 @@ class Code:
                         raise Exception('Error: simulate() only accepts time')
                     sim= Simulate(self.map, Pqueue(self.map.event_enabled_list))
                     sim.simulate(self.to_python(params[0]))
+                
+
+                #Expert System
+                elif line.subtype == 'info':
+                    params= self.args(line, inside_vars, inside)
+
+                    engine= ExpertSystem()
+                    engine.reset()
+
+                    if len(params) == 1:
+                        engine.declare(Info(nation=self.to_python(params[0])))
+                    elif len(params) == 2:
+                        ...
+                    elif len(params) == 3:
+                        ...
+                    c= engine.run()
+                    print('>>', engine.data)
                         
                 
             
@@ -345,6 +372,9 @@ class Code:
                     else:
                         raise Exception('Error: disable only accepts events')
 
+
+            elif line.type == 'cond':
+                return self.value(line.cond, inside_vars, inside+1)
 
             else:
                 raise Exception('Error: unknown type')
