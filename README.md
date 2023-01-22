@@ -69,36 +69,42 @@ Todos los detalles acerca de las reglas de gramática utilizada se puede ver en 
 <h4> Ejemplos de código</h4>
 
 ```
-category socialism();
-category capitalism();
+category social();
+category economic();
 
-province Havana(100, 10, 10345, []);
-province Mayabeque(236, 10, 204, []);
-province New_York(2056, 20, 103856, []);
-province California(341, 30, 402175, []);
+nation Cuba(10, 100, [], [], industrialization: 10 , economic_resources:30000);
+nation USA(10, 100, [], [], industrialization: 10 , economic_resources:30000);
 
-nation Cuba([Havana, Mayabeque], [socialism]);
-nation USA([New_York, California], [capitalism]);
+distribution pg(expon, scale: 100);
 
-distribution pg(expon, scale: 4);
+decision event industrialization_increases(economic)<<n>>{
+    n->economic_resources = n->economic_resources-5000;
+    n->industrialization = n->industrialization*0.9;
+}
 
-show(pos(Cuba->provinces, 0)->extension);
-pos(Cuba->provinces, 0) -> extension= 200;
-show(pos(Cuba->provinces, 0)->extension);
+decision industrialization_increases_dec(n->economic_resources >= 5000, industrialization_increases)<< n >>;
 
-event population_growth(pg, socialism, true, []){
-    foreach <<prov>> (map->provinces){
-        prov->population= irvs(expon, loc: prov->population);
+
+simulation event population_growth(pg, social, true, []){
+    foreach <<nat>> (map->nations){
+        nat->population= irvs(expon, loc: nat->population);
     }
 }
 
-event population_mortality(pg, socialism, true, []){
-    foreach <<prov>> (map->provinces){
-        prov->population= prov->population - irvs(expon, loc: 0);
+simulation event decrease_industrialization(pg,economic,true,[]){
+    foreach <<nat>> (map->nations){
+        nat->industrialization=nat->industrialization*0.9;
     }
 }
 
-simulate( 100d );
+simulation event population_mortality(pg, social, true, []){
+    foreach <<nat>> (map->nations){
+        nat->population= nat->population - irvs(expon, loc: 0);
+    }
+}
+
+simulate(100d);
+
 ```
 
 <h3> Ejecución del programa</h3>
