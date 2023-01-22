@@ -343,16 +343,17 @@ class Map:
                 raise Exception(f'The property {key} doesn\'t exist')
 
     #check same tipe
+    #check self.all
     def data_update(self, element: str, data: dict):
         """
         Change the data of an element
         :param element: the element
         :param data: the new data
         """
-        element= self.element_name(element)
-        self.not_exist(element)
+        # element= self.element_name(element)
+        # self.not_exist(element)
 
-        properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
+        properties= {name:val for (name, val) in gm(type(element), lambda x: isinstance(x, property))}
         for key in data:
             if key not in properties:
                 raise Exception(f'The element {element} doesn\'t have the attribute {key}')
@@ -362,15 +363,9 @@ class Map:
             
             if type(data[key]) == list:
                 for i in data[key]:
-                    if i in self.all:
-                        properties[key].fset(self.all[element], self.all[i])
-                    else:
-                        properties[key].fset(self.all[element], i)
+                    properties[key].fset(element, i)
             else:
-                if data[key] in self.all:
-                    properties[key].fset(self.all[element], self.all[data[key]])
-                else:
-                    properties[key].fset(self.all[element], data[key])  
+                properties[key].fset(element, data[key])  
                 
 
     def data_delete(self, element: str, data: dict):
