@@ -13,11 +13,21 @@ a.compile(
     distribution pg(expon, scale: 100);
 
     decision event industrialization_increases(economic)<<n>>{
-        n->economic_resources=n->economic_resources-5000;
-        n->industrialization=n->industrialization*0.9;
+        n->economic_resources = n->economic_resources-5000;
+        n->industrialization = n->industrialization*0.9;
     }
+    # function prec_ind_increases <<n>>{
+    #     if n->economic_resources <5000{
+    #         return false;
+    #     }
+    #     else {
+    #         return true;
+    #     }
+    #     #return n->economic_resources > 5000;
+    # }
+    # decision industrialization_increases_dec(prec_ind_increases, industrialization_increases)<< n >>;
+    decision industrialization_increases_dec(n->economic_resources >= 5000, industrialization_increases)<< n >>;
 
-    decision industrialization_increases_dec(n->economic_resources>=5000, industrialization_increases)<< n >>;
 
     simulation event population_growth(pg, social, true, []){
         foreach <<nat>> (map->nations){
