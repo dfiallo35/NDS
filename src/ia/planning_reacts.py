@@ -21,7 +21,7 @@ def get_only_actions(tree):
     dec=[i["action"] if i["action"] else None for i in get_path(tree)]
     return [i for i in dec if i]
 
-def transform_decisions(map_decisions):
+def transform_decisions( map_decisions):
     """Transform the decisions of the map into a list of actions""" 
     decisions=[]
     for decision in map_decisions.values():

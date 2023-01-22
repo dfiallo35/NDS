@@ -32,8 +32,10 @@ class ActionDecision(Action):
 
     def apply_action(self, state):     
         """return the new state after apply it an action""" 
-        self.event.add_nation(state)
-        self.event.execute()
+        # self.event.add_nation(state)
+        # self.event.execute()
+        new_event=self.event.get_event(state)
+        new_event.execute()
         return state
 
 

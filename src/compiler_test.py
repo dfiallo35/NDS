@@ -10,7 +10,9 @@ a.compile(
     nation Cuba(10, 100, [], [], industrialization: 10 , economic_resources:100000, tourism:10, average_living_standard:10);
     nation USA(10, 100, [], [], industrialization: 100 , economic_resources:500000, tourism:90, average_living_standard:100);
 
-    distribution pg(expon, scale: 10);
+    distribution pg(expon, scale: 50);
+    distribution block(expon, scale: 100);
+
 
     decision event industrialization_increases(economic)<<n>>{
         n->economic_resources = n->economic_resources-5000;
@@ -31,8 +33,6 @@ a.compile(
     decision average_living_standard_increases_dec(n->economic_resources >= 3000, average_living_standard_increases)<< n >>;
 
 
-
-
     simulation event population_growth(pg, social, true, []){
         foreach <<nat>> (map->nations){
             nat->population= irvs(expon, loc: nat->population);
@@ -45,7 +45,7 @@ a.compile(
         }
     }
 
-    simulation event intensification_of_the_blockade(pg,economic,true,[]){        
+    simulation event intensification_of_the_blockade(block,economic,true,[]){        
         foreach <<nat>> (map->nations){
             if nat == Cuba {
                 nat->industrialization=nat->industrialization*0.9;
@@ -61,7 +61,7 @@ a.compile(
         }
     }
 
-    simulate(100d);
+    simulate(10d);
 
 
     '''
