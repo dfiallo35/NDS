@@ -23,7 +23,7 @@ class Distribution(Element):
     
     def rvs(dist, *args, **kwargs):
         d= dist.distribution.rvs(*args, **kwargs)
-        if isinstance(d, list) or isinstance(dist, np.ndarray):
+        if isinstance(d, list) or isinstance(d, np.ndarray):
             return [float(i) for i in d]
         else:
             return float(d)
@@ -31,7 +31,7 @@ class Distribution(Element):
     
     def irvs(dist, *args, **kwargs):
         d= dist.distribution.rvs(*args, **kwargs)
-        if isinstance(d, list) or isinstance(dist, np.ndarray):
+        if isinstance(d, list) or isinstance(d, np.ndarray):
             return [int(i) for i in d]
         else:
             return int(d)
@@ -43,7 +43,11 @@ class Distribution(Element):
         '''
         Returns a random variable from the distribution
         '''
-        return int(self.distribution.rvs(loc=loc, *self.args, **self.kwargs))
+        d= self.distribution.rvs(loc=loc, *self.args, **self.kwargs)
+        if isinstance(d, list) or isinstance(d, np.ndarray):
+            return [int(i) for i in d]
+        else:
+            return int(d)
     
     def generate_distribution(name: str, data: list, bins:int=100, **kwargs):
         '''

@@ -10,7 +10,7 @@ a.compile(
     nation Cuba(10, 100, [], [], industrialization: 10 , economic_resources:30000);
     nation USA(10, 100, [], [], industrialization: 10 , economic_resources:30000);
 
-    distribution pg(expon, scale: 4);
+    distribution pg(expon, scale: 100);
 
     decision event industrialization_increases(economic)<<n>>{
         n->economic_resources=n->economic_resources-5000;

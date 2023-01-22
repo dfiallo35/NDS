@@ -25,7 +25,7 @@ def transform_decisions(map_decisions):
     """Transform the decisions of the map into a list of actions""" 
     decisions=[]
     for decision in map_decisions.values():
-        decisions.append(ActionDecision(action=decision.name ,preconds=decision.execution,event=decision.event))
+        decisions.append(ActionDecision(action=decision.name ,preconds=decision.condition,event=decision.event))
     return decisions
 
 def get_affected_nations(map,changes):
