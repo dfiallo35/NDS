@@ -107,22 +107,11 @@ class Nation(MapElement):
         if type(self) != type(new):
             raise Exception(f'Error: "{self.name}" and "{new.name}" are not of the same type')
 
-        changes= {
-            'new': [],
-            'lost': [],
-            'changed': {}
-        }
-        new_data= copy(new.data)
+        changes= dict()
         for key in self.data.keys():
-            if new.data.get(key) != None:
-                new_data.pop(key)
-                if self.data[key] != new.data[key]:
-                    changes['changed'][key]= (self.data[key], new.data[key])
-            else:
-                changes['lost'].append(copy(key))
-        changes['new']= [i for i in new_data]
-
-        if changes['changed'] or changes['new'] or changes['lost']:
+            if self.data[key] != new.data[key]:
+                changes[key]= (self.data[key], new.data[key])
+        if changes:
             return changes
         return None
          

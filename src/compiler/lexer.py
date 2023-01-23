@@ -108,6 +108,9 @@ class NDSLexer(Lexer):
     #check
     NAME['gen_dist'] = 'FUNC'
     NAME['simulate'] = 'FUNC'
+
+    NAME['plot'] = 'FUNC'
+    NAME['dataframe'] = 'FUNC'
     # NAME[''] = 'FUNC'
 
     #LOOPS

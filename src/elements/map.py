@@ -399,12 +399,12 @@ class Map:
             raise Exception(f'The map doesn\'t have the attribute {data}')
     
     def get_data(self, element: str, data: str, *args, **kwargs):
-        element= self.element_name(element)
-        self.not_exist(element)
+        # element= self.element_name(element)
+        # self.not_exist(element)
 
-        properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
+        properties= {name:val for (name, val) in gm(type(element), lambda x: isinstance(x, property))}
         if data in properties:
-            return properties[data].fget(self.all[element], *args, **kwargs)
+            return properties[data].fget(element, *args, **kwargs)
         else:
             raise Exception(f'The element {element} doesn\'t have the attribute {data}')
                 

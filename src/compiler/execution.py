@@ -8,12 +8,16 @@ from compiler.parser_obj import *
 from simulation.simulation import *
 # from ia.expert_system.expert_system import *
 
+import pandas as pd
 
 
 class Code:
     def __init__(self):
         self.map= Map()
         self.vars= dict()
+
+        self.plots= []
+        self.dataframes= []
     
     @property
     def elements(self):
@@ -51,7 +55,8 @@ class Code:
             'pos': {'args':2},
             'size': {'args':1},
             'simulate': {'args':1},
-            'info': {'min': 1, 'max': 3},
+            'plot': {'args':3},
+            'dataframe': {'args':2},
         }
 
         for line in code:
@@ -164,7 +169,8 @@ class Code:
                             self.map.update(element=self.to_python(self.value(line.name, inside_vars, inside)),
                                         data={'delete':{self.to_python(line.var): self.to_python(self.value(line.value, inside_vars, inside))}})
                     
-                    else:    
+                    else:
+
                         self.map.update(element=self.to_python(self.value(line.name, inside_vars, inside)),
                                     data={'update':{self.to_python(line.var): self.to_python(self.value(line.value, inside_vars, inside))}})
                 
@@ -249,21 +255,128 @@ class Code:
                     sim.simulate(self.to_python(params[0]))
                 
 
-                #Expert System
-                # elif line.subtype == 'info':
-                #     params= self.args(line, inside_vars, inside)
+                elif line.subtype == 'plot':
+                    params= self.args(line, inside_vars, inside)
+                    if self.to_python(params[2]) not in ['line', 'area', 'bar']:
+                        raise Exception('Error: plot() only acept line, area or bar as third parameter')
 
-                #     engine= ExpertSystem()
-                #     engine.reset()
+                    if isinstance(params[0], Nation) and not isinstance(params[1], array):
+                        if params[0].name not in self.elements:
+                            raise Exception('Error: the element is not recognized')
+                        self.map.get_data(self.to_python(params[0]), self.to_python(params[1]))
+                        
+                        self.plots.append(
+                            (self.to_python(params[2]),
+                            pd.DataFrame(
+                                self.map.log.get_nation_data(self.to_python(params[0].name), self.to_python(params[1])),
+                                columns=[self.to_python(params[1])]
+                            )
+                            )
+                        )
 
-                #     if len(params) == 1:
-                #         engine.declare(Info(nation=self.to_python(params[0])))
-                #     elif len(params) == 2:
-                #         ...
-                #     elif len(params) == 3:
-                #         ...
-                #     c= engine.run()
-                #     print('>>', engine.data)
+                    elif isinstance(params[0], array) and not isinstance(params[1], array):
+                        gn= []
+                        columns= []
+
+                        for nat in self.to_python(params[0]):
+                            if isinstance(nat, Nation):
+                                if nat.name not in self.elements:
+                                    raise Exception('Error: the element is not recognized')
+                                self.map.get_data(self.to_python(nat), self.to_python(params[1]))
+                                
+                                gn.append(self.map.log.get_nation_data(self.to_python(nat.name), self.to_python(params[1])))
+                                columns.append(nat.name)
+                        
+                        self.plots.append(
+                            (self.to_python(params[2]),
+                            pd.DataFrame(
+                                [list(i) for i in list(zip(*gn))],
+                                columns=columns
+                            )
+                            )
+                        )
+
+                    elif not isinstance(params[0], array) and isinstance(params[1], array):
+                        if params[0].name not in self.elements:
+                            raise Exception('Error: the element is not recognized')
+                        gn= []
+                        columns= []
+
+                        for data in self.to_python(params[1]):
+                            self.map.get_data(self.to_python(params[0]), self.to_python(data))
+                            
+                            gn.append(self.map.log.get_nation_data(self.to_python(params[0].name), self.to_python(data)))
+                            columns.append(self.to_python(data))
+                        
+                        self.plots.append(
+                            (self.to_python(params[2]),
+                            pd.DataFrame(
+                                [list(i) for i in list(zip(*gn))],
+                                columns=columns
+                            )
+                            )
+                        )
+                    
+                    else:
+                        raise Exception('Error: plot() only accepts nations or arrays as first and second parameters')
+
+                
+                elif line.subtype == 'dataframe':
+                    params= self.args(line, inside_vars, inside)
+
+                    if isinstance(params[0], Nation) and not isinstance(params[1], array):
+                        if params[0].name not in self.elements:
+                            raise Exception('Error: the element is not recognized')
+                        self.map.get_data(self.to_python(params[0]), self.to_python(params[1]))
+                        
+                        self.dataframes.append(
+                            pd.DataFrame(
+                                self.map.log.get_nation_data(self.to_python(params[0].name), self.to_python(params[1])),
+                                columns=[self.to_python(params[1])]
+                            )
+                        )
+
+                    elif isinstance(params[0], array) and not isinstance(params[1], array):
+                        gn= []
+                        columns= []
+
+                        for nat in self.to_python(params[0]):
+                            if isinstance(nat, Nation):
+                                if nat.name not in self.elements:
+                                    raise Exception('Error: the element is not recognized')
+                                self.map.get_data(self.to_python(nat), self.to_python(params[1]))
+                                
+                                gn.append(self.map.log.get_nation_data(self.to_python(nat.name), self.to_python(params[1])))
+                                columns.append(nat.name)
+                        
+                        self.dataframes.append(
+                            pd.DataFrame(
+                                [list(i) for i in list(zip(*gn))],
+                                columns=columns
+                            )
+                        )
+
+                    elif not isinstance(params[0], array) and isinstance(params[1], array):
+                        if params[0].name not in self.elements:
+                            raise Exception('Error: the element is not recognized')
+                        gn= []
+                        columns= []
+
+                        for data in self.to_python(params[1]):
+                            self.map.get_data(self.to_python(params[0]), self.to_python(data))
+                            
+                            gn.append(self.map.log.get_nation_data(self.to_python(params[0].name), self.to_python(data)))
+                            columns.append(self.to_python(data))
+                        
+                        self.dataframes.append(
+                            pd.DataFrame(
+                                [list(i) for i in list(zip(*gn))],
+                                columns=columns
+                            )
+                        )
+                    
+                    else:
+                        raise Exception('Error: dataframe() only accepts nations or arrays as first and second parameters')
                         
                 
             

@@ -33,6 +33,8 @@ class Log:
         self.log= {}
         self.initial_map= initial_map
         self.actual_map= initial_map
+
+        self.graphs= dict()
     
     def add(self, time: int, event, old_map, new_map):
         '''
@@ -44,15 +46,32 @@ class Log:
         '''
         data= old_map.compare(new_map)
         self.actual_map= new_map
-        self.log[time]= (event, data)
+        if self.log.get(time):
+            self.log[time].append((event, data))
+        else:
+            self.log[time]= [(event, data)]
     
     def get_day_data(self, day: int):
         '''
         Return the data of the day
         :param day: the day
         '''
-        data= {}
-        for time in self.log.keys():
-            if time == day:
-                data[time]= self.log[time]
-        return data
+        return self.log.get(day)
+    
+    def get_nation_data(self, nation: str, data: str):
+        l= []
+        for time in range(0, list(self.log.keys())[-1]+1):
+            if l:
+                #fix
+                datavar=l[-1]
+            else:
+                datavar=self.initial_map.get_data(self.initial_map.all[nation], data)
+
+            if self.log.get(time):
+                for d in self.log[time]:
+                    if d[1] and nation in d[1]['changed'] and data + 'var' in d[1]['changed'][nation]:
+                        datavar= d[1]['changed'][nation][data + 'var'][1]
+            l.append(datavar)
+        return l
+
+    
