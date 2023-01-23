@@ -30,7 +30,7 @@ def clean(doc):
 
 def sent_tokenize(text: str):
     """
-    Dado un string guarda su contenido en un documento spacy 
+    Dado un string guarda su contenido en un documento spacy
 
     Retorna una lista de las oraciones de este documento
     """
@@ -83,7 +83,6 @@ def text_processing(content: str):
         #     life_exp_sents, "life_exp"))
         sents_proc(life_exp_sents, "life_exp", result_list)
 
-
     return result_list
 
     # print(result_list)
@@ -92,7 +91,9 @@ def text_processing(content: str):
 def sents_proc(sents, id: str, result_list: list):
     # result_list = []
 
-    for span in sents:
+    if len(sents) > 0:
+        # for span in sents[len(sents) - 1]:
+        span = sents[len(sents) - 1]
         date = ''
         country = ''
 
@@ -165,7 +166,7 @@ def match_pop(sent, pop_sents):
     for match_id, start, end in pop_matcher:
         span = sent[start:end]
 
-        population_sents.append(span)
+        pop_sents.append(span)
 
 
 def population_matcher(sent):
@@ -279,8 +280,9 @@ def life_exp_matcher(sent):
 
     return matches
 
-# for item in text_processing("What was the life expectancy of Cuba in 2020"):
+
+# for item in text_processing("What was the population and the life expectancy of Cuba in 2020"):
 #     print("   ")
 #     print(item)
 
-# print(text_processing("What was the life expectancy of Cuba in 2020"))
+# print(text_processing("What was the population and the life expectancy of Cuba in 2020"))
