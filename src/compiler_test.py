@@ -2,6 +2,8 @@ from compiler.execution import *
 
 
 a= Code()
+import time
+t= time.time()
 a.compile(
     '''
     category social();
@@ -10,8 +12,8 @@ a.compile(
     nation Cuba(10, 100, [], [], industrialization: 10 , economic_resources:100000, tourism:10, average_living_standard:10);
     nation USA(10, 100, [], [], industrialization: 100 , economic_resources:500000, tourism:90, average_living_standard:100);
 
-    distribution pg(expon, scale: 50);
-    distribution block(expon, scale: 100);
+    distribution pg(expon, scale: 10);
+    distribution block(expon, scale: 50);
 
 
     decision event industrialization_increases(economic)<<n>>{
@@ -61,8 +63,9 @@ a.compile(
         }
     }
 
-    simulate(10d);
+    simulate(40d);
 
 
     '''
 )
+print('>>>>>', time.time()-t)

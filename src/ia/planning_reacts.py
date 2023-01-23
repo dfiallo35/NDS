@@ -9,6 +9,7 @@ def reaction_for_an_event(map,new_map,changes,event):
     nations = get_affected_nations(new_map,changes)
     decisions={}
     possible_decisions=transform_decisions(map.decisions)
+    # print(possible_decisions)
     for nation in nations:
         goal_func,goal_dict=get_target(nation,changes)
         decisions[nation]= get_only_actions(PlanningDecisions(nation,possible_decisions,goal_func,event,goal_dict).make_planning())
