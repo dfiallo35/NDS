@@ -1,5 +1,6 @@
 from copy import deepcopy
 from scipy.special import factorial
+import time
 
 class PlanningProblem:
     """General Planning Problem"""
@@ -100,7 +101,7 @@ def bfsearch(problem:PlanningProblem):
     while not queue.empty():
         iterations+=1
         max_iterations=factorial(len(problem.actions))*5
-        print("iterations and max_iterations",iterations,max_iterations)
+        # print("iterations and max_iterations",iterations,max_iterations)
         if iterations > max_iterations:
             return None
         state = queue.pop()
@@ -109,14 +110,23 @@ def bfsearch(problem:PlanningProblem):
         if state.value["state"] not in visited:
             visited.add(state.value["state"])        
             # h_values = problem.heuristic_function(state.value["state"],problem.actions)#dict with every action and the valued calculated by the heuristic function
+            t1= time.time()
             new_states=get_new_states(problem.actions,state.value["state"])
+            t2=time.time()
+            print("time to get new states",t2-t1)
             h_values = problem.state_value(state.value["state"],new_states)#dict with every action and the valued calculated by the heuristic function
+            t3=time.time()
+            print("time to get heuristic",t3-t2)
             actions_to_do_ordered=ordered_actions_priority(h_values)
+            t4=time.time()
+            print("time to get actions ordered",t4-t3)
             for action in actions_to_do_ordered:
                 # next_state=actions_to_do_ordered[action]#action.apply_action(deepcopy(state.value["state"]))
                 next_state=StateNode(value={"action":action,"state":new_states[action]})
                 state.add_son(next_state)
                 queue.push(next_state)
+            t5=time.time()
+            print("time to put the actions in the queue and create the state",t5-t4)
     return None # No solution found
 
 def get_new_states(actions,state):
@@ -141,50 +151,6 @@ def ordered_actions_priority_rec(h_values,ordered_actions:list):
     ordered_actions.append(action)
     ordered_actions_priority_rec(h_values,ordered_actions)
 
-
-
-# def bfsearch(problem:PlanningProblem):
-#     """Breadth-first search algorithm for a Planning Problem"""    
-#     queue = Queue()
-#     visited = set()   
-#     iterations=0
-#     queue.push(StateNode(value={"state":problem.initial_state,"action":None}))
-#     while not queue.empty():
-#         iterations+=1
-#         if iterations > factorial(len(problem.actions)):
-#             return None
-#         state = queue.pop()
-#         if(problem.is_goal_state(state.value["state"])):
-#                 return state
-#         if state.value["state"] not in visited:
-#             visited.add(state.value["state"])        
-#             # h_values = problem.heuristic_function(state.value["state"],problem.actions)#dict with every action and the valued calculated by the heuristic function
-#             h_values = problem.state_value(state.value["state"],problem.actions)#dict with every action and the valued calculated by the heuristic function
-#             actions_to_do_ordered=ordered_actions_priority(state.value["state"],h_values)
-#             for action in actions_to_do_ordered:
-#                 next_state=action.apply_action(deepcopy(state.value["state"]))
-#                 next_state=StateNode(value={"action":action,"state":next_state})
-#                 state.add_son(next_state)
-#                 queue.push(next_state)
-
-
-# def ordered_actions_priority(state,h_values):
-#     """receive a dict of actions and it's values and return a list of actions ordered by priority
-#      and comprobate that the state accomplish the precondition for each one"""
-#     ordered_actions=[]
-#     ordered_actions_priority_rec(state,h_values,ordered_actions)
-#     return ordered_actions
-
-# def ordered_actions_priority_rec(state,h_values,ordered_actions:list):
-#     """receive a dict of actions and it's values and return a list of actions ordered by priority
-#      and comprobate that the state accomplish the precondition for each one"""
-#     if not h_values:
-#         return
-#     action = min(h_values, key=h_values.get)    
-#     h_values.pop(action)
-#     if action.check_preconds(state):
-#         ordered_actions.append(action)
-#     ordered_actions_priority_rec(state,h_values,ordered_actions)
 
 
 def get_path(state):

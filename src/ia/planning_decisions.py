@@ -13,6 +13,7 @@ class PlanningDecisions(PlanningProblem):
 
     def heuristic_function(self,state, actions_states):
         """Heuristic for the decisions problem."""
+        # return {action:0 for action in actions_states.keys()}
         h_values={}
         for action in actions_states.keys():
             h_values[action]=5
@@ -58,10 +59,10 @@ class ActionDecision(Action):
 
     def apply_action(self, state):     
         """return the new state after apply it an action""" 
-        # self.event.add_nation(state)
-        # self.event.execute()
-        new_event=self.event.get_event(state)
-        new_event.execute()
+        self.event.add_nation(state)
+        self.event.execute()
+        # new_event=self.event.get_event(state)
+        # new_event.execute()
         return state
 
 

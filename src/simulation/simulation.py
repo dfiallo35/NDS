@@ -4,6 +4,8 @@ from ia.planning_reacts import reaction_for_an_event
 
 from queue import PriorityQueue
 a = PriorityQueue()
+import time as cp_time
+
 
 class Pqueue:
     def __init__(self, events: list[Event]= []):
@@ -103,19 +105,28 @@ class Simulate:
             for time, event in self.event_queue.pop():
                 if event.is_enabled and self.events[event.name].is_enabled:
                     print(time, event)
-
+                    t1=cp_time.time()
                     old_map = copy(self.map)
                     # for nation in self.map.nationdict.values():
                     #     print(event,nation.name,nation.get_nation_all_data())
 
+                    t=cp_time.time()
+                    print('time to copy the map',event.name,t-t1)
+
                     event.execute(self.map)
                     # for nation in self.map.nationdict.values():
                     #     print(event,nation.name,nation.get_nation_all_data())
-
+                    t2=cp_time.time()
+                    print('time to do the event',event.name,t2-t)
                     self.map.log.add(time, event, old_map, self.map)
-                    
+                    t5=cp_time.time()
+                    print('time to do the log',event.name,t5-t2)
                     self.generate_event(event, time)
+                    t3=cp_time.time()
+                    print('time to generate the next event',event.name,t3-t5)
                     self.decide(old_map,self.map, event, time)
+                    t4=cp_time.time()
+                    print('time to return the decisions',event.name,t4-t3)
 
 
     def generate_event(self, event: Event, time: int):
@@ -154,16 +165,24 @@ class Simulate:
         :param event: the event that occurred
         :param time: the time the event occurred
         '''
+
         if map.decision_eventdict.get(event.name):
             return
-        changes=old_map.compare(map)        
+        t=cp_time.time()
+        changes=old_map.compare(map)  
+        t1=cp_time.time() 
+        print("time_to compare",t1-t)
         decisions=self.get_events_from_decisions(reaction_for_an_event(old_map, map,changes,event))
+        t2=cp_time.time() 
+        print("time_to get decisions in decide",t2-t1)
 
         for nation in decisions.keys():
             nation_decs=self.get_time(time,decisions[nation],distribution="uniform")
             for time_dec in nation_decs:
                 print("planning",time_dec[0],time_dec[1].name,nation)
                 self.event_queue.push(time_dec)
+        t3=cp_time.time() 
+        print("time_to get decisions time and push in queue in decide",t3-t2)
         
 
     
