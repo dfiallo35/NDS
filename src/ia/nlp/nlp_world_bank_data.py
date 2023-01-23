@@ -95,7 +95,7 @@ def sents_proc(sents, id: str, result_list: list):
         # for span in sents[len(sents) - 1]:
         span = sents[len(sents) - 1]
         date = ''
-        country = ''
+        country = []
 
         for token in span:
             if token.ent_type_ == 'DATE':
@@ -103,38 +103,38 @@ def sents_proc(sents, id: str, result_list: list):
 
             if token.ent_type_ == 'GPE':
                 # country = token.text
-                country = wbd.search_countries(token.text)[0]['iso2Code']
+                country.append(wbd.search_countries(token.text)[0]['iso2Code'])
 
                 # print(wbd.search_countries(country)[0]['iso2Code'])
 
         if id == "population":
             try:
                 result_list.append(wb.get_series('SP.POP.TOTL', country=country,
-                                                 date=date, id_or_value='id', simplify_index=True))
+                                                 date=date, id_or_value='id', simplify_index=False))
                 # print(wb.get_series('SP.POP.TOTL', country=country,
                 #   date=date, id_or_value='id', simplify_index=True))
             except:
-                result_list.append("The requested data was not found")
+                result_list.append("The requested data about population was not found")
                 # print("The requested data was not found")
 
         if id == "hci":
             try:
                 result_list.append(wb.get_series('HD.HCI.OVRL', country=country,
-                                                 date=date, id_or_value='id', simplify_index=True))
+                                                 date=date, id_or_value='id', simplify_index=False))
                 # print(wb.get_series('HD.HCI.OVRL', country=country,
                 #       date=date, id_or_value='id', simplify_index=True))
             except:
-                result_list.append("The requested data was not found")
+                result_list.append("The requested data about human capital index was not found")
                 # print("The requested data was not found")
 
         if id == "migration":
             try:
                 result_list.append(wb.get_series('SM.POP.NETM', country=country,
-                                                 date=date, id_or_value='id', simplify_index=True))
+                                                 date=date, id_or_value='id', simplify_index=False))
                 # print(wb.get_series('SM.POP.NETM', country=country,
                 #       date=date, id_or_value='id', simplify_index=True))
             except:
-                result_list.append("The requested data was not found")
+                result_list.append("The requested data about migration was not found")
                 # print("The requested data was not found")
 
         if id == "life_exp":
@@ -144,7 +144,7 @@ def sents_proc(sents, id: str, result_list: list):
                 # print(wb.get_series('SP.DYN.LE00.IN', country=country,
                 #       date=date, id_or_value='id', simplify_index=True))
             except:
-                result_list.append("The requested data was not found")
+                result_list.append("The requested data about life expectancy was not found")
                 # print("The requested data was not found")
 
     # return result_list
@@ -281,8 +281,8 @@ def life_exp_matcher(sent):
     return matches
 
 
-# for item in text_processing("What was the population and the life expectancy of Cuba in 2020"):
-#     print("   ")
-#     print(item)
+for item in text_processing("What was the life expectancy of Cuba in 2021"):
+    print("   ")
+    print(item)
 
 # print(text_processing("What was the population and the life expectancy of Cuba in 2020"))
