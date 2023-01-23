@@ -99,7 +99,9 @@ def bfsearch(problem:PlanningProblem):
     queue.push(StateNode(value={"state":problem.initial_state,"action":None}))
     while not queue.empty():
         iterations+=1
-        if iterations > factorial(len(problem.actions))*5:
+        max_iterations=factorial(len(problem.actions))*5
+        print("iterations and max_iterations",iterations,max_iterations)
+        if iterations > max_iterations:
             return None
         state = queue.pop()
         if(problem.is_goal_state(state.value["state"])):
@@ -115,6 +117,7 @@ def bfsearch(problem:PlanningProblem):
                 next_state=StateNode(value={"action":action,"state":new_states[action]})
                 state.add_son(next_state)
                 queue.push(next_state)
+    return None # No solution found
 
 def get_new_states(actions,state):
     """returns a dict with every actions that can be done and the new state obtained"""
