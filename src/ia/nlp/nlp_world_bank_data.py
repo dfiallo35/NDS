@@ -54,25 +54,42 @@ def text_processing(content: str):
     migration_sents = []
     life_exp_sents = []
 
+    return_list = []
+
     for sent in sentences:
         list_country = country_ent_extract(sent)
-        print(list_country)
+        # print(list_country)
 
+        # Human capita index
         match_hci(sent, hci_sents)
+        # return_list.append(item for item in sents_proc(hci_sents, "hci"))
+        sents_proc(hci_sents, "hci", return_list)
 
+        # Total population
         match_pop(sent, pop_sents)
+        # return_list.append(
+        #     item for item in sents_proc(pop_sents, "population"))
+        sents_proc(pop_sents, "population", return_list)
 
+        # Net migration
         match_migration(sent, migration_sents)
+        # return_list.append(item for item in sents_proc(
+        #     migration_sents, "migration"))
+        sents_proc(migration_sents, "migration", return_list)
 
+        # Life expectancy
         match_life_exp(sent, life_exp_sents)
-
-        sents_proc(pop_sents, "population")
-        sents_proc(hci_sents, "hci")
-        sents_proc(migration_sents, "migration")
-        sents_proc(life_exp_sents, "life_exp")
+        # return_list.append(item for item in sents_proc(
+        #     life_exp_sents, "life_exp"))
+        sents_proc(life_exp_sents, "life_exp", return_list)
 
 
-def sents_proc(sents, id: str):
+    print(return_list)
+
+
+def sents_proc(sents, id: str, return_list: list):
+    # return_list = []
+
     for span in sents:
         date = ''
         country = ''
@@ -89,31 +106,45 @@ def sents_proc(sents, id: str):
 
         if id == "population":
             try:
-                print(wb.get_series('SP.POP.TOTL', country=country,
-                      date=date, id_or_value='id', simplify_index=True))
+                return_list.append(wb.get_series('SP.POP.TOTL', country=country,
+                                                 date=date, id_or_value='id', simplify_index=True))
+                # print(wb.get_series('SP.POP.TOTL', country=country,
+                #   date=date, id_or_value='id', simplify_index=True))
             except:
-                print("The requested data was not found")
+                return_list.append("The requested data was not found")
+                # print("The requested data was not found")
 
         if id == "hci":
             try:
-                print(wb.get_series('HD.HCI.OVRL', country=country,
-                      date=date, id_or_value='id', simplify_index=True))
+                return_list.append(wb.get_series('HD.HCI.OVRL', country=country,
+                                                 date=date, id_or_value='id', simplify_index=True))
+                # print(wb.get_series('HD.HCI.OVRL', country=country,
+                #       date=date, id_or_value='id', simplify_index=True))
             except:
-                print("The requested data was not found")
+                return_list.append("The requested data was not found")
+                # print("The requested data was not found")
 
         if id == "migration":
             try:
-                print(wb.get_series('SM.POP.NETM', country=country,
-                      date=date, id_or_value='id', simplify_index=True))
+                return_list.append(wb.get_series('SM.POP.NETM', country=country,
+                                                 date=date, id_or_value='id', simplify_index=True))
+                # print(wb.get_series('SM.POP.NETM', country=country,
+                #       date=date, id_or_value='id', simplify_index=True))
             except:
-                print("The requested data was not found")
+                return_list.append("The requested data was not found")
+                # print("The requested data was not found")
 
         if id == "life_exp":
             try:
-                print(wb.get_series('SP.DYN.LE00.IN', country=country,
-                      date=date, id_or_value='id', simplify_index=True))
+                return_list.append(wb.get_series('SP.DYN.LE00.IN', country=country,
+                                                 date=date, id_or_value='id', simplify_index=True))
+                # print(wb.get_series('SP.DYN.LE00.IN', country=country,
+                #       date=date, id_or_value='id', simplify_index=True))
             except:
-                print("The requested data was not found")
+                return_list.append("The requested data was not found")
+                # print("The requested data was not found")
+
+    # return return_list
 
 
 def country_ent_extract(sent):
