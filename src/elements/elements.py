@@ -33,8 +33,6 @@ class Log:
         self.log= {}
         self.initial_map= initial_map
         self.actual_map= initial_map
-
-        self.graphs= dict()
     
     def add(self, time: int, event, old_map, new_map):
         '''

@@ -219,21 +219,6 @@ class Map:
         cat= Category(name)
         self.categorydict[name]= cat
     
-    def add_decision_to_category(self, category: str, decision: Event):
-        '''
-        Add a decision to a Category. If the Category doesn't exist, it will be created
-        :param category: the category
-        :param decision: the decision
-        '''
-        # name= self.element_name(name)
-        # self.alredy_exist(name)
-        cat= self.categorydict.get(category)
-        if cat:
-            cat.add_decision(decision)
-        else:
-            self.categorydict[category]= Category(category)
-            self.categorydict[category].add_decision(decision)
-    
     
     def add_function(self, name: str, execution, code= None, params: list=[]):
         name= self.element_name(name)
