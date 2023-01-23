@@ -111,6 +111,7 @@ class NDSLexer(Lexer):
 
     NAME['plot'] = 'FUNC'
     NAME['dataframe'] = 'FUNC'
+    NAME['info'] = 'FUNC'
     # NAME[''] = 'FUNC'
 
     #LOOPS

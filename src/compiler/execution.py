@@ -6,7 +6,7 @@ from compiler.lexer import *
 from compiler.parser import *
 from compiler.parser_obj import *
 from simulation.simulation import *
-# from ia.expert_system.expert_system import *
+from ia.nlp.nlp_world_bank_data import *
 
 import pandas as pd
 
@@ -57,6 +57,7 @@ class Code:
             'simulate': {'args':1},
             'plot': {'args':3},
             'dataframe': {'args':2},
+            'info': {'args':1},
         }
 
         for line in code:
@@ -258,6 +259,15 @@ class Code:
     def func_gen_dist(self, line, inside_vars, inside):
         ...
     
+    def func_info(self, line, inside_vars, inside):
+        params= self.args(line, inside_vars, inside)
+        if not type(params[0]) == string:
+            raise Exception('Error: info() only accepts strings')
+        for d in text_processing(self.to_python(params[0])):
+            self.dataframes.append(
+                pd.DataFrame(d)
+            )
+    
     def func_simulate(self, line, inside_vars, inside):
         params= self.args(line, inside_vars, inside)
         if not type(params[0]) == time:
@@ -400,6 +410,7 @@ class Code:
         'simulate': func_simulate,
         'plot': func_plot,
         'dataframe': func_dataframe,
+        'info': func_info,
     }
 
     #fix return
