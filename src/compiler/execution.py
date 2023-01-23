@@ -45,7 +45,7 @@ class Code:
             'category': {'args':0},
             'dec event': {'params':1, 'args':1},
             'sim event': {'args':4},
-            # 'decision': 2,
+            'decision': {'args':1, 'params': 1},
             'distribution': {'min':1},
         }
 
