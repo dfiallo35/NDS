@@ -140,12 +140,15 @@ def sents_proc(sents, id: str, result_list: list):
         if id == "life_exp":
             try:
                 result_list.append(wb.get_series('SP.DYN.LE00.IN', country=country,
-                                                 date=date, id_or_value='id', simplify_index=True))
+                                                 date=date, id_or_value='id', simplify_index=False))
                 # print(wb.get_series('SP.DYN.LE00.IN', country=country,
                 #       date=date, id_or_value='id', simplify_index=True))
             except:
                 result_list.append("The requested data about life expectancy was not found")
                 # print("The requested data was not found")
+
+            # if result_list[len(result_list) - 1] == None:
+            #     result_list[len(result_list) - 1] = "The requested data about life expectancy was not found"
 
     # return result_list
 
@@ -281,8 +284,8 @@ def life_exp_matcher(sent):
     return matches
 
 
-for item in text_processing("What was the life expectancy of Cuba in 2021"):
-    print("   ")
-    print(item)
+# for item in text_processing("What was the life expectancy of Cuba in 2021"):
+#     print("   ")
+#     print(item)
 
 # print(text_processing("What was the population and the life expectancy of Cuba in 2020"))
