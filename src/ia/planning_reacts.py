@@ -43,12 +43,12 @@ def get_target(nation,changes):
     """the goal state that you want to reach with the planning is obtained """
     goals={}
     # for province in changes["changed"][nation.name]["changed"].keys():
-    for elem in changes["changed"][nation.name]["changed"]:
-        if(gets_worse(elem,changes["changed"][nation.name]["changed"][elem][0],changes["changed"][nation.name]["changed"][elem][1])):#todo aqui comprobar si el cambio es positivo o negativo
+    for elem in changes["changed"][nation.name]:
+        if(gets_worse(elem,changes["changed"][nation.name][elem][0],changes["changed"][nation.name][elem][1])):#todo aqui comprobar si el cambio es positivo o negativo
             if goals.__contains__(elem):
-                goals[elem]=goals[elem]+changes["changed"][nation.name]["changed"][elem][0]
+                goals[elem]=goals[elem]+changes["changed"][nation.name][elem][0]
             else:
-                goals[elem]=changes["changed"][nation.name]["changed"][elem][0]
+                goals[elem]=changes["changed"][nation.name][elem][0]
     #convert the goals into a function than comprobate this goal
     goals_function = lambda nation: all([nation.get_nation_data(goal)>=goals[goal] for goal in goals])
     return goals_function,goals
