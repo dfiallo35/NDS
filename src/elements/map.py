@@ -219,21 +219,6 @@ class Map:
         cat= Category(name)
         self.categorydict[name]= cat
     
-    def add_decision_to_category(self, category: str, decision: Event):
-        '''
-        Add a decision to a Category. If the Category doesn't exist, it will be created
-        :param category: the category
-        :param decision: the decision
-        '''
-        # name= self.element_name(name)
-        # self.alredy_exist(name)
-        cat= self.categorydict.get(category)
-        if cat:
-            cat.add_decision(decision)
-        else:
-            self.categorydict[category]= Category(category)
-            self.categorydict[category].add_decision(decision)
-    
     
     def add_function(self, name: str, execution, code= None, params: list=[]):
         name= self.element_name(name)
@@ -399,12 +384,12 @@ class Map:
             raise Exception(f'The map doesn\'t have the attribute {data}')
     
     def get_data(self, element: str, data: str, *args, **kwargs):
-        element= self.element_name(element)
-        self.not_exist(element)
+        # element= self.element_name(element)
+        # self.not_exist(element)
 
-        properties= {name:val for (name, val) in gm(type(self.all[element]), lambda x: isinstance(x, property))}
+        properties= {name:val for (name, val) in gm(type(element), lambda x: isinstance(x, property))}
         if data in properties:
-            return properties[data].fget(self.all[element], *args, **kwargs)
+            return properties[data].fget(element, *args, **kwargs)
         else:
             raise Exception(f'The element {element} doesn\'t have the attribute {data}')
                 

@@ -16,19 +16,19 @@ a.compile(
 
     decision event industrialization_increases(economic)<<n>>{
         n->economic_resources = n->economic_resources-5000;
-        n->industrialization = n->industrialization*1.1;
+        n->industrialization = n->industrialization*1.2;
     }    
     decision industrialization_increases_dec(n->economic_resources >= 5000, industrialization_increases)<< n >>;
 
     decision event tourism_increases(economic)<<n>>{
         n->economic_resources = n->economic_resources-7000;
-        n->tourism = n->tourism*1.1;
+        n->tourism = n->tourism*1.2;
     }
     decision tourism_increases_dec(n->economic_resources >= 7000, tourism_increases)<< n >>;
 
     decision event average_living_standard_increases(economic)<<n>>{
         n->economic_resources = n->economic_resources-3000;
-        n->average_living_standard = n->average_living_standard*1.1;
+        n->average_living_standard = n->average_living_standard*1.2;
     }    
     decision average_living_standard_increases_dec(n->economic_resources >= 3000, average_living_standard_increases)<< n >>;
 

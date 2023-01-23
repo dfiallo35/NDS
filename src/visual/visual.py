@@ -59,6 +59,19 @@ class CodeBlock:
             with self.col1:
                 st.markdown(f'output')
                 st.text(output)
+
+                for t, g in self.intern_code.plots:
+                    if t == 'line':
+                        st.line_chart(g)
+                    elif t == 'bar':
+                        st.bar_chart(g)
+                    elif t == 'area':
+                        st.area_chart(g)
+                for d in self.intern_code.dataframes:
+                    st.dataframe(d.transpose())
+                    
+            self.intern_code.plots= []
+            self.intern_code.dataframes= []
         
         except Exception as e:
             with self.col1:
@@ -115,18 +128,35 @@ class Visualizer:
             initial_sidebar_state="collapsed",
         )
 
+
+        # import pandas as pd
+        # import numpy as np
+
+        # chart_data = pd.DataFrame(
+        #     np.random.randn(40, 3),
+        #     columns=['a', 'b', 'c'],
+        #     )
+        
+        # st.line_chart(chart_data)
+        # st.dataframe(chart_data)
+        
+        # st.dataframe(chart_data.transpose())
+
+        
+
         with open('visual\\style.css') as f:
             st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
         
-        if 'code_blocks' not in st.session_state:
-            st.session_state.code_blocks= [CodeBlock(key=time.time(), code=Code())]
         st.title('Nations Development Simulator')
-
         st.sidebar.title('NDS')
         st.sidebar.markdown('Nations Development Simulator')
 
+        if 'code_blocks' not in st.session_state:
+            st.session_state.code_blocks= [CodeBlock(key=time.time(), code=Code())]
+
         for code_block in st.session_state.code_blocks:
             code_block.run()
+    
 
 
 # import pandas as pd

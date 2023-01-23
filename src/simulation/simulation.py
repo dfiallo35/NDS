@@ -154,13 +154,15 @@ class Simulate:
         :param event: the event that occurred
         :param time: the time the event occurred
         '''
+        if map.decision_eventdict.get(event.name):
+            return
         changes=old_map.compare(map)        
-        decisions=self.get_events_from_decisions(reaction_for_an_event(old_map, map,changes))
+        decisions=self.get_events_from_decisions(reaction_for_an_event(old_map, map,changes,event))
 
         for nation in decisions.keys():
             nation_decs=self.get_time(time,decisions[nation],distribution="uniform")
             for time_dec in nation_decs:
-                print("planning",time_dec[0],time_dec[1].name,nation)
+                # print("planning",time_dec[0],time_dec[1].name,nation)
                 self.event_queue.push(time_dec)
         
 
