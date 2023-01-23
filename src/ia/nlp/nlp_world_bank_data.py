@@ -9,8 +9,8 @@ from spacy.tokenizer import Tokenizer
 nlp = sp.load("en_core_web_sm")
 
 
-def main(text: str):
-    text_processing(text)
+# def main(text: str):
+#     text_processing(text)
 
 
 def clean(doc):
@@ -54,7 +54,7 @@ def text_processing(content: str):
     migration_sents = []
     life_exp_sents = []
 
-    return_list = []
+    result_list = []
 
     for sent in sentences:
         list_country = country_ent_extract(sent)
@@ -62,33 +62,35 @@ def text_processing(content: str):
 
         # Human capita index
         match_hci(sent, hci_sents)
-        # return_list.append(item for item in sents_proc(hci_sents, "hci"))
-        sents_proc(hci_sents, "hci", return_list)
+        # result_list.append(item for item in sents_proc(hci_sents, "hci"))
+        sents_proc(hci_sents, "hci", result_list)
 
         # Total population
         match_pop(sent, pop_sents)
-        # return_list.append(
+        # result_list.append(
         #     item for item in sents_proc(pop_sents, "population"))
-        sents_proc(pop_sents, "population", return_list)
+        sents_proc(pop_sents, "population", result_list)
 
         # Net migration
         match_migration(sent, migration_sents)
-        # return_list.append(item for item in sents_proc(
+        # result_list.append(item for item in sents_proc(
         #     migration_sents, "migration"))
-        sents_proc(migration_sents, "migration", return_list)
+        sents_proc(migration_sents, "migration", result_list)
 
         # Life expectancy
         match_life_exp(sent, life_exp_sents)
-        # return_list.append(item for item in sents_proc(
+        # result_list.append(item for item in sents_proc(
         #     life_exp_sents, "life_exp"))
-        sents_proc(life_exp_sents, "life_exp", return_list)
+        sents_proc(life_exp_sents, "life_exp", result_list)
 
 
-    print(return_list)
+    return result_list
+
+    # print(result_list)
 
 
-def sents_proc(sents, id: str, return_list: list):
-    # return_list = []
+def sents_proc(sents, id: str, result_list: list):
+    # result_list = []
 
     for span in sents:
         date = ''
@@ -106,45 +108,45 @@ def sents_proc(sents, id: str, return_list: list):
 
         if id == "population":
             try:
-                return_list.append(wb.get_series('SP.POP.TOTL', country=country,
+                result_list.append(wb.get_series('SP.POP.TOTL', country=country,
                                                  date=date, id_or_value='id', simplify_index=True))
                 # print(wb.get_series('SP.POP.TOTL', country=country,
                 #   date=date, id_or_value='id', simplify_index=True))
             except:
-                return_list.append("The requested data was not found")
+                result_list.append("The requested data was not found")
                 # print("The requested data was not found")
 
         if id == "hci":
             try:
-                return_list.append(wb.get_series('HD.HCI.OVRL', country=country,
+                result_list.append(wb.get_series('HD.HCI.OVRL', country=country,
                                                  date=date, id_or_value='id', simplify_index=True))
                 # print(wb.get_series('HD.HCI.OVRL', country=country,
                 #       date=date, id_or_value='id', simplify_index=True))
             except:
-                return_list.append("The requested data was not found")
+                result_list.append("The requested data was not found")
                 # print("The requested data was not found")
 
         if id == "migration":
             try:
-                return_list.append(wb.get_series('SM.POP.NETM', country=country,
+                result_list.append(wb.get_series('SM.POP.NETM', country=country,
                                                  date=date, id_or_value='id', simplify_index=True))
                 # print(wb.get_series('SM.POP.NETM', country=country,
                 #       date=date, id_or_value='id', simplify_index=True))
             except:
-                return_list.append("The requested data was not found")
+                result_list.append("The requested data was not found")
                 # print("The requested data was not found")
 
         if id == "life_exp":
             try:
-                return_list.append(wb.get_series('SP.DYN.LE00.IN', country=country,
+                result_list.append(wb.get_series('SP.DYN.LE00.IN', country=country,
                                                  date=date, id_or_value='id', simplify_index=True))
                 # print(wb.get_series('SP.DYN.LE00.IN', country=country,
                 #       date=date, id_or_value='id', simplify_index=True))
             except:
-                return_list.append("The requested data was not found")
+                result_list.append("The requested data was not found")
                 # print("The requested data was not found")
 
-    # return return_list
+    # return result_list
 
 
 def country_ent_extract(sent):
@@ -277,5 +279,8 @@ def life_exp_matcher(sent):
 
     return matches
 
+# for item in text_processing("What was the life expectancy of Cuba in 2020"):
+#     print("   ")
+#     print(item)
 
-text_processing("What was the life expectancy of Cuba in 2020")
+# print(text_processing("What was the life expectancy of Cuba in 2020"))
