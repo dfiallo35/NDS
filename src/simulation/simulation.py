@@ -1,6 +1,6 @@
 from elements.elements import Element
 from elements.map import *
-from ia.planning_reacts import reaction_for_an_event,transform_decisions
+from ia.planning.planning_reacts import reaction_for_an_event,transform_decisions
 
 from queue import PriorityQueue
 a = PriorityQueue()

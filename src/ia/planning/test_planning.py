@@ -1,7 +1,7 @@
 from pathlib import Path
 import sys
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-from ia.planning_decisions import *
+from ia.planning.planning_decisions import *
 
 class Nation():
     def __init__(self, name: str, provinces: dict, traits: list):

@@ -95,7 +95,7 @@ def bfsearch(problem:PlanningProblem):
     queue.push(StateNode(value={"state":problem.initial_state,"action":None}))
     while not queue.empty():
         iterations+=1
-        max_iterations=factorial(len(problem.actions))*5
+        max_iterations=(len(problem.actions))**3
         if iterations > max_iterations:
             return None
         state = queue.pop()
