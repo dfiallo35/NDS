@@ -277,11 +277,13 @@ def life_exp_matcher(sent):
         ]
     ]
 
-    matcher.add('migration', pattern)
+    matcher.add('life_expec', pattern)
 
     matches = (matcher(sent))
 
     return matches
+
+
 
 
 # for item in text_processing("What was the life expectancy of Cuba in 2021"):
