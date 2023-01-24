@@ -113,20 +113,20 @@ def bfsearch(problem:PlanningProblem):
             t1= time.time()
             new_states=get_new_states(problem.actions,state.value["state"])
             t2=time.time()
-            print("time to get new states",t2-t1)
+            # print("time to get new states",t2-t1)
             h_values = problem.state_value(state.value["state"],new_states)#dict with every action and the valued calculated by the heuristic function
             t3=time.time()
-            print("time to get heuristic",t3-t2)
+            # print("time to get heuristic",t3-t2)
             actions_to_do_ordered=ordered_actions_priority(h_values)
             t4=time.time()
-            print("time to get actions ordered",t4-t3)
+            # print("time to get actions ordered",t4-t3)
             for action in actions_to_do_ordered:
                 # next_state=actions_to_do_ordered[action]#action.apply_action(deepcopy(state.value["state"]))
                 next_state=StateNode(value={"action":action,"state":new_states[action]})
                 state.add_son(next_state)
                 queue.push(next_state)
             t5=time.time()
-            print("time to put the actions in the queue and create the state",t5-t4)
+            # print("time to put the actions in the queue and create the state",t5-t4)
     return None # No solution found
 
 def get_new_states(actions,state):

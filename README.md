@@ -115,7 +115,12 @@ Se define la simulación como un sistema que se basa principalmente en eventos, 
 
 Toda la simulación se desarrolla en un mismo mapa, en este se definen tanto elementos físicos como son las naciones con todas sus propiedades, como todos los elementos importantes que están relacionados con el proceso de la simulación como son los eventos, decisiones, distribuciones y funciones. Todos estos elementos se pueden crear y modificar desde el DSL.
 
-Los eventos en el mapa
+Los eventos en el mapa 
+
+Las naciones se defi
+
 <h2> Inteligencia Artificial</h2>
+
+<h4> Planificación</h4>
 
 Se define a las naciones como agentes inteligentes, las cuales reaccionan a los cambios en el medio, como la simulación está dirigida por los eventos que ocurren, cada nación al ocurrir un evento que a esta le afecte responde a este, tratando de contrarrestar sus efectos negativos. Para esto se utilizó la planificación, para de todos las deciciones posibles a tomar por las naciones. Estas decisiones están definidas como las acciones usuales que lleva la planificación, tienen una precondición y un efecto, que en este caso es un evento que define el cambio que se le realiza a la nación que tome esa decisión

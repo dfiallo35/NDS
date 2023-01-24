@@ -5,23 +5,23 @@ from ia.planning_decisions import *
 # import gc
 
 
-def reaction_for_an_event(map,new_map,changes,event):
+def reaction_for_an_event(map,new_map,changes,event,possible_decisions):
     """Get a list of actions to react this event"""
     t=time.time()    
     nations = get_affected_nations(new_map,changes)
-    print("time to get affected nations",time.time()-t)
+    # print("time to get affected nations",time.time()-t)
     t2=time.time()
     decisions={}
-    possible_decisions=transform_decisions(map.decisions)
-    print("len decisions in planning",len(possible_decisions))
-    print("time to transform decisions",time.time()-t2)
+    # possible_decisions=transform_decisions(map.decisions)
+    # print("len decisions in planning",len(possible_decisions))
+    # print("time to transform decisions",time.time()-t2)
     # print(possible_decisions)
     for nation in nations:
         goal_func,goal_dict=get_target(nation,changes)
         t1=time.time()
         planning_tree=PlanningDecisions(nation,possible_decisions,goal_func,event,goal_dict).make_planning()
         decisions[nation]= get_only_actions(planning_tree)
-        print("time to do the planning",time.time()-t1)
+        # print("time to do the planning",time.time()-t1)
         # delete_tree(get_root(planning_tree))
     return decisions
     
