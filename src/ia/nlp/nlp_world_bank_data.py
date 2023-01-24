@@ -15,7 +15,7 @@ nlp = sp.load("en_core_web_sm")
 
 indicator = {'population': 'SP.POP.TOTL', 'hci': 'HD.HCI.OVRL', 'human capital index': 'HD.HCI.OVRL', 'life expectancy': 'SP.DYN.LE00.IN',
              'poverty headcount ratio': 'SI.POV.DDAY', 'population growth': 'SP.POP.GROW', 'migration': 'SM.POP.NETM', 'GDP': 'NY.GDP.MKTP.CD',
-             'GDP per capita': 'NY.GDP.PCAP.CD', 'GDP growth': 'NY.GDP.MKTP.KD.ZG', 'unemployment': 'SL.UEM.TOTL.ZS', 'inflation': ' FP.CPI.TOTL.ZG',
+             'GDP per capita': 'NY.GDP.PCAP.CD', 'GDP growth': 'NY.GDP.MKTP.KD.ZG', 'unemployment': 'SL.UEM.TOTL.ZS', 'inflation': 'FP.CPI.TOTL.ZG',
              'personal remittances': 'BX.TRF.PWKR.DT.GD.ZS', 'CO2 emissions': 'EN.ATM.CO2E.PC', 'forest area': 'AG.LND.FRST.ZS',
              'access to electricty': 'EG.ELC.ACCS.ZS', 'annual freshwater withdrawals': 'ER.H2O.FWTL.ZS',
              'people using safely managed sanitation services': 'SH.STA.SMSS.ZS', 'intentional homicides': 'VC.IHR.PSRC.P5',
@@ -65,6 +65,7 @@ def text_processing(content: str):
     migration_sents = []
     life_exp_sents = []
     unemployment_sents = []
+    inflation_sents = []
 
     result_list = []
 
@@ -88,16 +89,25 @@ def text_processing(content: str):
         # Life expectancy
 
         life_exp_matcher(sent, life_exp_sents)
-        sents_proc(life_exp_sents, "life_exp", result_list)
+        sents_proc(life_exp_sents, "life expectancy", result_list)
 
-        # Unemployment 
+        # Unemployment
 
         unemployment_matcher(sent, unemployment_sents)
         sents_proc(unemployment_sents, "unemployment", result_list)
 
+        # Inflation
+
+        inflation_matcher(sent, inflation_sents)
+        sents_proc(inflation_sents, "inflation", result_list)
+
     return result_list
 
     # print(result_list)
+
+
+ind = {'population': 'SP.POP.TOTL', 'inflation': 'FP.CPI.TOTL.ZG', 'migration': 'SM.POP.NETM',
+       'hci': 'HD.HCI.OVRL', 'life expectancy': 'SP.DYN.LE00.IN', 'unemployment': 'SL.UEM.TOTL.ZS'}
 
 
 def sents_proc(sents, id: str, result_list: list):
@@ -115,46 +125,61 @@ def sents_proc(sents, id: str, result_list: list):
             if token.ent_type_ == 'GPE':
                 country.append(wbd.search_countries(token.text)[0]['iso2Code'])
 
-        if id == "population":
-            try:
-                result_list.append(wb.get_series('SP.POP.TOTL', country=country,
-                                                 date=date, id_or_value='id', simplify_index=False))
-            except:
-                result_list.append(
-                    "The requested data about population was not found")
+        try:
+            result_list.append(wb.get_series(ind[id], country=country,
+                                             date=date, id_or_value='id', simplify_index=False))
 
-        if id == "hci":
-            try:
-                result_list.append(wb.get_series('HD.HCI.OVRL', country=country,
-                                                 date=date, id_or_value='id', simplify_index=False))
-            except:
-                result_list.append(
-                    "The requested data about human capital index was not found")
+        except:
+            result_list.append(
+                "The requested data about " + id + " was not found")
 
-        if id == "migration":
-            try:
-                result_list.append(wb.get_series('SM.POP.NETM', country=country,
-                                                 date=date, id_or_value='id', simplify_index=False))
-            except:
-                result_list.append(
-                    "The requested data about migration was not found")
+        # if id == "population":
+        #     try:
+        #         result_list.append(wb.get_series('SP.POP.TOTL', country=country,
+        #                                          date=date, id_or_value='id', simplify_index=False))
+        #     except:
+        #         result_list.append(
+        #             "The requested data about population was not found")
 
-        if id == "life_exp":
-            try:
-                result_list.append(wb.get_series('SP.DYN.LE00.IN', country=country,
-                                                 date=date, id_or_value='id', simplify_index=False))
-            except:
-                result_list.append(
-                    "The requested data about life expectancy was not found")
+        # if id == "hci":
+        #     try:
+        #         result_list.append(wb.get_series('HD.HCI.OVRL', country=country,
+        #                                          date=date, id_or_value='id', simplify_index=False))
+        #     except:
+        #         result_list.append(
+        #             "The requested data about human capital index was not found")
 
-        if id == "unemployment":
-            try:
-                result_list.append(wb.get_series('SL.UEM.TOTL.ZS', country=country,
-                                                 date=date, id_or_value='id', simplify_index=False))
-            except:
-                result_list.append(
-                    "The requested data about the unemployment was not found")
+        # if id == "migration":
+        #     try:
+        #         result_list.append(wb.get_series('SM.POP.NETM', country=country,
+        #                                          date=date, id_or_value='id', simplify_index=False))
+        #     except:
+        #         result_list.append(
+        #             "The requested data about migration was not found")
 
+        # if id == "life_exp":
+        #     try:
+        #         result_list.append(wb.get_series('SP.DYN.LE00.IN', country=country,
+        #                                          date=date, id_or_value='id', simplify_index=False))
+        #     except:
+        #         result_list.append(
+        #             "The requested data about life expectancy was not found")
+
+        # if id == "unemployment":
+        #     try:
+        #         result_list.append(wb.get_series('SL.UEM.TOTL.ZS', country=country,
+        #                                          date=date, id_or_value='id', simplify_index=False))
+        #     except:
+        #         result_list.append(
+        #             "The requested data about the unemployment was not found")
+
+        # if id == "inflation":
+        #     try:
+        #         result_list.append(wb.get_series('FP.CPI.TOTL.ZG', country=country,
+        #                                          date=date, id_or_value='id', simplify_index=False))
+        #     except:
+        #         result_list.append(
+        #             "The requested data about the inflation was not found")
 
     # return result_list
 
@@ -264,7 +289,7 @@ def life_exp_matcher(sent, life_exp_sents):
         span = sent[start:end]
 
         life_exp_sents.append(span)
-        
+
 
 def unemployment_matcher(sent, unemployment_sents):
     matcher = Matcher(nlp.vocab)
@@ -287,8 +312,31 @@ def unemployment_matcher(sent, unemployment_sents):
 
         unemployment_sents.append(span)
 
-for item in text_processing("What was the life expectancy, population, migration, hci and unemployment of Cuba in 2021"):
-    print("   ")
-    print(item)
+
+def inflation_matcher(sent, inflation_sents):
+    matcher = Matcher(nlp.vocab)
+
+    pattern = [
+        [
+            {'TEXT': {'REGEX': 'inflation'}},
+            {'POS': {'IN': ['PROPN', 'NOUN', 'ADJ',
+                            'VERB', 'PUNCT']}, 'OP': '*'},
+            {"LIKE_NUM": True, 'SHAPE': 'dddd', 'OP': "*"}
+        ]
+    ]
+
+    matcher.add('inflation', pattern)
+
+    matches = (matcher(sent))
+
+    for match_id, start, end in matches:
+        span = sent[start:end]
+
+        inflation_sents.append(span)
+
+
+# for item in text_processing("What was the life expectancy, population, migration, hci, unemployment, inflation of Spain in 2020"):
+#     print("   ")
+#     print(item)
 
 # print(text_processing("What was the population and the life expectancy of Cuba in 2020"))
