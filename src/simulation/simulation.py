@@ -84,6 +84,7 @@ class Simulate:
         self.event_queue = initial_events
         self.map = map
         self.decisions:list=None
+        self.map.log=Log(self.map)
     
     @property
     def en_dis(self):

@@ -52,12 +52,12 @@ a.compile(
     }
     decision create_jobs_dec(n->aviable_economic_resources >= 4000, create_jobs)<< n >>;
 
-    # decision event increment_aviable_economic_resources(social)<<n>>{        
+    # decision event increment_aviable_economic_resources(social)<<n>>{
     #     a = n->PIB * 0.1;
     #     n->PIB = n->PIB - a;
-    #     n->aviable_economic_resources = n->aviable_economic_resources + 1;
+    #     n->aviable_economic_resources = n->aviable_economic_resources + a;
     # }    
-    # decision increment_aviable_economic_resources_dec(n->PIB >= n->population*100, increment_aviable_economic_resources)<< n >>;
+    # # decision increment_aviable_economic_resources_dec(n->PIB >= n->population*100, increment_aviable_economic_resources)<< n >>;
 
 
 
@@ -99,9 +99,17 @@ a.compile(
     }
 
 
+ foreach <<nat>> (map->nations){
+        show(nat,nat->tourism);
+        }
 
 
-    simulate(100d);
+    simulate(10d);
+
+
+ foreach <<nat>> (map->nations){
+show(nat,nat->tourism);
+        }
 
 
     '''
