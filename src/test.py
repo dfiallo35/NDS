@@ -72,7 +72,10 @@ for nation in m.nationdict.values():
 def Simulation_test():
     for i in m.nationdict.values():
         print_nation(i)
-    a= Simulate(m, Pqueue(m.event_enabled_list)).simulate(10)
+    t= time.time()
+
+    a= Simulate(m, Pqueue(m.event_enabled_list)).simulate(30)
+    print("time",time.time()-t)
     for i in m.nationdict.values():
         print_nation(i)
 
