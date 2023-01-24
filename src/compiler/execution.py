@@ -53,11 +53,12 @@ class Code:
         semantic_funcs= {
             'type': {'args':1},
             'pos': {'args':2},
-            'size': {'args':1},
+            'len': {'args':1},
             'simulate': {'args':1},
             'plot': {'args':3},
             'dataframe': {'args':2},
             'info': {'args':1},
+            'gen_dist': {'args':1},
         }
 
         for line in code:
@@ -231,7 +232,7 @@ class Code:
     def func_size(self, line, inside_vars, inside):
         params= self.args(line, inside_vars, inside)
         if not type(self.to_python(params[0])) == list:
-            raise Exception('Error: size() only accepts lists')
+            raise Exception('Error: len() only accepts lists')
 
         return ('ret', self.to_object(len(params[0])))
     
@@ -282,8 +283,7 @@ class Code:
 
         if isinstance(params[0], Nation) and not isinstance(params[1], array):
             if params[0].name not in self.elements:
-                raise Exception('Error: the element is not recognized')
-            self.map.get_data(self.to_python(params[0]), self.to_python(params[1]))
+                raise Exception(f'Error: the element {params[0].name} is not recognized')
             
             self.plots.append(
                 (self.to_python(params[2]),
@@ -297,12 +297,10 @@ class Code:
         elif isinstance(params[0], array) and not isinstance(params[1], array):
             gn= []
             columns= []
-
             for nat in self.to_python(params[0]):
                 if isinstance(nat, Nation):
                     if nat.name not in self.elements:
                         raise Exception('Error: the element is not recognized')
-                    self.map.get_data(self.to_python(nat), self.to_python(params[1]))
                     
                     gn.append(self.map.log.get_nation_data(self.to_python(nat.name), self.to_python(params[1])))
                     columns.append(nat.name)
@@ -321,9 +319,7 @@ class Code:
                 raise Exception('Error: the element is not recognized')
             gn= []
             columns= []
-
             for data in self.to_python(params[1]):
-                self.map.get_data(self.to_python(params[0]), self.to_python(data))
                 
                 gn.append(self.map.log.get_nation_data(self.to_python(params[0].name), self.to_python(data)))
                 columns.append(self.to_python(data))
@@ -349,11 +345,12 @@ class Code:
                 raise Exception('Error: the element is not recognized')
             self.map.get_data(self.to_python(params[0]), self.to_python(params[1]))
             
-            self.dataframes.append(
-                pd.DataFrame(
+            df= pd.DataFrame(
                     self.map.log.get_nation_data(self.to_python(params[0].name), self.to_python(params[1])),
                     columns=[self.to_python(params[1])]
                 )
+            self.dataframes.append(
+                df.transpose()
             )
 
         elif isinstance(params[0], array) and not isinstance(params[1], array):
@@ -403,7 +400,7 @@ class Code:
         'show': func_show,
         'type': func_type,
         'pos': func_pos,
-        'size': func_size,
+        'len': func_size,
         'rvs': func_rvs,
         'irvs': func_irvs,
         'gen_dist': func_gen_dist,
@@ -634,6 +631,9 @@ class Code:
         
         elif obj.value in self.elements:
             return self.elements[obj.value]
+        
+        elif obj.value in self.map.dataset:
+            return obj.value
 
         else:
             raise Exception(f'Name {obj.value} not found')

@@ -98,7 +98,7 @@ class NDSLexer(Lexer):
 
     #SPECIAL FUNCTIONS
     NAME['show'] = 'FUNC'
-    NAME['size'] = 'FUNC'
+    NAME['len'] = 'FUNC'
     NAME['type'] = 'FUNC'
     NAME['pos'] = 'FUNC'
 

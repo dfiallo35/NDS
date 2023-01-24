@@ -23,7 +23,7 @@ class Map:
         self.distdict= {k:Distribution(name=k, dist=v) for k,v in Distribution.distributions.items()}
         self.distributiondict= dict()
 
-        self.dataset= set()
+        self.dataset= {'extension', 'population'}
 
         self.neighbours_graph= Graph()
 
