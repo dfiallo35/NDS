@@ -106,6 +106,8 @@ a.compile(
 
     simulate(10d);
 
+    plot(Cuba, ['tourism', 'industrialization'] , 'line');
+
 
  foreach <<nat>> (map->nations){
 show(nat,nat->tourism);
