@@ -61,62 +61,42 @@ def text_processing(content: str):
     sentences = sent_tokenize(content)
 
     match_sent = []
-    # pop_sents = []
-    # hci_sents = []
-    # migration_sents = []
-    # life_exp_sents = []
-    # unemployment_sents = []
-    # inflation_sents = []
 
     result_list = []
 
     for sent in sentences:
 
         # Human capital index
-
-        # hci_matcher(sent, hci_sents)
-        # sents_proc(hci_sents, "hci", result_list)        
+     
         hci_matcher(sent, match_sent)
         sents_proc(match_sent, "hci", result_list)
 
         # Total population
 
-        # population_matcher(sent, pop_sents)
-        # sents_proc(pop_sents, "population", result_list)
         population_matcher(sent, match_sent)
         sents_proc(match_sent, "population", result_list)
 
         # Net migration
 
-        # migration_matcher(sent, migration_sents)
-        # sents_proc(migration_sents, "migration", result_list)
         migration_matcher(sent, match_sent)
         sents_proc(match_sent, "migration", result_list)
 
         # Life expectancy
 
-        # life_exp_matcher(sent, life_exp_sents)
-        # sents_proc(life_exp_sents, "life expectancy", result_list)
         life_exp_matcher(sent, match_sent)
         sents_proc(match_sent, "life expectancy", result_list)
 
         # Unemployment
 
-        # unemployment_matcher(sent, unemployment_sents)
-        # sents_proc(unemployment_sents, "unemployment", result_list)
         unemployment_matcher(sent, match_sent)
         sents_proc(match_sent, "unemployment", result_list)
 
         # Inflation
 
-        # inflation_matcher(sent, inflation_sents)
-        # sents_proc(inflation_sents, "inflation", result_list)
         inflation_matcher(sent, match_sent)
         sents_proc(match_sent, "inflation", result_list)
 
     return result_list
-
-    # print(result_list)
 
 
 ind = {'population': 'SP.POP.TOTL', 'inflation': 'FP.CPI.TOTL.ZG', 'migration': 'SM.POP.NETM',
@@ -299,7 +279,7 @@ def inflation_matcher(sent, inflation_sents):
 
 
 # for item in text_processing("What was the life expectancy, population, migration, hci, unemployment, inflation of Spain in 2020"):
-#     print("   ")
 #     print(item)
+#     print("   ")
 
 # print(text_processing("What was the population and the life expectancy of Cuba in 2020"))
