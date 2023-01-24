@@ -67,6 +67,14 @@ def text_processing(content: str):
     sentences = sent_tokenize(content)
 
     match_sent = []
+    population_sents = []
+    hci_sents = []
+    unemp_sents = []
+    migration_sents = []
+    inflation_sents = []
+    life_exp_sents = []
+    
+
 
     result_list = []
 
@@ -74,33 +82,33 @@ def text_processing(content: str):
 
         # Human capital index
      
-        hci_matcher(sent, match_sent)
-        sents_proc(match_sent, "hci", result_list)
+        hci_matcher(sent, hci_sents)
+        sents_proc(hci_sents, "hci", result_list)
 
         # Total population
 
-        population_matcher(sent, match_sent)
-        sents_proc(match_sent, "population", result_list)
+        population_matcher(sent, population_sents)
+        sents_proc(population_sents, "population", result_list)
 
         # Net migration
 
-        migration_matcher(sent, match_sent)
-        sents_proc(match_sent, "migration", result_list)
+        migration_matcher(sent, migration_sents)
+        sents_proc(migration_sents, "migration", result_list)
 
         # Life expectancy
 
-        life_exp_matcher(sent, match_sent)
-        sents_proc(match_sent, "life expectancy", result_list)
+        life_exp_matcher(sent, life_exp_sents)
+        sents_proc(life_exp_sents, "life expectancy", result_list)
 
         # Unemployment
 
-        unemployment_matcher(sent, match_sent)
-        sents_proc(match_sent, "unemployment", result_list)
+        unemployment_matcher(sent, unemp_sents)
+        sents_proc(unemp_sents, "unemployment", result_list)
 
         # Inflation
 
-        inflation_matcher(sent, match_sent)
-        sents_proc(match_sent, "inflation", result_list)
+        inflation_matcher(sent, inflation_sents)
+        sents_proc(inflation_sents, "inflation", result_list)
 
     return result_list
 
@@ -280,7 +288,7 @@ def inflation_matcher(sent, inflation_sents):
         inflation_sents.append(span)
 
 
-# for item in text_processing("What was the life expectancy, population, migration, hci, unemployment, inflation of Spain in 2020"):
+# for item in text_processing("what is the life expectancy of cuba"):
 #     print(item)
 #     print("   ")
 
