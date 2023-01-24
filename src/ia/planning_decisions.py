@@ -13,7 +13,6 @@ class PlanningDecisions(PlanningProblem):
 
     def heuristic_function(self,state, actions_states):
         """Heuristic for the decisions problem."""
-        # return {action:0 for action in actions_states.keys()}
         h_values={}
         for action in actions_states.keys():
             h_values[action]=5
@@ -25,15 +24,8 @@ class PlanningDecisions(PlanningProblem):
             for goal in self.goal_state_dict.keys():
                 ratio_old= state.data[goal]/self.goal_state_dict[goal]*5
                 ratio_new=actions_states[action].data[goal]/self.goal_state_dict[goal]*5
-                # ratio_new=self.get_property_with_name(actions_states,action,goal)/self.goal_state_dict[goal]*5
                 h_values[action]-= (ratio_new-ratio_old)
         return h_values
-
-    # def get_property_with_name(self,actions_states, action_, name):
-    #     """Get the property via its name"""
-    #     for action in actions_states.keys():
-    #         if(action.action==action_):
-    #             return actions_states[action].data[name]
 
     def state_value(self,state,actions_states):
         """Function that return the value of an state obtaining the sum between nodes values and heuristic function"""
@@ -61,8 +53,6 @@ class ActionDecision(Action):
         """return the new state after apply it an action""" 
         self.event.add_nation(state)
         self.event.execute()
-        # new_event=self.event.get_event(state)
-        # new_event.execute()
         return state
 
 

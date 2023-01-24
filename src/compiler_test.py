@@ -63,7 +63,7 @@ a.compile(
         }
     }
 
-    simulate(50d);
+    simulate(100d);
 
 
     '''
