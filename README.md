@@ -140,4 +140,12 @@ Para desarrollar la planificación se utilizó un algoritmo de búsqueda con un 
 
 Para mejorar el rendimiento de este algoritmo se utilizó una función heurística que en un estado, para cada acción que se puede tomar se calcula un valor estimado de tomar esta acción, esto a partir de la distancia que está el estado actual del estado meta y se toman en cuenta también las categorías de la acción y del evento al que se está dando respuesta, esto para que se prioricen las acciones que se encuentren más cerca del estado meta y que sean de categorías más similares. Con el costo de la heurística y  el costo de la acción se calcula (en este caso igual a 0) el valor final de la acción, `f(s)=g(s)+h(s)`, por lo que algoritmo de búsqueda + heurística = A*. En este punto también para acciones con un valor superior al estimado se quitan de la posibilidad de ser escogidas, de las acciones que quedan luego de esta poda se colocan en la cola cada una de estas acciones con el estado que generan y además se va construyendo un árbol para cuando se llegue al estado meta sea posible devolver cada estado con la acción que lo genera y tomar en orden todas las acciones a realizar.
 
+<h4> NLP </h4>
 
+Para consultar algunos datos de las naciones que provee `World Bank Data` (población total, esperanza de vida, índice de capital humano, migración, desempleo, inflación) se puede realizar una consulta en lenguaje natural donde se especifiquen cuáles de estas características se quiere determinar, el o los países de interés así como el año del cuál se quiere ver la información. 
+
+El texto con la consulta del usuario será normalizado inicialmente, eliminando `stopwords` y dejando solamente el `lema` de las palabras. Para ello se emplea la biblioteca de python `spacy`. Una vez realizado este proceso se analiza el `part-of-speech tag` de los `token`, así como el tipo de entidad, en este último caso para determinar si se ha especificado algún país (`GPE`) o un año a analizar (`DATE`). 
+
+Para determinar el tipo de información que se pide (población total, esperanza de vida, índice de capital humano, migración, desempleo, inflación) se emplea la clase `Matcher` de `spacy`, donde se buscan coincidencias de `tokens` a partir de un patrón determinado para cada tipo de dato.
+
+Una vez analizado el texto se procede, en dependencia de las coincidencias con el tipo de dato, a obtener la información de `World Bank Data` utilizando la biblioteca de python `world_bank_data` que retrona en `dataframes` de `pandas` la información.

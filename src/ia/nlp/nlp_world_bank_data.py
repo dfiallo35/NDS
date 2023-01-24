@@ -13,15 +13,21 @@ nlp = sp.load("en_core_web_sm")
 #     text_processing(text)
 
 
-indicator = {'population': 'SP.POP.TOTL', 'hci': 'HD.HCI.OVRL', 'human capital index': 'HD.HCI.OVRL', 'life expectancy': 'SP.DYN.LE00.IN',
-             'poverty headcount ratio': 'SI.POV.DDAY', 'population growth': 'SP.POP.GROW', 'migration': 'SM.POP.NETM', 'GDP': 'NY.GDP.MKTP.CD',
-             'GDP per capita': 'NY.GDP.PCAP.CD', 'GDP growth': 'NY.GDP.MKTP.KD.ZG', 'unemployment': 'SL.UEM.TOTL.ZS', 'inflation': 'FP.CPI.TOTL.ZG',
-             'personal remittances': 'BX.TRF.PWKR.DT.GD.ZS', 'CO2 emissions': 'EN.ATM.CO2E.PC', 'forest area': 'AG.LND.FRST.ZS',
-             'access to electricty': 'EG.ELC.ACCS.ZS', 'annual freshwater withdrawals': 'ER.H2O.FWTL.ZS',
-             'people using safely managed sanitation services': 'SH.STA.SMSS.ZS', 'intentional homicides': 'VC.IHR.PSRC.P5',
-             'central government debt': 'GC.DOD.TOTL.GD.ZS', 'statistical perfomance indicators': 'IQ.SPI.OVRL',
-             'individuals using the internet': 'IT.NET.USER.ZS', 'proportion of seats held by women in national parliaments': 'SG.GEN.PARL.ZS',
-             'foreign direct investment': 'BX.KLT.DINV.WD.GD.ZS', 'foreign direct investment': 'BX.KLT.DINV.WD.GD.ZS'}
+# indicator = {'population': 'SP.POP.TOTL', 'hci': 'HD.HCI.OVRL', 'human capital index': 'HD.HCI.OVRL', 'life expectancy': 'SP.DYN.LE00.IN',
+#              'poverty headcount ratio': 'SI.POV.DDAY', 'population growth': 'SP.POP.GROW', 'migration': 'SM.POP.NETM', 'GDP': 'NY.GDP.MKTP.CD',
+#              'GDP per capita': 'NY.GDP.PCAP.CD', 'GDP growth': 'NY.GDP.MKTP.KD.ZG', 'unemployment': 'SL.UEM.TOTL.ZS', 'inflation': 'FP.CPI.TOTL.ZG',
+#              'personal remittances': 'BX.TRF.PWKR.DT.GD.ZS', 'CO2 emissions': 'EN.ATM.CO2E.PC', 'forest area': 'AG.LND.FRST.ZS',
+#              'access to electricty': 'EG.ELC.ACCS.ZS', 'annual freshwater withdrawals': 'ER.H2O.FWTL.ZS',
+#              'people using safely managed sanitation services': 'SH.STA.SMSS.ZS', 'intentional homicides': 'VC.IHR.PSRC.P5',
+#              'central government debt': 'GC.DOD.TOTL.GD.ZS', 'statistical perfomance indicators': 'IQ.SPI.OVRL',
+#              'individuals using the internet': 'IT.NET.USER.ZS', 'proportion of seats held by women in national parliaments': 'SG.GEN.PARL.ZS',
+#              'foreign direct investment': 'BX.KLT.DINV.WD.GD.ZS', 'foreign direct investment': 'BX.KLT.DINV.WD.GD.ZS'}
+
+
+
+ind = {'population': 'SP.POP.TOTL', 'inflation': 'FP.CPI.TOTL.ZG', 'migration': 'SM.POP.NETM',
+       'hci': 'HD.HCI.OVRL', 'life expectancy': 'SP.DYN.LE00.IN', 'unemployment': 'SL.UEM.TOTL.ZS'}
+
 
 
 def clean(doc):
@@ -61,6 +67,14 @@ def text_processing(content: str):
     sentences = sent_tokenize(content)
 
     match_sent = []
+    population_sents = []
+    hci_sents = []
+    unemp_sents = []
+    migration_sents = []
+    inflation_sents = []
+    life_exp_sents = []
+    
+
 
     result_list = []
 
@@ -68,39 +82,35 @@ def text_processing(content: str):
 
         # Human capital index
      
-        hci_matcher(sent, match_sent)
-        sents_proc(match_sent, "hci", result_list)
+        hci_matcher(sent, hci_sents)
+        sents_proc(hci_sents, "hci", result_list)
 
         # Total population
 
-        population_matcher(sent, match_sent)
-        sents_proc(match_sent, "population", result_list)
+        population_matcher(sent, population_sents)
+        sents_proc(population_sents, "population", result_list)
 
         # Net migration
 
-        migration_matcher(sent, match_sent)
-        sents_proc(match_sent, "migration", result_list)
+        migration_matcher(sent, migration_sents)
+        sents_proc(migration_sents, "migration", result_list)
 
         # Life expectancy
 
-        life_exp_matcher(sent, match_sent)
-        sents_proc(match_sent, "life expectancy", result_list)
+        life_exp_matcher(sent, life_exp_sents)
+        sents_proc(life_exp_sents, "life expectancy", result_list)
 
         # Unemployment
 
-        unemployment_matcher(sent, match_sent)
-        sents_proc(match_sent, "unemployment", result_list)
+        unemployment_matcher(sent, unemp_sents)
+        sents_proc(unemp_sents, "unemployment", result_list)
 
         # Inflation
 
-        inflation_matcher(sent, match_sent)
-        sents_proc(match_sent, "inflation", result_list)
+        inflation_matcher(sent, inflation_sents)
+        sents_proc(inflation_sents, "inflation", result_list)
 
     return result_list
-
-
-ind = {'population': 'SP.POP.TOTL', 'inflation': 'FP.CPI.TOTL.ZG', 'migration': 'SM.POP.NETM',
-       'hci': 'HD.HCI.OVRL', 'life expectancy': 'SP.DYN.LE00.IN', 'unemployment': 'SL.UEM.TOTL.ZS'}
 
 
 def sents_proc(sents, id: str, result_list: list):
@@ -278,7 +288,7 @@ def inflation_matcher(sent, inflation_sents):
         inflation_sents.append(span)
 
 
-# for item in text_processing("What was the life expectancy, population, migration, hci, unemployment, inflation of Spain in 2020"):
+# for item in text_processing("what is the life expectancy of cuba"):
 #     print(item)
 #     print("   ")
 
