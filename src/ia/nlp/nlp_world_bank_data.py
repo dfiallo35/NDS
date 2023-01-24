@@ -133,56 +133,6 @@ def sents_proc(sents, id: str, result_list: list):
             result_list.append(
                 "The requested data about " + id + " was not found")
 
-        # if id == "population":
-        #     try:
-        #         result_list.append(wb.get_series('SP.POP.TOTL', country=country,
-        #                                          date=date, id_or_value='id', simplify_index=False))
-        #     except:
-        #         result_list.append(
-        #             "The requested data about population was not found")
-
-        # if id == "hci":
-        #     try:
-        #         result_list.append(wb.get_series('HD.HCI.OVRL', country=country,
-        #                                          date=date, id_or_value='id', simplify_index=False))
-        #     except:
-        #         result_list.append(
-        #             "The requested data about human capital index was not found")
-
-        # if id == "migration":
-        #     try:
-        #         result_list.append(wb.get_series('SM.POP.NETM', country=country,
-        #                                          date=date, id_or_value='id', simplify_index=False))
-        #     except:
-        #         result_list.append(
-        #             "The requested data about migration was not found")
-
-        # if id == "life_exp":
-        #     try:
-        #         result_list.append(wb.get_series('SP.DYN.LE00.IN', country=country,
-        #                                          date=date, id_or_value='id', simplify_index=False))
-        #     except:
-        #         result_list.append(
-        #             "The requested data about life expectancy was not found")
-
-        # if id == "unemployment":
-        #     try:
-        #         result_list.append(wb.get_series('SL.UEM.TOTL.ZS', country=country,
-        #                                          date=date, id_or_value='id', simplify_index=False))
-        #     except:
-        #         result_list.append(
-        #             "The requested data about the unemployment was not found")
-
-        # if id == "inflation":
-        #     try:
-        #         result_list.append(wb.get_series('FP.CPI.TOTL.ZG', country=country,
-        #                                          date=date, id_or_value='id', simplify_index=False))
-        #     except:
-        #         result_list.append(
-        #             "The requested data about the inflation was not found")
-
-    # return result_list
-
 
 # def country_ent_extract(sent):
 #     list_regions = []
