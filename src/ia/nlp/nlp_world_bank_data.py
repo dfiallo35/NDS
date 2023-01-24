@@ -13,6 +13,17 @@ nlp = sp.load("en_core_web_sm")
 #     text_processing(text)
 
 
+indicator = {'population': 'SP.POP.TOTL', 'hci': 'HD.HCI.OVRL', 'human capital index': 'HD.HCI.OVRL', 'life expectancy': 'SP.DYN.LE00.IN',
+             'poverty headcount ratio': 'SI.POV.DDAY', 'population growth': 'SP.POP.GROW', 'migration': 'SM.POP.NETM', 'GDP': 'NY.GDP.MKTP.CD',
+             'GDP per capita': 'NY.GDP.PCAP.CD', 'GDP growth': 'NY.GDP.MKTP.KD.ZG', 'unemployment': 'SL.UEM.TOTL.ZS', 'inflation': 'FP.CPI.TOTL.ZG',
+             'personal remittances': 'BX.TRF.PWKR.DT.GD.ZS', 'CO2 emissions': 'EN.ATM.CO2E.PC', 'forest area': 'AG.LND.FRST.ZS',
+             'access to electricty': 'EG.ELC.ACCS.ZS', 'annual freshwater withdrawals': 'ER.H2O.FWTL.ZS',
+             'people using safely managed sanitation services': 'SH.STA.SMSS.ZS', 'intentional homicides': 'VC.IHR.PSRC.P5',
+             'central government debt': 'GC.DOD.TOTL.GD.ZS', 'statistical perfomance indicators': 'IQ.SPI.OVRL',
+             'individuals using the internet': 'IT.NET.USER.ZS', 'proportion of seats held by women in national parliaments': 'SG.GEN.PARL.ZS',
+             'foreign direct investment': 'BX.KLT.DINV.WD.GD.ZS', 'foreign direct investment': 'BX.KLT.DINV.WD.GD.ZS'}
+
+
 def clean(doc):
     tokens = []
 
@@ -49,50 +60,53 @@ def sent_tokenize(text: str):
 def text_processing(content: str):
     sentences = sent_tokenize(content)
 
-    pop_sents = []
-    hci_sents = []
-    migration_sents = []
-    life_exp_sents = []
+    match_sent = []
 
     result_list = []
 
     for sent in sentences:
-        list_country = country_ent_extract(sent)
-        # print(list_country)
 
-        # Human capita index
-        match_hci(sent, hci_sents)
-        # result_list.append(item for item in sents_proc(hci_sents, "hci"))
-        sents_proc(hci_sents, "hci", result_list)
+        # Human capital index
+     
+        hci_matcher(sent, match_sent)
+        sents_proc(match_sent, "hci", result_list)
 
         # Total population
-        match_pop(sent, pop_sents)
-        # result_list.append(
-        #     item for item in sents_proc(pop_sents, "population"))
-        sents_proc(pop_sents, "population", result_list)
+
+        population_matcher(sent, match_sent)
+        sents_proc(match_sent, "population", result_list)
 
         # Net migration
-        match_migration(sent, migration_sents)
-        # result_list.append(item for item in sents_proc(
-        #     migration_sents, "migration"))
-        sents_proc(migration_sents, "migration", result_list)
+
+        migration_matcher(sent, match_sent)
+        sents_proc(match_sent, "migration", result_list)
 
         # Life expectancy
-        match_life_exp(sent, life_exp_sents)
-        # result_list.append(item for item in sents_proc(
-        #     life_exp_sents, "life_exp"))
-        sents_proc(life_exp_sents, "life_exp", result_list)
+
+        life_exp_matcher(sent, match_sent)
+        sents_proc(match_sent, "life expectancy", result_list)
+
+        # Unemployment
+
+        unemployment_matcher(sent, match_sent)
+        sents_proc(match_sent, "unemployment", result_list)
+
+        # Inflation
+
+        inflation_matcher(sent, match_sent)
+        sents_proc(match_sent, "inflation", result_list)
 
     return result_list
 
-    # print(result_list)
+
+ind = {'population': 'SP.POP.TOTL', 'inflation': 'FP.CPI.TOTL.ZG', 'migration': 'SM.POP.NETM',
+       'hci': 'HD.HCI.OVRL', 'life expectancy': 'SP.DYN.LE00.IN', 'unemployment': 'SL.UEM.TOTL.ZS'}
 
 
 def sents_proc(sents, id: str, result_list: list):
     # result_list = []
 
     if len(sents) > 0:
-        # for span in sents[len(sents) - 1]:
         span = sents[len(sents) - 1]
         date = ''
         country = []
@@ -102,77 +116,28 @@ def sents_proc(sents, id: str, result_list: list):
                 date = token.text
 
             if token.ent_type_ == 'GPE':
-                # country = token.text
                 country.append(wbd.search_countries(token.text)[0]['iso2Code'])
 
-                # print(wbd.search_countries(country)[0]['iso2Code'])
+        try:
+            result_list.append(wb.get_series(ind[id], country=country,
+                                             date=date, id_or_value='id', simplify_index=False))
 
-        if id == "population":
-            try:
-                result_list.append(wb.get_series('SP.POP.TOTL', country=country,
-                                                 date=date, id_or_value='id', simplify_index=False))
-                # print(wb.get_series('SP.POP.TOTL', country=country,
-                #   date=date, id_or_value='id', simplify_index=True))
-            except:
-                result_list.append("The requested data about population was not found")
-                # print("The requested data was not found")
-
-        if id == "hci":
-            try:
-                result_list.append(wb.get_series('HD.HCI.OVRL', country=country,
-                                                 date=date, id_or_value='id', simplify_index=False))
-                # print(wb.get_series('HD.HCI.OVRL', country=country,
-                #       date=date, id_or_value='id', simplify_index=True))
-            except:
-                result_list.append("The requested data about human capital index was not found")
-                # print("The requested data was not found")
-
-        if id == "migration":
-            try:
-                result_list.append(wb.get_series('SM.POP.NETM', country=country,
-                                                 date=date, id_or_value='id', simplify_index=False))
-                # print(wb.get_series('SM.POP.NETM', country=country,
-                #       date=date, id_or_value='id', simplify_index=True))
-            except:
-                result_list.append("The requested data about migration was not found")
-                # print("The requested data was not found")
-
-        if id == "life_exp":
-            try:
-                result_list.append(wb.get_series('SP.DYN.LE00.IN', country=country,
-                                                 date=date, id_or_value='id', simplify_index=False))
-                # print(wb.get_series('SP.DYN.LE00.IN', country=country,
-                #       date=date, id_or_value='id', simplify_index=True))
-            except:
-                result_list.append("The requested data about life expectancy was not found")
-                # print("The requested data was not found")
-
-            # if result_list[len(result_list) - 1] == None:
-            #     result_list[len(result_list) - 1] = "The requested data about life expectancy was not found"
-
-    # return result_list
+        except:
+            result_list.append(
+                "The requested data about " + id + " was not found")
 
 
-def country_ent_extract(sent):
-    list_regions = []
+# def country_ent_extract(sent):
+#     list_regions = []
 
-    for entity in sent.ents:
-        if (entity.label_ == "GPE" or entity.label_ == "LOC") and entity.text not in list_regions:
-            list_regions.append(entity.text)
+#     for entity in sent.ents:
+#         if (entity.label_ == "GPE" or entity.label_ == "LOC") and entity.text not in list_regions:
+#             list_regions.append(entity.text)
 
-    return list_regions
-
-
-def match_pop(sent, pop_sents):
-    pop_matcher = population_matcher(sent)
-
-    for match_id, start, end in pop_matcher:
-        span = sent[start:end]
-
-        pop_sents.append(span)
+#     return list_regions
 
 
-def population_matcher(sent):
+def population_matcher(sent, pop_sents):
     matcher = Matcher(nlp.vocab)
 
     pattern = [
@@ -188,19 +153,13 @@ def population_matcher(sent):
 
     matches = (matcher(sent))
 
-    return matches
-
-
-def match_hci(sent, hci_sents):
-    _hci_matcher = hci_matcher(sent)
-
-    for match_id, start, end in _hci_matcher:
+    for match_id, start, end in matches:
         span = sent[start:end]
 
-        hci_sents.append(span)
+        pop_sents.append(span)
 
 
-def hci_matcher(sent):
+def hci_matcher(sent, hci_sents):
     matcher = Matcher(nlp.vocab)
 
     pattern = [
@@ -224,19 +183,13 @@ def hci_matcher(sent):
 
     matches = (matcher(sent))
 
-    return matches
-
-
-def match_migration(sent, migration_sents):
-    mig_matcher = migration_matcher(sent)
-
-    for match_id, start, end in mig_matcher:
+    for match_id, start, end in matches:
         span = sent[start:end]
 
-        migration_sents.append(span)
+        hci_sents.append(span)
 
 
-def migration_matcher(sent):
+def migration_matcher(sent, migration_sents):
     matcher = Matcher(nlp.vocab)
 
     pattern = [
@@ -252,19 +205,13 @@ def migration_matcher(sent):
 
     matches = (matcher(sent))
 
-    return matches
-
-
-def match_life_exp(sent, life_exp_sents):
-    l_e_matcher = life_exp_matcher(sent)
-
-    for match_id, start, end in l_e_matcher:
+    for match_id, start, end in matches:
         span = sent[start:end]
 
-        life_exp_sents.append(span)
+        migration_sents.append(span)
 
 
-def life_exp_matcher(sent):
+def life_exp_matcher(sent, life_exp_sents):
     matcher = Matcher(nlp.vocab)
 
     pattern = [
@@ -281,13 +228,58 @@ def life_exp_matcher(sent):
 
     matches = (matcher(sent))
 
-    return matches
+    for match_id, start, end in matches:
+        span = sent[start:end]
+
+        life_exp_sents.append(span)
 
 
+def unemployment_matcher(sent, unemployment_sents):
+    matcher = Matcher(nlp.vocab)
+
+    pattern = [
+        [
+            {'TEXT': {'REGEX': 'unemployment'}},
+            {'POS': {'IN': ['PROPN', 'NOUN', 'ADJ',
+                            'VERB', 'PUNCT']}, 'OP': '*'},
+            {"LIKE_NUM": True, 'SHAPE': 'dddd', 'OP': "*"}
+        ]
+    ]
+
+    matcher.add('unemployment', pattern)
+
+    matches = (matcher(sent))
+
+    for match_id, start, end in matches:
+        span = sent[start:end]
+
+        unemployment_sents.append(span)
 
 
-# for item in text_processing("What was the life expectancy of Cuba in 2021"):
-#     print("   ")
+def inflation_matcher(sent, inflation_sents):
+    matcher = Matcher(nlp.vocab)
+
+    pattern = [
+        [
+            {'TEXT': {'REGEX': 'inflation'}},
+            {'POS': {'IN': ['PROPN', 'NOUN', 'ADJ',
+                            'VERB', 'PUNCT']}, 'OP': '*'},
+            {"LIKE_NUM": True, 'SHAPE': 'dddd', 'OP': "*"}
+        ]
+    ]
+
+    matcher.add('inflation', pattern)
+
+    matches = (matcher(sent))
+
+    for match_id, start, end in matches:
+        span = sent[start:end]
+
+        inflation_sents.append(span)
+
+
+# for item in text_processing("What was the life expectancy, population, migration, hci, unemployment, inflation of Spain in 2020"):
 #     print(item)
+#     print("   ")
 
 # print(text_processing("What was the population and the life expectancy of Cuba in 2020"))
