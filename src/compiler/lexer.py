@@ -109,6 +109,8 @@ class NDSLexer(Lexer):
     NAME['gen_dist'] = 'FUNC'
     NAME['simulate'] = 'FUNC'
 
+    NAME['neighbors'] = 'FUNC'
+
     NAME['plot'] = 'FUNC'
     NAME['dataframe'] = 'FUNC'
     NAME['info'] = 'FUNC'

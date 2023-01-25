@@ -232,6 +232,14 @@ class Code:
 
         return ('ret', self.to_object(len(params[0])))
     
+    def func_neighbors(self, line, inside_vars, inside):
+        params= self.args(line, inside_vars, inside)
+        if not type(params[0]) == Nation:
+            raise Exception('Error: neighbors() only accepts nations as first parameter')
+        
+        neighbors= self.map.neighbors(self.to_python(params[0]))
+        return ('ret', self.to_object(neighbors))
+    
     def func_rvs(self, line, inside_vars, inside):
         args, kwargs= self.args_names(line, inside_vars, inside)
         args= self.to_python(args)
@@ -258,7 +266,7 @@ class Code:
         
         return ('ret', self.to_object(Distribution.generate_distribution(self.to_python(params[0]))))
 
-    
+    #First NLP
     # def func_info(self, line, inside_vars, inside):
     #     params= self.args(line, inside_vars, inside)
     #     if not type(params[0]) == string:
@@ -416,6 +424,7 @@ class Code:
         'plot': func_plot,
         'dataframe': func_dataframe,
         'info': func_info,
+        'neighbors': func_neighbors,
     }
 
     def code_func(self, line, inside_vars, inside):
@@ -468,6 +477,7 @@ class Code:
         'repeat': loop_repeat,
         'foreach': loop_foreach,
     }
+
     def code_loops(self, line, inside_vars, inside):
         if line.subtype not in self.loops_types:
             raise Exception('Error: the loop is not recognized')
@@ -551,6 +561,7 @@ class Code:
         'enable': out_enable,
         'disable': out_disable,
     }
+
     def code_out(self, line, inside_vars, inside):
         if line.subtype not in self.out_types:
             raise Exception('Error: the out is not recognized')
@@ -638,9 +649,6 @@ class Code:
         
         elif obj.value in self.elements:
             return self.elements[obj.value]
-        
-        elif obj.value in self.map.dataset:
-            return obj.value
 
         else:
             raise Exception(f'Name {obj.value} not found')

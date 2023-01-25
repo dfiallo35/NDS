@@ -25,7 +25,7 @@ class Map:
 
         self.dataset= {'extension', 'population'}
 
-        self.neighbours_graph= Graph()
+        self.neighbors_graph= Graph()
 
         self.en_dis_events= {
             'enable': [],
@@ -64,7 +64,7 @@ class Map:
         return None
 
     @property
-    def mapelementsdict(self) -> dict:
+    def mapelements(self) -> dict:
         """
         Get the map elements
         :return: the map elements
@@ -103,7 +103,7 @@ class Map:
     
     @property
     def data(self) -> set:
-        return self.dataset
+        return {i:i for i in self.dataset}
 
 
     @property
@@ -143,8 +143,18 @@ class Map:
             self.en_dis_events['disable'].append(event.name)
             if event.name in self.en_dis_events['enable']:
                 self.en_dis_events['enable'].remove(event.name)
+    
 
-    def add_nation(self, name: str, population: int, extension: int, traits: list= [], neighbours: list= [], *args, **kwargs):
+    def neighbors(self, nation: Nation) -> list:
+        '''
+        Get the neighbors of a nation
+        :param nation: the nation
+        :return: the neighbors
+        '''
+        self.not_exist(nation.name)
+        return [self.all[i] for i in list(self.neighbors_graph.neighbors(nation.name))]
+
+    def add_nation(self, name: str, population: int, extension: int, traits: list= [], neighbors: list= [], *args, **kwargs):
         '''
         Add a nation to the map
         :param name: the nation name
@@ -159,8 +169,8 @@ class Map:
         
         nat= Nation(name, population, extension, traits, *args, **kwargs)
         self.nationdict[name]= nat
-        self.neighbours_graph.add_node(name)
-        self.add_edges(name, neighbours)
+        self.neighbors_graph.add_node(name)
+        self.add_edges(name, [i.name for i in neighbors])
         self.add_data_to_nations()
 
 
@@ -176,23 +186,23 @@ class Map:
                 if not nat.__dict__.get(data+'var'):
                     nat.add_data(data, None)
 
-    def add_sea(self, name: str, extension: float, neighbours: list= []):
+    def add_sea(self, name: str, extension: float, neighbors: list= []):
         '''
         Add a sea to the map
         :param name: the sea name
         :param extension: the sea extension
-        :param neighbours: the sea neighbours
+        :param neighbors: the sea neighbors
         '''
         name= self.element_name(name)
-        neighbours= self.element_name(neighbours)
+        neighbors= self.element_name(neighbors)
 
         self.alredy_exist(name)
-        self.not_exist_list(neighbours)
+        self.not_exist_list(neighbors)
 
-        sea= Sea(name, extension, neighbours)
+        sea= Sea(name, extension, neighbors)
         self.seadict[name]= sea
-        self.neighbours_graph.add_node(name)
-        self.add_edges(name, neighbours)
+        self.neighbors_graph.add_node(name)
+        self.add_edges(name, [i.name for i in neighbors])
 
     
     def add_trait(self, name: str):
@@ -400,28 +410,6 @@ class Map:
         else:
             raise Exception(f'The map doesn\'t have the attribute {data}')
 
-    #fix
-    def nation_neighbours(self, nation: str):
-        """
-        Get the nation neighbours
-        :param nation: the nation name
-        :return: the nation neighbours
-        """
-        nation= self.element_name(nation)
-        self.not_exist(nation)
-
-        neighbours = []
-        for province in self.nationdict[nation].contains:
-            neighbours.extend(self.neighbours_graph[province])
-        neighbours = list(set(neighbours))
-
-        nation_neighbours = []
-        for nat in self.nationdict:
-            for province in self.nationdict[nat].contains:
-                if province in neighbours:
-                    nation_neighbours.append(nat)
-        nation_neighbours = list(set(nation_neighbours))
-        return nation_neighbours
 
     def get_element_name(self, element: str):
         """
@@ -448,15 +436,15 @@ class Map:
             return self.get_element_name(element)
 
 
-    def add_edges(self, province: str, neighbours: list):
+    def add_edges(self, element: str, neighbors: list):
         """
         Add edges to the element
         :param element: the element
-        :param neighbour: the neighbour list
+        :param neighbors: the neighbor list
         """
-        for neighbour in neighbours:
-            if neighbour in self.seas or neighbour in self.nations:
-                self.neighbours_graph.add_edge(province, neighbour)
+        for neighbor in neighbors:
+            if neighbor in self.mapelements:
+                self.neighbors_graph.add_edge(element, neighbor)
             else:
                 raise Exception("Map element not found")
 

@@ -56,19 +56,10 @@ class NLP:
 
     def generate_nation_matcher(self):
         matcher= NLPMatcher()
-        for nat in self.nations:
-            pnat= []
-            for word in self.tokenize_pattern(nat):
-                word= str(word)
-                pnat.append({'TEXT': word.lower()})
-            if pnat:
-                matcher.add(nat, [pnat])
-
         for key, nat in zip(self.nations, self.nations.values()):
             pnat= []
             for word in self.tokenize_pattern(nat):
-                word= str(word)
-                pnat.append({'TEXT': word.lower()})
+                pnat.append({'TEXT': str(word).lower()})
             if pnat:
                 matcher.add(key, [pnat])
 
@@ -215,8 +206,3 @@ class NLP:
     
     def match_year(self, sentence):
         return self.year_matcher.match(sentence)
-        
-
-# a= NLP()
-# print(a.text_processing('from Cuba take the Population also the life expectancy the hci and the net migration in 2030. From Brazil take the migration. Then from Cuba the population'))
-
