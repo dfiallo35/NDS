@@ -1,6 +1,6 @@
 <h1> Evolución de Naciones</h1>
 
-Se quiere simular el desarrollo de ciertas Naciones en un tiempo definido y en una zona geográfica generada. Estas Naciones van a contener ciertas Provincias de las que se proporciona su desarrollo y su población, mientras que de las naciones se proporcionarán los rasgos distintivos de estas. Además, pueden existir zonas neutrales o mares, los cuales representan áreas vacías. Se tomará como base principal para la simulación a los Eventos (a los cuales se les atribuye una distribución específica y un período de tiempo), todo suceso en la simulación será un Evento; estos pueden provocar una toma de decisiones por parte de una Nación, las cuales varían con respecto al evento al que se enfrentan y las características que posee esta Nación.
+Se quiere simular el desarrollo de ciertas Naciones en un tiempo definido y en una zona geográfica generada.Para esto se permitirá generar Naciones con las características necesarias para la simulación que se desea ejecutar, además de poder crear mares. Se tomará como base principal para la simulación a los Eventos (a los cuales se les atribuye una distribución específica), todo suceso en la simulación será un Evento; estos pueden provocar una toma de decisiones por parte de una Nación, las cuales varían con respecto al evento al que se enfrentan y las características que posee esta Nación.
 Se podrán recopilar datos sobre los cambios territoriales, el desarrollo, la población y las características de las Naciones y con estos analizar la influencia de las características de una Nación ya sean geográficas, políticas o económicas en el desarrollo que esta sea capaz de alcanzar.
 
 
@@ -27,7 +27,7 @@ Todos los detalles acerca de las reglas de gramática utilizada se puede ver en 
 
 <h5> Tipos </h5>
 
-- `element`: elementos que se usarán en la simulación, y se encuentran presentes en el mapa: `nation`, `province`, `sea`, `neutral`, `trait`, `decision`, `distribution`, `category`, `event`.
+- `element`: elementos que se usarán en la simulación, y se encuentran presentes en el mapa: `nation`, `sea`, `trait`, `decision`, `distribution`, `category`, `simulation event`, `decision event` y `function`.
 - `interger`: número entero.
 - `decimal`: número flotante.
 - `boolean`: booleano, puede ser `true` o `false`.
@@ -68,41 +68,61 @@ Todos los detalles acerca de las reglas de gramática utilizada se puede ver en 
 <h4> Ejemplos de código</h4>
 
 ```
-category social();
-category economic();
+#categories
+    category social();
+    category economic();
+    category political();
+    category military();
+    category territorial();
 
-nation Cuba(10, 100, [], [], industrialization: 10 , economic_resources:30000);
-nation USA(10, 100, [], [], industrialization: 10 , economic_resources:30000);
+    #nations
+    nation Cuba(11256372, 109884 , [], [], industrialization: 30, tourism:80);
+    nation USA(9147593, 337341954, [], [], industrialization: 80 , tourism:70);
+    nation Canada(38246108, 9984670, [], [], industrialization: 70 , tourism:30);
+    nation Mexico(128455567, 1964375 , [], [], industrialization: 60 , tourism:70);
 
-distribution pg(expon, scale: 100);
-
-decision event industrialization_increases(economic)<<n>>{
-    n->economic_resources = n->economic_resources-5000;
-    n->industrialization = n->industrialization*0.9;
-}
-
-decision industrialization_increases_dec(n->economic_resources >= 5000, industrialization_increases)<< n >>;
+    #distributions
+    distribution pg(expon, scale: 20);
+    distribution block(expon, scale: 50);
 
 
-simulation event population_growth(pg, social, true, []){
-    foreach <<nat>> (map->nations){
-        nat->population= irvs(expon, loc: nat->population);
+    #decisions
+    decision event industrialization_increases(economic)<<n>>{
+        n->aviable_economic_resources = n->aviable_economic_resources-500;
+        n->industrialization = n->industrialization*1.2;
+    }    
+    decision industrialization_increases_dec(n->aviable_economic_resources >= 5000, industrialization_increases)<< n >>;
+
+    decision event tourism_increases(economic)<<n>>{
+        n->aviable_economic_resources = n->aviable_economic_resources-7000;
+        n->tourism = n->tourism*1.2;
     }
-}
+    decision tourism_increases_dec(n->aviable_economic_resources >= 7000, tourism_increases)<< n >>;
 
-simulation event decrease_industrialization(pg,economic,true,[]){
-    foreach <<nat>> (map->nations){
-        nat->industrialization=nat->industrialization*0.9;
+
+    #events
+    simulation event decrease_industrialization(pg,economic,true,[]){
+        foreach <<nat>> (map->nations){
+            nat->industrialization=nat->industrialization*0.9;
+        }
     }
-}
 
-simulation event population_mortality(pg, social, true, []){
-    foreach <<nat>> (map->nations){
-        nat->population= nat->population - irvs(expon, loc: 0);
+    simulation event population_growth(pg, social, true, []){
+        foreach <<nat>> (map->nations){
+            nat->population= irvs(expon, loc: nat->population);
+        }
     }
-}
 
-simulate(100d);
+    simulation event population_mortality(pg, social, true, []){
+        foreach <<nat>> (map->nations){
+            nat->population= nat->population - irvs(expon, loc: 0);
+        }
+    }
+
+
+    simulate(10d);
+
+    plot(Cuba, ['tourism', 'industrialization'] , 'line');
 
 ```
 
