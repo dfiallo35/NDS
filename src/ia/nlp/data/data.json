@@ -1,0 +1,23 @@
+{
+    "name":{
+        "SP.DYN.LE00.IN":"Life expectancy at birth, total (years)",
+        "SP.POP.TOTL":"Population, total",
+        "3.11.01.01.popcen":"Population census",
+        "C1.2":"Population",
+        "IN.EC.POP.RURL.PCT":"Population, Rural (%)",
+        "IN.EC.POP.URBN.PCT":"Population, Urban (%)",
+        "SP.POP.GROW":"Population growth (annual %)",
+        "SP.POP.LAND.ZS":"Population density (people per sq km)",
+        "SM.POP.NETM":"Net migration",
+        "HD.HCI.OVRL":"Human Capital Index (HCI) (scale 0-1)",
+        "NY.GDP.MKTP.CD":"GDP (current US$)",
+        "NY.GDP.PCAP.CD":"GDP per capita (current US$)",
+        "6.0.GDP_growth":"GDP growth (annual %)",
+        "NY.GDP.MKTP.KD.ZG":"GDP growth (annual %)",
+        "NY.GDP.MKTP.KN.87.ZG":"GDP growth (annual %)",
+        "AG.LND.FRST.ZS":"Forest area (% of land area)",
+        "EG.ELC.ACCS.ZS":"Access to electricity (% of population)",
+        "ER.H2O.FWTL.ZS":"Annual freshwater withdrawals, total (% of internal resources)",
+        "SH.STA.SMSS.ZS":"People using safely managed sanitation services (% of population)"
+    }
+}

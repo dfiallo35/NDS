@@ -7,6 +7,7 @@ from compiler.parser import *
 from compiler.parser_obj import *
 from simulation.simulation import *
 from ia.nlp.nlp_world_bank_data import *
+from ia.nlp.nlp import *
 
 import pandas as pd
 
@@ -36,7 +37,6 @@ class Code:
         self.semantic_check(parsed_code)
         self.execute(parsed_code, vars={}, inside=0)
     
-    #fix
     def semantic_check(self, code):
         semantic_elements= {
             'nation': {'min':4},
@@ -49,7 +49,6 @@ class Code:
             'distribution': {'min':1},
         }
 
-        #fix
         semantic_funcs= {
             'type': {'args':1},
             'pos': {'args':2},
@@ -213,12 +212,10 @@ class Code:
         params= self.args(line, inside_vars, inside)
         print('>>', *params)
     
-    #fix return
     def func_type(self, line, inside_vars, inside):
         params= self.args(line, inside_vars, inside)
         return ('ret', self.to_object(type(self.value(params[0], inside_vars, inside)).__name__))
     
-    #fix return
     def func_pos(self, line, inside_vars, inside):
         params= self.args(line, inside_vars, inside)
         if not type(params[0]) == array:
@@ -228,7 +225,6 @@ class Code:
             
         return ('ret', self.to_object(params[0].value[params[1].value]))
     
-    #fix return
     def func_size(self, line, inside_vars, inside):
         params= self.args(line, inside_vars, inside)
         if not type(self.to_python(params[0])) == list:
@@ -236,7 +232,6 @@ class Code:
 
         return ('ret', self.to_object(len(params[0])))
     
-    #fix return
     def func_rvs(self, line, inside_vars, inside):
         args, kwargs= self.args_names(line, inside_vars, inside)
         args= self.to_python(args)
@@ -246,7 +241,6 @@ class Code:
         else:
             return ('ret', self.to_object(Distribution.rvs(*args, **kwargs)))
     
-    #fix return
     def func_irvs(self, line, inside_vars, inside):
         args, kwargs= self.args_names(line, inside_vars, inside)
         args= self.to_python(args)
@@ -258,17 +252,31 @@ class Code:
             return ('ret', self.to_object(Distribution.irvs(*args, **kwargs)))
 
     def func_gen_dist(self, line, inside_vars, inside):
-        ...
+        params= self.args(line, inside_vars, inside)
+        if not type(params[0]) == array:
+            raise Exception('Error: gen_dist() only accepts lists as first parameter')
+        
+        return ('ret', self.to_object(Distribution.generate_distribution(self.to_python(params[0]))))
+
+    
+    # def func_info(self, line, inside_vars, inside):
+    #     params= self.args(line, inside_vars, inside)
+    #     if not type(params[0]) == string:
+    #         raise Exception('Error: info() only accepts strings')
+    #     for d in text_processing(self.to_python(params[0])):
+    #         self.dataframes.append(
+    #             pd.DataFrame(d)
+    #         )
     
     def func_info(self, line, inside_vars, inside):
         params= self.args(line, inside_vars, inside)
         if not type(params[0]) == string:
             raise Exception('Error: info() only accepts strings')
-        for d in text_processing(self.to_python(params[0])):
-            self.dataframes.append(
-                pd.DataFrame(d)
-            )
-    
+        
+        nlp= NLP()
+        for d in nlp.get_data(self.to_python(params[0])):
+            self.dataframes.append(d)
+
     def func_simulate(self, line, inside_vars, inside):
         params= self.args(line, inside_vars, inside)
         if not type(params[0]) == time:
@@ -410,7 +418,6 @@ class Code:
         'info': func_info,
     }
 
-    #fix return
     def code_func(self, line, inside_vars, inside):
         if line.subtype not in self.func_types:
             raise Exception('Error: the function is not recognized')
@@ -420,7 +427,7 @@ class Code:
             return c
     
 
-    #fix return
+
     #LOOPS
     def loop_while(self, line, inside_vars, inside):
         while self.to_python(self.value(line.condition, inside_vars, inside)):
@@ -428,7 +435,7 @@ class Code:
             if self.to_python(val) != None:
                 return ('ret', val)
     
-    #fix return
+
     def loop_repeat(self, line, inside_vars, inside):
         init= self.value(line.init, inside_vars, inside)
         end= self.value(line.end, inside_vars, inside)
@@ -443,7 +450,7 @@ class Code:
             if self.to_python(val) != None:
                 return ('ret', val)
     
-    #fix return
+    
     def loop_foreach(self, line, inside_vars, inside):
         param= self.value(line.param)
         if type(param) != array:
@@ -470,7 +477,7 @@ class Code:
             return c
     
 
-    #fix return
+    
     #CONDITIONALS
     def code_conditional(self, line, inside_vars, inside):
         if line.subtype == 'if':
@@ -491,7 +498,7 @@ class Code:
             raise Exception('Error: unknown conditional')
 
 
-    #fix return
+    
     #EXECUTION
     def code_execution(self, line, inside_vars, inside):
         if self.events.get(self.to_python(line.name)):
@@ -506,7 +513,7 @@ class Code:
             raise Exception(f'Error: event {line.name} does not exist')
     
 
-    #fix return
+    
     #OUT
     def out_return(self, line, inside_vars, inside):
         return ('ret', self.value(line.value, inside_vars, inside))
@@ -553,7 +560,7 @@ class Code:
             return c
     
 
-    #fix return
+    
     #COND
     def code_cond(self, line, inside_vars, inside):
         return ('ret', self.value(line.cond, inside_vars, inside+1))
