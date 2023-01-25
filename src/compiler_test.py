@@ -99,9 +99,9 @@ a.compile(
     }
 
 
- foreach <<nat>> (map->nations){
+    foreach <<nat>> (map->nations){
         show(nat,nat->tourism);
-        }
+    }
 
 
     simulate(10d);
@@ -109,9 +109,9 @@ a.compile(
     plot(Cuba, ['tourism', 'industrialization'] , 'line');
 
 
- foreach <<nat>> (map->nations){
-show(nat,nat->tourism);
-        }
+    foreach <<nat>> (map->nations){
+        show(nat,nat->tourism);
+    }
 
 
     '''
