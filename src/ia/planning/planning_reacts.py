@@ -4,7 +4,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 from ia.planning.planning_decisions import *
 
 
-def reaction_for_an_event(map,new_map,changes,event,possible_decisions):
+def reaction_for_an_event(new_map,changes,event,possible_decisions):
     """Get a list of actions to react this event"""
     t=time.time()    
     nations = get_affected_nations(new_map,changes)
