@@ -7,6 +7,7 @@ a = PriorityQueue()
 import time as cp_time
 
 
+
 class Pqueue:
     def __init__(self, events: list[Event]= []):
         self.queue = PriorityQueue()
@@ -80,11 +81,11 @@ class Pqueue:
 
 
 class Simulate:
-    def __init__(self, map: Map, initial_events: Pqueue):
+    def __init__(self, map: Map, initial_events: Pqueue, log: Log):
         self.event_queue = initial_events
         self.map = map
         self.decisions:list=None
-        self.map.log=Log(self.map)
+        self.log= log
     
     @property
     def en_dis(self):
@@ -107,11 +108,11 @@ class Simulate:
             for time, event in self.event_queue.pop():
                 if event.is_enabled and self.events[event.name].is_enabled:
                     print(time, event)
-                    old_map = copy(self.map)
 
                     event.execute(self.map)
 
-                    self.map.log.add(time, event, old_map, self.map)
+                    changes= self.map.get_changes()
+                    self.log.add(time, event, changes)
 
                     self.generate_event(event, time)
 

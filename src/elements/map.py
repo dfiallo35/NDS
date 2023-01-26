@@ -31,7 +31,12 @@ class Map:
             'enable': [],
             'disable': []
         }
-        self.log= Log(self)
+
+        self.changes= {
+            'changed': {},
+            'new': [],
+            'lost': []
+        }
     
 
     def compare(self, new):
@@ -101,6 +106,7 @@ class Map:
     def decisions(self) -> dict:
         return self.decisionsdict
     
+    #OK
     @property
     def data(self) -> set:
         return {i:i for i in self.dataset}
@@ -144,7 +150,7 @@ class Map:
             if event.name in self.en_dis_events['enable']:
                 self.en_dis_events['enable'].remove(event.name)
     
-
+    #ok
     def neighbors(self, nation: Nation) -> list:
         '''
         Get the neighbors of a nation
@@ -337,6 +343,16 @@ class Map:
             else:
                 raise Exception(f'The property {key} doesn\'t exist')
 
+
+    def get_changes(self):
+        changes = self.changes.copy()
+        self.changes= {
+            'changed': {},
+            'new': [],
+            'lost': []
+        }
+        return changes
+
     #check same tipe
     #check self.all
     def data_update(self, element: str, data: dict):
@@ -347,6 +363,10 @@ class Map:
         """
         # element= self.element_name(element)
         # self.not_exist(element)
+        if not self.changes['changed'].get(element.name):
+            self.changes['changed'].update({element.name: [data]})
+        else:
+            self.changes['changed'][element.name].append(data)
 
         properties= {name:val for (name, val) in gm(type(element), lambda x: isinstance(x, property))}
         for key in data:
