@@ -98,7 +98,7 @@ a.compile(
     }
 
 
-    simulate(10d);
+    simulate(100d,5);
     # plot(Cuba, ['tourism', 'industrialization'] , 'line');
     # info('Cuba net migration and population in 2000');
     '''

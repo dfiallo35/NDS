@@ -114,7 +114,11 @@ def bfsearch(problem:PlanningProblem):
 
 def get_new_states(actions,state):
     """returns a dict with every actions that can be done and the new state obtained"""
-    return {action:action.apply_action(deepcopy(state)) for action in actions if action.check_preconds(state)}
+    # t=time.time()
+    # return {action:action.apply_action(deepcopy(state)) for action in actions if action.check_preconds(state)}
+    return {action:action.apply_action(state.get_copy()) for action in actions if action.check_preconds(state)}
+    # print("deepcopy time: ",time.time()-t)
+    # return a
 
 def ordered_actions_priority(h_values):
     """receive a dict of actions and it's values and return a list of actions ordered by priority
@@ -134,7 +138,6 @@ def ordered_actions_priority_rec(h_values,ordered_actions:list):
     ordered_actions_priority_rec(h_values,ordered_actions)
 
 
-
 def get_path(state):
     """Get the path from the initial state to the state"""
     path=[]
@@ -145,7 +148,3 @@ def get_path(state):
         state=state.parent
     path.append(state.value)
     return path[::-1]
-
-
-
-

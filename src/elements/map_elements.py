@@ -89,6 +89,10 @@ class Nation(MapElement):
         if changes:
             return changes
         return None
+
+    def get_copy(self):
+        return Nation(population= self.population, extension=self.extension, traits=self.traits, **self.data)
+
          
 
 class Sea(MapElement):

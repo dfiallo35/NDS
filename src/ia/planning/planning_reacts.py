@@ -6,15 +6,21 @@ from ia.planning.planning_decisions import *
 
 def reaction_for_an_event(new_map,changes,event,possible_decisions):
     """Get a list of actions to react this event"""
-    t=time.time()    
+    # t=time.time()    
     nations = get_affected_nations(new_map,changes)
     t2=time.time()
+    # print("time to get affected nations: ",t2-t)
     decisions={}
-    for nation in nations:
+    for nation in nations:        
         goal_func,goal_dict=get_target(nation,changes)
-        t1=time.time()
+        # t1=time.time()
+        # print("time to get goal: ",t1-t2)
         planning_tree=PlanningDecisions(nation,possible_decisions,goal_func,event,goal_dict).make_planning()
+        # t3=time.time()
+        # print("time to make planning: ",t3-t1)
         decisions[nation]= get_only_actions(planning_tree)
+        # t4=time.time()
+        # print("time to get only actions: ",t4-t3)
     return decisions
     
 
@@ -22,8 +28,8 @@ def get_only_actions(tree):
     """Get a list of actions from the states tree of the planning"""
     if (not tree):
         return []
-    dec=[i["action"] if i["action"] else None for i in get_path(tree)]
-    return [i for i in dec if i]
+    return [i["action"]  for i in get_path(tree) if i["action"]]
+    # return [i for i in dec if i]
 
 
 def transform_decisions( map_decisions):
@@ -54,9 +60,9 @@ def get_target(nation,changes):
         if(gets_worse(elem,changes["changed"][nation.name][elem][0],changes["changed"][nation.name][elem][1])):#todo aqui comprobar si el cambio es positivo o negativo
             if goals.__contains__(elem):
                 goals[elem]=goals[elem]+changes["changed"][nation.name][elem][0]
-            else:
+            else: 
                 goals[elem]=changes["changed"][nation.name][elem][0]
-    #convert the goals into a function than comprobate this goal
+    #convert the goals into a function than comprobate this goala
     goals_function = lambda nation: all([nation.get_nation_data(goal)>=goals[goal] for goal in goals])
     return goals_function,goals
 
