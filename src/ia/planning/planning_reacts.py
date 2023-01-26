@@ -31,14 +31,14 @@ def get_only_actions(tree):
     return [i["action"]  for i in get_path(tree) if i["action"]]
     # return [i for i in dec if i]
 
-
+#fix
 def transform_decisions( map_decisions):
     """Transform the decisions of the map into a list of actions""" 
     decisions=[]
     for decision in map_decisions.values():
         name=decision.name
         prec=decision.condition
-        event_=deepcopy(decision.event)
+        event_= decision.event.copy()
         cat=decision.event.category
         decisions.append(ActionDecision(action=name ,preconds=prec,event=event_,category=cat))
     return decisions

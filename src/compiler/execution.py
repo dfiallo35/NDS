@@ -297,6 +297,7 @@ class Code:
             self.logs.add(map)
             sim= Simulate(map, Pqueue(map.event_enabled_list), self.logs.current_log)
             sim.simulate(self.to_python(params[0]))
+            del sim
         else:
             if not type(params[1]) == integer:
                 raise Exception('Error: simulate() only accepts integer as second param')
@@ -308,6 +309,7 @@ class Code:
                 self.logs.add(map)
                 sim= Simulate(map, Pqueue(map.event_enabled_list), self.logs.current_log)
                 sim.simulate(self.to_python(params[0]))
+                del sim
 
     
 

@@ -91,7 +91,7 @@ class Nation(MapElement):
         return None
 
     def get_copy(self):
-        return Nation(population= self.population, extension=self.extension, traits=self.traits, **self.data)
+        return Nation(**{**{key[:-3]: val for key, val in zip(self.data.keys(), self.data.values()) if key != 'name'}, 'name': self.name})
 
          
 
