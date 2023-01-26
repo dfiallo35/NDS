@@ -9,7 +9,7 @@ from inspect import getmembers as gm
 
 
 class Map:
-    def __init__(self) -> None:
+    def __init__(self):
         self.nationdict = dict()
         self.seadict = dict()
         self.traitdict = dict()

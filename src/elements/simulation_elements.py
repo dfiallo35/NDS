@@ -177,6 +177,9 @@ class DecisionEvent(Event):
         '''
         return self.enabled
     
+    def copy(self):
+        return DecisionEvent(self.name, self.category, self.execution, self.code, self.params)
+    
     def __str__(self) -> str:
         return f'{self.name}'
 
