@@ -1,6 +1,7 @@
 #note: En las comparaciones no se tienen en cuenta lso cambios en los nombres de las provincias o naciones
 #note: Se asume que estos son invariables
 from copy import deepcopy as copy
+from inspect import getmembers as gm
 
 class Element:
     """
@@ -25,16 +26,24 @@ class Element:
             raise Exception(f'Error: "{self.name}" and "{other.name}" are not of the same type')
 
 
-class Log:
+class Log(Element):
     '''
     The log of the simulation. It is used to store the data of the simulation.
     '''
-    def __init__(self, initial_map):
+    def __init__(self, name: str, initial_map):
+        super().__init__(name)
         self.log= {}
         self.initial_map= initial_map
-        self.actual_map= initial_map
     
-    def add(self, time: int, event, old_map, new_map):
+    @property
+    def day(self, d: int):
+        '''
+        Return the data of the day
+        :param d: the day
+        '''
+        return self.log.get(d)
+    
+    def add(self, time: int, event, data: dict):
         '''
         Add a new event to the log
         :param time: the time of the event
@@ -42,8 +51,6 @@ class Log:
         :param old_map: the map before the event
         :param new_map: the map after the event
         '''
-        data= old_map.compare(new_map)
-        self.actual_map= new_map
         if self.log.get(time):
             self.log[time].append((event, data))
         else:
@@ -72,4 +79,29 @@ class Log:
             l.append(datavar)
         return l
 
+
+    def get_log_data(self, data: str):
+        properties= {name:val for (name, val) in gm(Log, lambda x: isinstance(x, property))}
+        if data in properties:
+            return properties[data].fget(self)
+        else:
+            raise Exception(f'The map doesn\'t have the attribute {data}')
+
+
+class Logs:
+    def __init__(self):
+        self.logs= {}
+        self.log_counter= 0
+        self.current_log= None
     
+    def add(self, map):
+        self.log_counter+=1
+        self.logs['log'+str(self.log_counter)] = Log('log'+str(self.log_counter), map)
+        self.current_log= self.logs['log'+str(self.log_counter)]
+    
+    def get_map_data(self, data: str):
+        properties= {name:val for (name, val) in gm(Log, lambda x: isinstance(x, property))}
+        if data in properties:
+            return properties[data].fget(self)
+        else:
+            raise Exception(f'The map doesn\'t have the attribute {data}')

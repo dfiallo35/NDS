@@ -352,6 +352,13 @@ class Map:
             'lost': []
         }
         return changes
+    
+    #fix
+    def add_change(self, element, property, data_old, data_new):
+        if not self.changes['changed'].get(element.name):
+            self.changes['changed'].update({element.name: {property+'var': (data_old, data_new)}})
+        else:
+            self.changes['changed'][element.name][property+'var']= (data_old, data_new)
 
     #check same tipe
     #check self.all
@@ -363,10 +370,7 @@ class Map:
         """
         # element= self.element_name(element)
         # self.not_exist(element)
-        if not self.changes['changed'].get(element.name):
-            self.changes['changed'].update({element.name: [data]})
-        else:
-            self.changes['changed'][element.name].append(data)
+        
 
         properties= {name:val for (name, val) in gm(type(element), lambda x: isinstance(x, property))}
         for key in data:
@@ -378,9 +382,11 @@ class Map:
             
             if type(data[key]) == list:
                 for i in data[key]:
+                    self.add_change(element, key, properties[key].fget(element), i)
                     properties[key].fset(element, i)
             else:
-                properties[key].fset(element, data[key])  
+                self.add_change(element, key, properties[key].fget(element), data[key])
+                properties[key].fset(element, data[key])
                 
 
     def data_delete(self, element: str, data: dict):

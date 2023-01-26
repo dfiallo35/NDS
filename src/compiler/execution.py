@@ -10,6 +10,7 @@ from ia.nlp.nlp_world_bank_data import *
 from ia.nlp.nlp import *
 
 import pandas as pd
+from copy import deepcopy
 
 
 class Code:
@@ -19,10 +20,11 @@ class Code:
 
         self.plots= []
         self.dataframes= []
+        self.logs= Logs()
     
     @property
     def elements(self):
-        return self.map.all
+        return {**self.map.all, **self.logs.logs}
     
     @property
     def events(self):
@@ -53,9 +55,9 @@ class Code:
             'type': {'args':1},
             'pos': {'args':2},
             'len': {'args':1},
-            'simulate': {'args':1},
-            'plot': {'args':3},
-            'dataframe': {'args':2},
+            'simulate': {'min':1, 'max':2},
+            'plot': {'args':4},
+            'dataframe': {'args':3},
             'info': {'args':1},
             'gen_dist': {'args':1},
         }
@@ -287,68 +289,161 @@ class Code:
 
     def func_simulate(self, line, inside_vars, inside):
         params= self.args(line, inside_vars, inside)
-        if not type(params[0]) == time:
-            raise Exception('Error: simulate() only accepts time')
-        sim= Simulate(self.map, Pqueue(self.map.event_enabled_list))
-        sim.simulate(self.to_python(params[0]))
+        if len(params) ==1:
+            if not type(params[0]) == time:
+                raise Exception('Error: simulate() only accepts time as first param')
+            
+            map= deepcopy(self.map)
+            self.logs.add(map)
+            sim= Simulate(map, Pqueue(map.event_enabled_list), self.logs.current_log)
+            sim.simulate(self.to_python(params[0]))
+        else:
+            if not type(params[1]) == integer:
+                raise Exception('Error: simulate() only accepts integer as second param')
+            for i in range(0, self.to_python(params[1])):
+                if not type(params[0]) == time:
+                    raise Exception('Error: simulate() only accepts time as first param')
+            
+                map= deepcopy(self.map)
+                self.logs.add(map)
+                sim= Simulate(map, Pqueue(map.event_enabled_list), self.logs.current_log)
+                sim.simulate(self.to_python(params[0]))
+
     
+
+
     def func_plot(self, line, inside_vars, inside):
         params= self.args(line, inside_vars, inside)
-        if self.to_python(params[2]) not in ['line', 'area', 'bar']:
+        if self.to_python(params[3]) not in ['line', 'area', 'bar']:
             raise Exception('Error: plot() only acept line, area or bar as third parameter')
 
-        if isinstance(params[0], Nation) and not isinstance(params[1], array):
-            if params[0].name not in self.elements:
-                raise Exception(f'Error: the element {params[0].name} is not recognized')
-            
-            self.plots.append(
-                (self.to_python(params[2]),
-                pd.DataFrame(
-                    self.map.log.get_nation_data(self.to_python(params[0].name), self.to_python(params[1])),
-                    columns=[self.to_python(params[1])]
-                )
-                )
-            )
+        elif isinstance(params[0], array):
+            for i in self.to_python(params[0]):
+                if not isinstance(i, Log):
+                    raise Exception('Error: First parameter must be a Log or a list of logs')
 
-        elif isinstance(params[0], array) and not isinstance(params[1], array):
-            gn= []
-            columns= []
-            for nat in self.to_python(params[0]):
-                if isinstance(nat, Nation):
-                    if nat.name not in self.elements:
-                        raise Exception('Error: the element is not recognized')
-                    
-                    gn.append(self.map.log.get_nation_data(self.to_python(nat.name), self.to_python(params[1])))
-                    columns.append(nat.name)
-            
-            self.plots.append(
-                (self.to_python(params[2]),
-                pd.DataFrame(
-                    [list(i) for i in list(zip(*gn))],
-                    columns=columns
-                )
-                )
-            )
 
-        elif not isinstance(params[0], array) and isinstance(params[1], array):
-            if params[0].name not in self.elements:
-                raise Exception('Error: the element is not recognized')
-            gn= []
-            columns= []
-            for data in self.to_python(params[1]):
+            if isinstance(params[1], Nation) and not isinstance(params[2], array):
+                if params[1].name not in self.elements:
+                    raise Exception(f'Error: the element {params[1].name} is not recognized')
                 
-                gn.append(self.map.log.get_nation_data(self.to_python(params[0].name), self.to_python(data)))
-                columns.append(self.to_python(data))
-            
-            self.plots.append(
-                (self.to_python(params[2]),
-                pd.DataFrame(
-                    [list(i) for i in list(zip(*gn))],
-                    columns=columns
+                gn= []
+                columns= self.to_python(params[0])
+                for log in self.to_python(params[0]):
+                    log: Log= log
+                    gn.append(log.get_nation_data(self.to_python(params[1].name), self.to_python(params[2])))
+
+                self.plots.append(
+                    (self.to_python(params[3]),
+                    pd.DataFrame(
+                        [list(i) for i in list(zip(*gn))],
+                        columns=columns
+                    )
+                    )
                 )
-                )
-            )
         
+            elif isinstance(params[1], array) and not isinstance(params[2], array):
+                for log in self.to_python(params[0]):
+                    log: Log= log
+                    gn= []
+                    columns= []
+                    for nat in self.to_python(params[1]):
+                        if isinstance(nat, Nation):
+                            if nat.name not in self.elements:
+                                raise Exception('Error: the element is not recognized')
+                            
+                            gn.append(log.get_nation_data(self.to_python(nat.name), self.to_python(params[2])))
+                            columns.append(nat.name)
+                    
+                    self.plots.append(
+                        (self.to_python(params[3]),
+                        pd.DataFrame(
+                            [list(i) for i in list(zip(*gn))],
+                            columns=columns
+                        )
+                        )
+                    )
+
+            elif not isinstance(params[1], array) and isinstance(params[2], array):
+                for log in self.to_python(params[0]):
+                    log: Log= log
+                    if params[1].name not in self.elements:
+                        raise Exception('Error: the element is not recognized')
+                    gn= []
+                    columns= []
+                    for data in self.to_python(params[2]):
+                        
+                        gn.append(log.get_nation_data(self.to_python(params[1].name), self.to_python(data)))
+                        columns.append(self.to_python(data))
+                    
+                    self.plots.append(
+                        (self.to_python(params[3]),
+                        pd.DataFrame(
+                            [list(i) for i in list(zip(*gn))],
+                            columns=columns
+                        )
+                        )
+                    )
+            else:
+                raise Exception('Error: plot() only accepts logs, nations or data arrays as parameters')
+        
+        elif isinstance(params[0], Log):
+            log: Log= params[0]
+
+            if isinstance(params[1], Nation) and not isinstance(params[2], array):
+                if params[0].name not in self.elements:
+                    raise Exception(f'Error: the element {params[1].name} is not recognized')
+                
+                self.plots.append(
+                    (self.to_python(params[3]),
+                    pd.DataFrame(
+                        log.get_nation_data(self.to_python(params[1].name), self.to_python(params[2])),
+                        columns=[self.to_python(params[2])]
+                    )
+                    )
+                )
+
+            elif isinstance(params[1], array) and not isinstance(params[2], array):
+                gn= []
+                columns= []
+                for nat in self.to_python(params[1]):
+                    if isinstance(nat, Nation):
+                        if nat.name not in self.elements:
+                            raise Exception('Error: the element is not recognized')
+                        
+                        gn.append(log.get_nation_data(self.to_python(nat.name), self.to_python(params[2])))
+                        columns.append(nat.name)
+                
+                self.plots.append(
+                    (self.to_python(params[3]),
+                    pd.DataFrame(
+                        [list(i) for i in list(zip(*gn))],
+                        columns=columns
+                    )
+                    )
+                )
+
+            elif not isinstance(params[1], array) and isinstance(params[2], array):
+                if params[1].name not in self.elements:
+                    raise Exception('Error: the element is not recognized')
+                gn= []
+                columns= []
+                for data in self.to_python(params[2]):
+                    
+                    gn.append(log.get_nation_data(self.to_python(params[1].name), self.to_python(data)))
+                    columns.append(self.to_python(data))
+                
+                self.plots.append(
+                    (self.to_python(params[3]),
+                    pd.DataFrame(
+                        [list(i) for i in list(zip(*gn))],
+                        columns=columns
+                    )
+                    )
+                )
+            else:
+                raise Exception('Error: plot() only accepts logs, nations or data arrays as parameters')
+
         else:
             raise Exception('Error: plot() only accepts nations or arrays as first and second parameters')
 
@@ -661,6 +756,10 @@ class Code:
         
         if isinstance(self.value(obj.name, inside_vars, inside), Map):
             return self.to_object(self.map.map_data(self.to_python(obj.var)))
+        
+        # elif self.to_python(self.value(obj.name, inside_vars, inside)) in self.logs.logs:
+        #     return self.to_object(self.map.get_data(self.to_python(self.value(obj.name, inside_vars, inside))))
+
 
         else:
             return self.to_object(self.map.get_data(self.to_python(self.value(obj.name, inside_vars, inside)),

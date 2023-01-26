@@ -107,17 +107,15 @@ class Simulate:
 
             for time, event in self.event_queue.pop():
                 if event.is_enabled and self.events[event.name].is_enabled:
+                    
                     print(time, event)
-
                     event.execute(self.map)
 
                     changes= self.map.get_changes()
                     self.log.add(time, event, changes)
-
                     self.generate_event(event, time)
 
-                    self.decide(old_map,self.map, event, time)
-                    del old_map
+                    self.decide(changes, self.map, event, time)
 
 
     def generate_event(self, event: Event, time: int):
