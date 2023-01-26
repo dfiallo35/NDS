@@ -150,7 +150,7 @@ class Simulate:
             nt += 1
         return nt
     
-    def decide(self,old_map:Map, map: Map, event: Event, time: int):
+    def decide(self,changes, map: Map, event: Event, time: int):
         '''
         Decisions of a nation given an event and the moment in which it occurs
         :param event: the event that occurred
@@ -162,9 +162,9 @@ class Simulate:
         if not self.decisions:
             self.decisions=transform_decisions(map.decisions)
 
-        t=cp_time.time()
-        changes=old_map.compare(map)  
-        decisions=self.get_events_from_decisions(reaction_for_an_event(old_map, map,changes,event,self.decisions))
+        # t=cp_time.time()
+        # changes=old_map.compare(map)  
+        decisions=self.get_events_from_decisions(reaction_for_an_event(map,changes,event,self.decisions))
 
         for nation in decisions.keys():
             nation_decs=self.get_time(time,decisions[nation],distribution="uniform")
