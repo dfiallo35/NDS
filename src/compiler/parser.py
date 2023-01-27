@@ -8,19 +8,20 @@ class NDSParser(Parser):
     start = 'script'
 
     precedence = (
-        ('left', 'PLUS', 'MINUS'),
-        ('left', 'MULTIPLY', 'FLOORDIV', 'DIVIDE', 'MOD', 'POW'),
-
         ('left', 'OR', 'XOR'),
         ('left', 'AND'),
 
         ('left', 'EQUALS', 'NOTEQUALS'),
         ('left', 'GREATER', 'LESS', 'EGREATER', 'ELESS'),
 
+        ('left', 'PLUS', 'MINUS'),
+        ('left', 'MULTIPLY', 'FLOORDIV', 'DIVIDE', 'MOD', 'POW'),
+
         ('right', 'XPLUS', 'XMINUS'),
         ('right', 'UMINUS', 'UPLUS'),
 
         ('right', 'NOT'),
+        ('right', 'ARROW')
         )
 
 
