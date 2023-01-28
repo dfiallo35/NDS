@@ -75,6 +75,7 @@ Como apoyo a la simulación se tienen los siguientes elementos que se pueden cre
 
 
 Para ejecutar la simulación se usa el método `simulate` al cual se le pasan los siguientes parámetros:
++ **simulate**: Método que ejecuta la simulación.
     + **tiempo**: Tiempo máximo de la simulación.
     + **cantidad**: Cantidad de veces que se va a ejecutar la simulación. Este parámetro es opcional y por defecto es 1.
 
