@@ -168,13 +168,17 @@ Para mejorar el rendimiento de este algoritmo se utilizó una función heurísti
 
 ##### NLP
 
-Para consultar algunos datos de las naciones que provee `World Bank Data` (población total, esperanza de vida, índice de capital humano, migración, desempleo, inflación) se puede realizar una consulta en lenguaje natural donde se especifiquen cuáles de estas características se quiere determinar, el o los países de interés así como el año del cuál se quiere ver la información. 
+Para facilitar el trabajo del usuario en cuanto a la busqueda de información real sobre las naciones se implementó un sistema de procesamiento de lenguaje natural que permite al usuario ingresar una pregunta en lenguaje natural y obtener los resultados de la busqueda en forma de dataframe.
 
-El texto con la consulta del usuario será normalizado inicialmente, eliminando `stopwords` y dejando solamente el `lema` de las palabras. Para ello se emplea la biblioteca de python `spacy`. Una vez realizado este proceso se analiza el `part-of-speech tag` de los `token`, así como el tipo de entidad, en este último caso para determinar si se ha especificado algún país (`GPE`) o un año a analizar (`DATE`). 
+Para el procesamiento de lenguaje natural se utilizó la biblioteca `spacy` de python, la cual permite realizar el análisis de texto en inglés, así como el análisis de las entidades nombradas en el texto. Para el caso de este proyecto se utilizó el modelo `en_core_web_sm` el cual es un modelo entrenado con datos de wikipedia y otros textos en inglés. Por otra parte, se hace uso de una API de **World Bank Data** en Python para obtener información de las naciones del mundo.
 
-Para determinar el tipo de información que se pide (población total, esperanza de vida, índice de capital humano, migración, desempleo, inflación) se emplea la clase `Matcher` de `spacy`, donde se buscan coincidencias de `tokens` a partir de un patrón determinado para cada tipo de dato.
+El procesamiento de lenguaje natural se realiza en la función `process_text` de la clase `NLP`. En un principio el texto de la consulta es normalizado para eliminar `stopwords` y dejar solamente el `lema` de las palabras, esto con el fin de que el usuario pueda ingresar una consulta en lenguaje natural y que el sistema pueda entenderla. Luego se realiza el análisis de texto y se obtienen las entidades nombradas, las cuales se utilizan para determinar la consulta que se quiere realizar. Haciendo uso de las funciones de Matching de `spacy` se determinan las entidades nombradas que se encuentran en el texto, así como el tipo de entidad que es, si es un país, un año o un tipo de dato de la nación, para luego realizar la consulta a la API de **World Bank Data**.
 
-Una vez analizado el texto se procede, en dependencia de las coincidencias con el tipo de dato, a obtener la información de `World Bank Data` utilizando la biblioteca de python `world_bank_data` que retrona en `dataframes` de `pandas` la información.
+Para el caso de los match se utiliza la clase `NLPMatch` la cual se apoya en el `Match` de `spacy`. Para el caso de las naciones se crea un `Matcher` que busca coincidencias de `tokens` a partir de un patrón determinado para cada país, para los años se utiliza uno con un patrón de 4 dígitos, y para los tipos de datos se utiliza un `Matcher` que busca coincidencias de `tokens` a partir de un patrón determinado para cada tipo de dato.
+
+Luego de tener las entidades se pasa a realizar la consulta a la API de **World Bank Data**. Para el caso de las naciones ya se sabe el nombre de estas y su código ISO, por lo que se realiza la consulta a la API con el código ISO de la nación y el tipo de dato que se quiere obtener. Para el caso de los años solo se tienen datos desde 1960 hasta la actualidad.
+
+Al final es retornada una o varias tablas con los datos obtenidos de la consulta según el tipo de consulta que se haya realizado.
 
 
 
@@ -244,6 +248,9 @@ Una vez analizado el texto se procede, en dependencia de las coincidencias con e
     plot(log5, [Cuba, Canada], 'tourism' , 'bar');
     #data list
     plot(logs->all, Cuba, ['tourism', population'], 'dataframe');
+
+    #nlp
+    info('What is the population and net migration of Cuba? And from Canada and Mexico in 2010 the population');
 
 ```
 
