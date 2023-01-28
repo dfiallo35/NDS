@@ -100,9 +100,13 @@ class Simulate:
         Run the simulation for a certain amount of time
         :param time: the time the simulation should run
         '''
+        t=cp_time.time()
         while not self.event_queue.empty():
             if self.event_queue.look()[0] > end_time:
                 print('break in', end_time, 'next', self.event_queue.look()[0])
+                print("time of simulation", cp_time.time()-t)
+                print("_______________________________________________________________________________\n")
+
                 break
 
             for time, event in self.event_queue.pop():
@@ -114,9 +118,7 @@ class Simulate:
                     changes = self.map.get_changes()
                     self.log.add(time, event, changes)
                     self.generate_event(event, time)
-                    # t=cp_time.time()
                     self.decide(changes, self.map, event, time)
-                    # print('decide', cp_time.time()-t)
 
 
     def generate_event(self, event: Event, time: int):
@@ -155,53 +157,39 @@ class Simulate:
         :param event: the event that occurred
         :param time: the time the event occurred
         '''
-        # t=cp_time.time()
         if map.decision_eventdict.get(event.name):
             return
         if not self.decisions:
             self.decisions=transform_decisions(map.decisions)
 
-        # t=cp_time.time()
-        # changes=old_map.compare(map)  
-        # t_dec_init=cp_time.time()
         decisions=self.get_events_from_decisions(reaction_for_an_event(map,changes,event,self.decisions))
-        # print('get_events_from_decisions', cp_time.time()-t)
-        # print('time decisions all', cp_time.time()-t_dec_init)
-        # t1=cp_time.time()
-        # print('all before get_time and put in the queue', t1-t)
+
         for nation in decisions.keys():
             nation_decs=self.get_time(time,decisions[nation],distribution="uniform")
             for time_dec in nation_decs:
-                # print('decisions',nation, time_dec[0],time_dec[1].name)
+                # print('decisions',nation, time_dec[0],time_dec[1].name) #print to watch the decisions taken
                 self.event_queue.push(time_dec)
-        # print('get_time and put in the queue', cp_time.time()-t1)
         
 
     
     def get_time(self,initial_time,decisions,distribution="uniform",scale=10):
         """Get the time of the event and return a list of tuples with the time and the event""" 
-        # t=cp_time.time()
         distribution=Distribution(distribution,distribution)        
         timed_decisions=[]
         for decision in decisions:
             initial_time = int(initial_time + distribution.rvs() * scale)
             timed_decisions.append((initial_time, decision))        
-        # print("only get_time", cp_time.time()-t)    
         return timed_decisions
 
     def get_events_from_decisions(self,decisions):
         """Get the events from the decisions"""     
-        # t=cp_time.time()   
         events={}        
         for nation in decisions.keys():
             events[nation]=[]
             for decision in decisions[nation]:
                 event=decision.event.copy()
-                # event=DecisionEvent(name=decision.event.name,category=decision.event.category,execution=decision.event.execution)
                 event.add_nation(nation)
                 events[nation].append(event)
-                # events[nation].append(decision.event.get_event(nation))
-        # print("only get_events_from_decisions", cp_time.time()-t)
         return events
 
 

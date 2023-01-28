@@ -6,21 +6,12 @@ from ia.planning.planning_decisions import *
 
 def reaction_for_an_event(new_map,changes,event,possible_decisions):
     """Get a list of actions to react this event"""
-    # t=time.time()    
     nations = get_affected_nations(new_map,changes)
-    t2=time.time()
-    # print("time to get affected nations: ",t2-t)
     decisions={}
     for nation in nations:        
         goal_func,goal_dict=get_target(nation,changes)
-        # t1=time.time()
-        # print("time to get goal: ",t1-t2)
         planning_tree=PlanningDecisions(nation,possible_decisions,goal_func,event,goal_dict).make_planning()
-        # t3=time.time()
-        # print("time to make planning: ",t3-t1)
         decisions[nation]= get_only_actions(planning_tree)
-        # t4=time.time()
-        # print("time to get only actions: ",t4-t3)
     return decisions
     
 
@@ -29,9 +20,7 @@ def get_only_actions(tree):
     if (not tree):
         return []
     return [i["action"]  for i in get_path(tree) if i["action"]]
-    # return [i for i in dec if i]
 
-#fix
 def transform_decisions( map_decisions):
     """Transform the decisions of the map into a list of actions""" 
     decisions=[]
