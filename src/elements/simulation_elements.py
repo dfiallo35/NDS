@@ -181,7 +181,7 @@ class DecisionEvent(Event):
         return DecisionEvent(self.name, self.category, self.execution, self.code, self.params)
     
     def __str__(self) -> str:
-        return f'{self.name}'
+        return f'{self.name} in {self.nation.name}'
 
     def execute(self, *args, **kwargs):
         '''
