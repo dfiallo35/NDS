@@ -17,7 +17,27 @@ El objetivo que se persigue con este poryecto es facilitar, mediante el uso de u
 
 ### Modelo de Simulación
 
-El modelo de simulación que se implementó es un modelo de simulación discreta, basado en eventos de los cuales se presentan:
+Se define la simulación como un sistema que se basa principalmente en eventos, aunque el tiempo, el cuál en la simulación se lleva como días transcurridos, también juega un papel importante en cuanto a en que momento se ejecuta cada evento. Para esto se utiliza una cola de prioridad modificada en la cual se almacenan los eventos, este Heap en lugar de devolver un solo elemento cuando se le hace pop, devuelve todos los eventos que tengan el mínimo valor de prioridad. La prioridad de un evento se define como el tiempo en días en el cual se ejecutará, es decir, el número del día en el cual se ejecutará el evento es la prioridad de este. En cada paso de la ejecución se pide todo el grupo de eventos que tengan la menor prioridad y se mandan a ejecutar todos de forma secuencial. En cada evento se puede definir si se repite o no, en caso de que se repita se agrega de nuevo al Heap con la prioridad correspondiente al tiempo en el cual se ejecutará nuevamente, para obtener este tiempo se obtiene una variable aleatoria a partir de la distribución que se le haya asignado al evento. También se pueden desactivar eventos, en caso de que se desee que no se ejecuten en adelante, esto con poner en `false` la propiedad `enabled` del evento y en caso de que se desee activar un evento basta con poner su valor en `true`.
+
+Toda la simulación se desarrolla en un mismo mapa, en este se definen tanto elementos físicos como son los mares y naciones con todas sus propiedades, como todos los elementos importantes que están relacionados con el proceso de la simulación como son los eventos, decisiones, distribuciones y funciones. Todos estos elementos se pueden crear y modificar desde el DSL.
+
+Las naciones se definen como agentes inteligentes, las cuales reaccionan a los cambios en el medio, como la simulación está dirigida por los eventos que ocurren, cada nación al ocurrir un evento que le afecte responde a este, tratando de contrarrestar sus efectos negativos. Para esto se utilizó la planificación, para con todas las decisiones posibles a tomar por las naciones se realice una selección ordenada de decisiones que le permitan lograr el objetivo que se propone. Estas decisiones están definidas como las acciones usuales que lleva la planificación, tienen una precondición y un efecto, que en este caso es un evento que define el cambio que se le realiza a la nación que tome esa decisión. 
+
+Los eventos en el mapa están separados en dos tipos, los eventos de la simulación y los eventos que forman parte de la ejecución de las decisiones. Los eventos de simulación son los que se ejecutan en cada paso de la simulación, estos eventos son los que modifican el estado del mapa, o de algunas naciones en caso de que sea definido de esta forma específica. Los eventos de las decisiones son los que se ejecutan cuando una nación toma una decisión, tambien son los que se utilizan dentro del algoritmo de planificación como acciones para cambiar de estado.
+
+Las decisiones son las acciones que pueden tomar las naciones para lograr sus objetivos. Una decisión está formada por una precondición que debe cumplirse para que la nación pueda tomar la decisión, y un efecto que es un evento que se ejecuta cuando la nación toma la decisión.
+
+El flujo de la simulación consta de los siguientes pasos:
+
+- Se toman todos los eventos de cola de prioridad que tengan el menor tiempo.
+- Cada evento se ejecuta, en caso de que se deba generar se agrega de nuevo a la cola de prioridad con el tiempo en el cual se ejecutará nuevamente.
+- Se buscan los cambios ocurridos en el mapa, en específico en cada nación y la que presente cambios negativos se realiza la planificación con el objetivo de llevar esta característica dañada a su valor anterior, los eventos generados por las decisiones se agregan a la cola de prioridad con el tiempo en el cual se ejecutarán, obtenido a partir de una disttribución uniforme.
+- se repiten los pasos anteriores hasta que se alcance el tiempo máximo de la simulación.
+
+
+##### Elementos de la Simulación
+
+El modelo de simulación que se implementó se va a dividir en dos tipos de eventos:
 
 + **simulation event**: Evento que va a pertenecer a la simulación agregandose a una cola de prioridad según el tiempo en que se debe ejecutar. Este va a estar constituido por:
     + **distribución**: Distribución de la cual se va a tomar la variable aleatoria de las siguiente ejecución del evento.
@@ -114,24 +134,6 @@ Todos los detalles acerca de las reglas de gramática utilizada se puede ver en 
 - Clásicos `if` y `else`.
 
 
-### Simulación
-
-Se define la simulación como un sistema que se basa principalmente en eventos, aunque el tiempo, el cuál en la simulación se lleva como días transcurridos, también juega un papel importante en cuanto a en que momento se ejecuta cada evento. Para esto se utiliza una cola de prioridad modificada en la cual se almacenan los eventos, este Heap en lugar de devolver un solo elemento cuando se le hace pop, devuelve todos los eventos que tengan el mínimo valor de prioridad. La prioridad de un evento se define como el tiempo en días en el cual se ejecutará, es decir, el número del día en el cual se ejecutará el evento es la prioridad de este. En cada paso de la ejecución se pide todo el grupo de eventos que tengan la menor prioridad y se mandan a ejecutar todos de forma secuencial. En cada evento se puede definir si se repite o no, en caso de que se repita se agrega de nuevo al Heap con la prioridad correspondiente al tiempo en el cual se ejecutará nuevamente, para obtener este tiempo se obtiene una variable aleatoria a partir de la distribución que se le haya asignado al evento. También se pueden desactivar eventos, en caso de que se desee que no se ejecuten en adelante, esto con poner en `false` la propiedad `enabled` del evento y en caso de que se desee activar un evento basta con poner su valor en `true`.
-
-Toda la simulación se desarrolla en un mismo mapa, en este se definen tanto elementos físicos como son los mares y naciones con todas sus propiedades, como todos los elementos importantes que están relacionados con el proceso de la simulación como son los eventos, decisiones, distribuciones y funciones. Todos estos elementos se pueden crear y modificar desde el DSL.
-
-Las naciones se definen como agentes inteligentes, las cuales reaccionan a los cambios en el medio, como la simulación está dirigida por los eventos que ocurren, cada nación al ocurrir un evento que le afecte responde a este, tratando de contrarrestar sus efectos negativos. Para esto se utilizó la planificación, para con todas las decisiones posibles a tomar por las naciones se realice una selección ordenada de decisiones que le permitan lograr el objetivo que se propone. Estas decisiones están definidas como las acciones usuales que lleva la planificación, tienen una precondición y un efecto, que en este caso es un evento que define el cambio que se le realiza a la nación que tome esa decisión. 
-
-Los eventos en el mapa están separados en dos tipos, los eventos de la simulación y los eventos que forman parte de la ejecución de las decisiones. Los eventos de simulación son los que se ejecutan en cada paso de la simulación, estos eventos son los que modifican el estado del mapa, o de algunas naciones en caso de que sea definido de esta forma específica. Los eventos de las decisiones son los que se ejecutan cuando una nación toma una decisión, tambien son los que se utilizan dentro del algoritmo de planificación como acciones para cambiar de estado.
-
-Las decisiones son las acciones que pueden tomar las naciones para lograr sus objetivos. Una decisión está formada por una precondición que debe cumplirse para que la nación pueda tomar la decisión, y un efecto que es un evento que se ejecuta cuando la nación toma la decisión.
-
-El flujo de la simulación consta de los siguientes pasos:
-
-- Se toman todos los eventos de cola de prioridad que tengan el menor tiempo.
-- Cada evento se ejecuta, en caso de que se deba generar se agrega de nuevo a la cola de prioridad con el tiempo en el cual se ejecutará nuevamente.
-- Se buscan los cambios ocurridos en el mapa, en específico en cada nación y la que presente cambios negativos se realiza la planificación con el objetivo de llevar esta característica dañada a su valor anterior, los eventos generados por las decisiones se agregan a la cola de prioridad con el tiempo en el cual se ejecutarán, obtenido a partir de una disttribución uniforme.
-- se repiten los pasos anteriores hasta que se alcance el tiempo máximo de la simulación.
 
 ### Inteligencia Artificial
 
