@@ -74,6 +74,26 @@ Como apoyo a la simulación se tienen los siguientes elementos que se pueden cre
 + **category**: Elementos utilizado para agrupar a los eventos en conjuntos según algunas características en común.
 
 
+Para ejecutar la simulación se usa el método `simulate` al cual se le pasan los siguientes parámetros:
+    + **tiempo**: Tiempo máximo de la simulación.
+    + **cantidad**: Cantidad de veces que se va a ejecutar la simulación. Este parámetro es opcional y por defecto es 1.
+
+Luego de ejecutar la simulación todos los cambios que se realizaron en el mapa se almacenan en el elemento `logs` el cual contiene los `log` de cada simulación enumerados por el número de simulación(Ej: `log1`, `log2`, ...). Cada `log` contiene en cada tiempo de la simulación los eventos que se ejecutaron y los cambios que se realizaron en el mapa.
+
+Es posible acceder a la lista de logs usando `logs->all`. Para acceder a un log en particular solo se debe escribir el nombre del log, por ejemplo `log1`.
+
+Para la visualización de los resultados se cuenta con un módulo que permite generar gráficos de barras, líneas y area, además de permitir visualizar los dataframes de estos. Para esto se debe agregar un **plot** a la simulación, este contiene:
+
++ **plot**: Visualización que se desea realizar.
+    + **log**: Log que hace referencia a los datos de la simulación que se desea visualizar. Este puede ser un log en particular o una lista de logs.
+    + **nación**: Nación que se desea visualizar. Este puede ser una nación en particular o una lista de naciones.
+    + **dato**: Dato que se desea visualizar. Este puede ser un dato en particular o una lista de datos.
+    + **tipo**: Tipo de gráfico que se desea visualizar. Hay 4 tipos de gráficos: `bar`, `line`, `area` y `dataframe`.
+
+Para el caso de este método `plot` solo uno de los parámetros `log`, `nación` y `dato` puede ser una lista, los otros dos deben ser un solo elemento.
+
+
+
 
 ### DSL
 
@@ -171,8 +191,8 @@ Una vez analizado el texto se procede, en dependencia de las coincidencias con e
     #nations
     nation Cuba(11256372, 109884 , [], [], industrialization: 30, tourism:80);
     nation USA(9147593, 337341954, [], [], industrialization: 80 , tourism:70);
-    nation Canada(38246108, 9984670, [], [], industrialization: 70 , tourism:30);
-    nation Mexico(128455567, 1964375 , [], [], industrialization: 60 , tourism:70);
+    nation Canada(38246108, 9984670, [], [USA], industrialization: 70 , tourism:30);
+    nation Mexico(128455567, 1964375 , [], [USA], industrialization: 60 , tourism:70);
 
     #distributions
     distribution pg(expon, scale: 20);
@@ -213,8 +233,23 @@ Una vez analizado el texto se procede, en dependencia de las coincidencias con e
     }
 
 
-    simulate(10d);
+    #simulation
+    simulate(20y, 10);
 
-    plot(Cuba, ['tourism', 'industrialization'] , 'line');
+
+    #plots
+    #log list
+    plot(log1,  Cuba, 'tourism'  , 'line');
+    #nation list
+    plot(log5, [Cuba, Canada], 'tourism' , 'bar');
+    #data list
+    plot(logs->all, Cuba, ['tourism', population'], 'dataframe');
 
 ```
+
+
+### Bibliografía
+
+1. Dr. Luciano García Garrido, Lic. Luis Martí Orosa, Lic. Luis Pérez Sánchez: Temas de Simulación.
+2. Documentación de scipy https://docs.scipy.org
+3. Stuart Russell, Peter Norvig: Artificial Intelligence a Modern Approach Fourth Edition.

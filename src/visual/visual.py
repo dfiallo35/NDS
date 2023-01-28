@@ -67,8 +67,8 @@ class CodeBlock:
                         st.bar_chart(g)
                     elif t == 'area':
                         st.area_chart(g)
-                for d in self.intern_code.dataframes:
-                    st.dataframe(d)
+                for _, d in self.intern_code.dataframes:
+                    st.dataframe(d.T)
                     
             self.intern_code.plots= []
             self.intern_code.dataframes= []

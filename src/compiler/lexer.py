@@ -112,7 +112,6 @@ class NDSLexer(Lexer):
     NAME['neighbors'] = 'FUNC'
 
     NAME['plot'] = 'FUNC'
-    NAME['dataframe'] = 'FUNC'
     NAME['info'] = 'FUNC'
     # NAME[''] = 'FUNC'
 

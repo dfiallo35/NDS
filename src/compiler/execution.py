@@ -57,7 +57,6 @@ class Code:
             'len': {'args':1},
             'simulate': {'min':1, 'max':2},
             'plot': {'args':4},
-            'dataframe': {'args':3},
             'info': {'args':1},
             'gen_dist': {'args':1},
         }
@@ -316,10 +315,16 @@ class Code:
 
     def func_plot(self, line, inside_vars, inside):
         params= self.args(line, inside_vars, inside)
-        if self.to_python(params[3]) not in ['line', 'area', 'bar']:
+        if self.to_python(params[3]) not in ['line', 'area', 'bar', 'dataframe']:
             raise Exception('Error: plot() only acept line, area or bar as third parameter')
 
-        elif isinstance(params[0], array):
+        data_list= []
+        if self.to_python(params[3]) == 'dataframe':
+            data_list= self.dataframes
+        else:
+            data_list= self.plots
+
+        if isinstance(params[0], array):
             for i in self.to_python(params[0]):
                 if not isinstance(i, Log):
                     raise Exception('Error: First parameter must be a Log or a list of logs')
@@ -335,7 +340,7 @@ class Code:
                     log: Log= log
                     gn.append(log.get_nation_data(self.to_python(params[1].name), self.to_python(params[2])))
 
-                self.plots.append(
+                data_list.append(
                     (self.to_python(params[3]),
                     pd.DataFrame(
                         [list(i) for i in list(zip(*gn))],
@@ -357,7 +362,7 @@ class Code:
                             gn.append(log.get_nation_data(self.to_python(nat.name), self.to_python(params[2])))
                             columns.append(nat.name)
                     
-                    self.plots.append(
+                    data_list.append(
                         (self.to_python(params[3]),
                         pd.DataFrame(
                             [list(i) for i in list(zip(*gn))],
@@ -378,7 +383,7 @@ class Code:
                         gn.append(log.get_nation_data(self.to_python(params[1].name), self.to_python(data)))
                         columns.append(self.to_python(data))
                     
-                    self.plots.append(
+                    data_list.append(
                         (self.to_python(params[3]),
                         pd.DataFrame(
                             [list(i) for i in list(zip(*gn))],
@@ -396,7 +401,7 @@ class Code:
                 if params[0].name not in self.elements:
                     raise Exception(f'Error: the element {params[1].name} is not recognized')
                 
-                self.plots.append(
+                data_list.append(
                     (self.to_python(params[3]),
                     pd.DataFrame(
                         log.get_nation_data(self.to_python(params[1].name), self.to_python(params[2])),
@@ -416,7 +421,7 @@ class Code:
                         gn.append(log.get_nation_data(self.to_python(nat.name), self.to_python(params[2])))
                         columns.append(nat.name)
                 
-                self.plots.append(
+                data_list.append(
                     (self.to_python(params[3]),
                     pd.DataFrame(
                         [list(i) for i in list(zip(*gn))],
@@ -435,7 +440,7 @@ class Code:
                     gn.append(log.get_nation_data(self.to_python(params[1].name), self.to_python(data)))
                     columns.append(self.to_python(data))
                 
-                self.plots.append(
+                data_list.append(
                     (self.to_python(params[3]),
                     pd.DataFrame(
                         [list(i) for i in list(zip(*gn))],
@@ -449,64 +454,6 @@ class Code:
         else:
             raise Exception('Error: plot() only accepts nations or arrays as first and second parameters')
 
-    
-    def func_dataframe(self, line, inside_vars, inside):
-        params= self.args(line, inside_vars, inside)
-
-        if isinstance(params[0], Nation) and not isinstance(params[1], array):
-            if params[0].name not in self.elements:
-                raise Exception('Error: the element is not recognized')
-            self.map.get_data(self.to_python(params[0]), self.to_python(params[1]))
-            
-            df= pd.DataFrame(
-                    self.map.log.get_nation_data(self.to_python(params[0].name), self.to_python(params[1])),
-                    columns=[self.to_python(params[1])]
-                )
-            self.dataframes.append(
-                df.transpose()
-            )
-
-        elif isinstance(params[0], array) and not isinstance(params[1], array):
-            gn= []
-            columns= []
-
-            for nat in self.to_python(params[0]):
-                if isinstance(nat, Nation):
-                    if nat.name not in self.elements:
-                        raise Exception('Error: the element is not recognized')
-                    self.map.get_data(self.to_python(nat), self.to_python(params[1]))
-                    
-                    gn.append(self.map.log.get_nation_data(self.to_python(nat.name), self.to_python(params[1])))
-                    columns.append(nat.name)
-            
-            self.dataframes.append(
-                pd.DataFrame(
-                    [list(i) for i in list(zip(*gn))],
-                    columns=columns
-                )
-            )
-
-        elif not isinstance(params[0], array) and isinstance(params[1], array):
-            if params[0].name not in self.elements:
-                raise Exception('Error: the element is not recognized')
-            gn= []
-            columns= []
-
-            for data in self.to_python(params[1]):
-                self.map.get_data(self.to_python(params[0]), self.to_python(data))
-                
-                gn.append(self.map.log.get_nation_data(self.to_python(params[0].name), self.to_python(data)))
-                columns.append(self.to_python(data))
-            
-            self.dataframes.append(
-                pd.DataFrame(
-                    [list(i) for i in list(zip(*gn))],
-                    columns=columns
-                )
-            )
-        
-        else:
-            raise Exception('Error: dataframe() only accepts nations or arrays as first and second parameters')
 
 
     func_types={
@@ -519,7 +466,6 @@ class Code:
         'gen_dist': func_gen_dist,
         'simulate': func_simulate,
         'plot': func_plot,
-        'dataframe': func_dataframe,
         'info': func_info,
         'neighbors': func_neighbors,
     }
@@ -737,6 +683,9 @@ class Code:
         if obj.value == 'map':
             return self.map
         
+        elif obj.value == 'logs':
+            return self.logs
+        
         elif inside and (obj.value in inside_vars):
             return inside_vars[obj.value]
 
@@ -759,8 +708,8 @@ class Code:
         if isinstance(self.value(obj.name, inside_vars, inside), Map):
             return self.to_object(self.map.map_data(self.to_python(obj.var)))
         
-        # elif self.to_python(self.value(obj.name, inside_vars, inside)) in self.logs.logs:
-        #     return self.to_object(self.map.get_data(self.to_python(self.value(obj.name, inside_vars, inside))))
+        elif isinstance(self.value(obj.name, inside_vars, inside), Logs):
+            return self.to_object(self.map.get_data(self.logs, self.to_python(obj.var)))
 
 
         else:
@@ -819,6 +768,7 @@ class Code:
         '**': arithmetic_pow,
         '//': arithmetic_floor_div,
     }
+    
     def code_arithmetic(self, obj, inside_vars, inside):
         left= self.value(obj.left, inside_vars, inside)
         right= self.value(obj.right, inside_vars, inside)

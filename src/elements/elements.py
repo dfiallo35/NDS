@@ -35,13 +35,6 @@ class Log(Element):
         self.log= {}
         self.initial_map= initial_map
     
-    @property
-    def day(self, d: int):
-        '''
-        Return the data of the day
-        :param d: the day
-        '''
-        return self.log.get(d)
     
     def add(self, time: int, event, data: dict):
         '''
@@ -93,6 +86,10 @@ class Logs:
         self.logs= {}
         self.log_counter= 0
         self.current_log= None
+    
+    @property
+    def all(self):
+        return [log for log in self.logs.values()]
     
     def add(self, map):
         self.log_counter+=1
