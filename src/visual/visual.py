@@ -26,8 +26,6 @@ class CodeBlock:
                                     height=200,
                                     label_visibility='hidden',
                                 )
-            #print all the args of st.text_area
-            print(st.text_area.__code__)
 
         
         with self.col2:
@@ -39,10 +37,6 @@ class CodeBlock:
             st.markdown('##')
             st.button('Add', key=self.key + '5', on_click=self.add_code_block)
             st.button('Delete', key=self.key + '4', on_click=self.delete_code_block)
-        
-        # with self.col2 and self.col3:
-        
-        #     st.file_uploader('Upload file', key=self.key + '6', )
 
         st.markdown('##')
     
@@ -57,8 +51,12 @@ class CodeBlock:
             self.update()
 
             with self.col1:
-                st.markdown(f'output')
-                st.text(output)
+                if len(output.split('\n')) > 40:
+                    with st.expander('output', expanded=False):
+                        st.text(output)
+                else:
+                    with st.expander('output', expanded=True):
+                        st.text(output)
 
                 for t, g in self.intern_code.plots:
                     if t == 'line':
@@ -103,8 +101,6 @@ class CodeBlock:
                 cb.append(code_block)
 
         st.session_state.code_blocks= cb
-    
-    # def open_file(self):
 
 
     def delete_code_block(self):
@@ -127,21 +123,6 @@ class Visualizer:
             layout="wide",
             initial_sidebar_state="collapsed",
         )
-
-
-        # import pandas as pd
-        # import numpy as np
-
-        # chart_data = pd.DataFrame(
-        #     np.random.randn(40, 3),
-        #     columns=['a', 'b', 'c'],
-        #     )
-        
-        # st.line_chart(chart_data)
-        # st.dataframe(chart_data)
-        
-        # st.dataframe(chart_data.transpose())
-
         
 
         with open('visual\\style.css') as f:
@@ -157,15 +138,3 @@ class Visualizer:
         for code_block in st.session_state.code_blocks:
             code_block.run()
     
-
-
-# import pandas as pd
-# import numpy as np
-
-# df = pd.DataFrame(
-#    np.random.randn(50, 20),
-#    columns=('col %d' % i for i in range(20)))
-
-# st.dataframe(df)
-
-
