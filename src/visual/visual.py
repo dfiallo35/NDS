@@ -14,7 +14,7 @@ class CodeBlock:
         self.code= code
         self.intern_code= deepcopy(self.code)
         self.key= str(key)
-        
+        self.output= None
 
     def run(self):
         
@@ -39,6 +39,7 @@ class CodeBlock:
             st.button('Delete', key=self.key + '4', on_click=self.delete_code_block)
 
         st.markdown('##')
+        self.visualize()
     
     def execute(self):
         self.intern_code= deepcopy(self.code)
@@ -47,34 +48,36 @@ class CodeBlock:
             f = io.StringIO()
             with contextlib.redirect_stdout(f):
                 self.intern_code.compile(self.script)
-            output = f.getvalue()
+            self.output = f.getvalue()
             self.update()
-
-            with self.col1:
-                if len(output.split('\n')) > 40:
-                    with st.expander('output', expanded=False):
-                        st.text(output)
-                else:
-                    with st.expander('output', expanded=True):
-                        st.text(output)
-
-                for t, g in self.intern_code.plots:
-                    if t == 'line':
-                        st.line_chart(g)
-                    elif t == 'bar':
-                        st.bar_chart(g)
-                    elif t == 'area':
-                        st.area_chart(g)
-                for _, d in self.intern_code.dataframes:
-                    st.dataframe(d.T)
-                    
-            self.intern_code.plots= []
-            self.intern_code.dataframes= []
         
         except Exception as e:
             with self.col1:
                 st.markdown(f'output')
                 st.text(e)
+    
+    def visualize(self):
+        with self.col1:
+            if self.output:
+                if len(self.output.split('\n')) > 40:
+                    with st.expander('output', expanded=False):
+                        st.text(self.output)
+                else:
+                    with st.expander('output', expanded=True):
+                        st.text(self.output)
+            
+            for t, g in self.intern_code.plots:
+                if t == 'line':
+                    st.line_chart(g)
+                elif t == 'bar':
+                    st.bar_chart(g)
+                elif t == 'area':
+                    st.area_chart(g)
+            for _, d in self.intern_code.dataframes:
+                st.dataframe(d.T)
+                        
+            self.intern_code.plots= []
+            self.intern_code.dataframes= []
     
     def update(self):
         for n, code_block in enumerate(st.session_state.code_blocks):
