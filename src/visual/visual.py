@@ -52,6 +52,7 @@ class CodeBlock:
             self.update()
         
         except Exception as e:
+            self.output= None
             with self.col1:
                 st.markdown(f'output')
                 st.text(e)
