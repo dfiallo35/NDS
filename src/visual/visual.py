@@ -15,6 +15,8 @@ class CodeBlock:
         self.intern_code= deepcopy(self.code)
         self.key= str(key)
         self.output= None
+        self.plots= []
+        self.dataframe= []
 
     def run(self):
         
@@ -67,7 +69,12 @@ class CodeBlock:
                     with st.expander('output', expanded=True):
                         st.text(self.output)
             
-            for t, g in self.intern_code.plots:
+            if self.intern_code.plots:
+                self.plots= deepcopy(self.intern_code.plots)
+            if self.intern_code.dataframes:
+                self.dataframe= deepcopy(self.intern_code.dataframes)
+
+            for t, g in self.plots:
                 if t == 'line':
                     st.line_chart(g)
                 elif t == 'bar':
