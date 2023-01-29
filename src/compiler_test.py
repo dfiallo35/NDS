@@ -1,6 +1,6 @@
 from compiler.execution import *
 
-
+t=cp_time.time()
 a= Code()
 a.compile(
     '''
@@ -17,7 +17,7 @@ a.compile(
     nation Canada(38246108, 9984670, [], [USA], aviable_economic_resources:53120000, industrialization: 70 , PIB:2027371000000, tourism:30, average_living_standard:80,life_expectancy: 82, employment: 98.5);
     nation Mexico(128455567, 1964375 , [], [USA], aviable_economic_resources:93410000, industrialization: 60 , PIB:2890685000000, tourism:70, average_living_standard:68,life_expectancy: 70, employment: 94.9);
 
-    show(neighbors(USA));
+    # show(neighbors(USA));
 
     #distributions
     distribution pg(expon, scale: 20);
@@ -51,12 +51,12 @@ a.compile(
     }
     decision create_jobs_dec(n->aviable_economic_resources >= 4000, create_jobs)<< n >>;
 
-    # decision event increment_aviable_economic_resources(social)<<n>>{
-    #     a = n->PIB * 0.1;
-    #     n->PIB = n->PIB - a;
-    #     n->aviable_economic_resources = n->aviable_economic_resources + a;
-    # }    
-    # # decision increment_aviable_economic_resources_dec(n->PIB >= n->population*100, increment_aviable_economic_resources)<< n >>;
+    decision event increment_aviable_economic_resources(social)<<n>>{
+        a = n->PIB * 0.1;
+        n->PIB = n->PIB - a;
+        n->aviable_economic_resources = n->aviable_economic_resources + a;
+    }    
+    decision increment_aviable_economic_resources_dec(n->PIB >= n->population*100, increment_aviable_economic_resources)<< n >>;
 
 
 
@@ -97,9 +97,27 @@ a.compile(
         }
     }
 
+    # distribution ab(expon, scale: 10);
+    # a=irvs(ab,scale:10);
+    # show(a);
 
-    simulate(100d,5);
+
+    # show('variable aleatoria',a);
+    
+    simulate(50d);
+
+    # #plots
+    # #log list
+    # plot(log1,  USA, ['average_living_standard','tourism']  , 'line');
+    # #nation list
+    # plot([log1,log2], [Cuba, Canada], 'average_living_standard' , 'bar');
+    # #data list
+    # plot(logs->all, [Cuba,Canada], 'average_living_standard', 'dataframe');
+
+
     # plot(Cuba, ['tourism', 'industrialization'] , 'line');
     # info('Cuba net migration and population in 2000');
     '''
 )
+
+print("total time",cp_time.time()-t)
