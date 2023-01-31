@@ -146,13 +146,6 @@ class Logs:
             new_log.add(time, None, current_data)
         return new_log
 
-    def fill_list(self, list, length):
-        if len(list) < length:
-            list.extend([list[-1]]*(length-len(list)))
-        return list
-
-
-
     
     def add(self, map):
         self.log_counter+=1
