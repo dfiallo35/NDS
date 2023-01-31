@@ -19,7 +19,7 @@ El objetivo que se persigue con este poryecto es facilitar, mediante el uso de u
 
 Se define la simulación como un sistema que se basa principalmente en eventos, aunque el tiempo, el cuál en la simulación se lleva como días transcurridos, también juega un papel importante en cuanto a en que momento se ejecuta cada evento. Para esto se utiliza una cola de prioridad modificada en la cual se almacenan los eventos, este Heap en lugar de devolver un solo elemento cuando se le hace pop, devuelve todos los eventos que tengan el mínimo valor de prioridad. La prioridad de un evento se define como el tiempo en días en el cual se ejecutará, es decir, el número del día en el cual se ejecutará el evento es la prioridad de este. En cada paso de la ejecución se pide todo el grupo de eventos que tengan la menor prioridad y se mandan a ejecutar todos de forma secuencial. En cada evento se puede definir si se repite o no, en caso de que se repita se agrega de nuevo al Heap con la prioridad correspondiente al tiempo en el cual se ejecutará nuevamente, para obtener este tiempo se obtiene una variable aleatoria a partir de la distribución que se le haya asignado al evento. También se pueden desactivar eventos, en caso de que se desee que no se ejecuten en adelante, esto con poner en `false` la propiedad `enabled` del evento y en caso de que se desee activar un evento basta con poner su valor en `true`.
 
-Toda la simulación se desarrolla en un mismo mapa, en este se definen tanto elementos físicos como son los mares y naciones con todas sus propiedades, como todos los elementos importantes que están relacionados con el proceso de la simulación como son los eventos, decisiones, distribuciones y funciones. Todos estos elementos se pueden crear y modificar desde el DSL.
+Toda la simulación se desarrolla en un mismo mapa, en este se definen tanto elementos físicos como son los mares y naciones con todas sus propiedades, como todos los elementos importantes que están relacionados con el proceso de la simulación que son los eventos, decisiones, distribuciones y funciones. Todos estos elementos se pueden crear y modificar desde el DSL.
 
 Las naciones se definen como agentes inteligentes, las cuales reaccionan a los cambios en el medio, como la simulación está dirigida por los eventos que ocurren, cada nación al ocurrir un evento que le afecte responde a este, tratando de contrarrestar sus efectos negativos. Para esto se utilizó la planificación, para con todas las decisiones posibles a tomar por las naciones se realice una selección ordenada de decisiones que le permitan lograr el objetivo que se propone. Estas decisiones están definidas como las acciones usuales que lleva la planificación, tienen una precondición y un efecto, que en este caso es un evento que define el cambio que se le realiza a la nación que tome esa decisión. 
 
@@ -29,10 +29,10 @@ Las decisiones son las acciones que pueden tomar las naciones para lograr sus ob
 
 El flujo de la simulación consta de los siguientes pasos:
 
-- Se toman todos los eventos de cola de prioridad que tengan el menor tiempo.
-- Cada evento se ejecuta, en caso de que se deba generar se agrega de nuevo a la cola de prioridad con el tiempo en el cual se ejecutará nuevamente.
-- Se buscan los cambios ocurridos en el mapa, en específico en cada nación y la que presente cambios negativos se realiza la planificación con el objetivo de llevar esta característica dañada a su valor anterior, los eventos generados por las decisiones se agregan a la cola de prioridad con el tiempo en el cual se ejecutarán, obtenido a partir de una disttribución uniforme.
-- se repiten los pasos anteriores hasta que se alcance el tiempo máximo de la simulación.
++ Se toman todos los eventos de cola de prioridad que tengan el menor tiempo.
++ Cada evento se ejecuta, en caso de que se deba generar se agrega de nuevo a la cola de prioridad con el tiempo en el cual se ejecutará nuevamente.
++ Se buscan los cambios ocurridos en el mapa, en específico en cada nación y la que presente cambios negativos se realiza la planificación con el objetivo de llevar esta característica dañada a su valor anterior, los eventos generados por las decisiones se agregan a la cola de prioridad con el tiempo en el cual se ejecutarán, obtenido a partir de una disttribución uniforme.
++ se repiten los pasos anteriores hasta que se alcance el tiempo máximo de la simulación.
 
 
 ##### Elementos de la Simulación
@@ -163,7 +163,7 @@ Todos los detalles acerca de las reglas de gramática utilizada se puede ver en 
 El algoritmo de planificación utilizado primeramente se define de forma general para que con este algoritmo se pueda resolver cualquier problema de planificación que herede de `PlanningProblem`,para esto solo debe contar con un estado inicial, una lista de acciones, cada una definida como `Action` o derivada de esta, las que son decisiones en el problema específico, y una función que pasado un estado devuelva si este es la meta a alcanzar o no. Para este problema en específico se definió una clase `PlanningDecisions` que hereda de `PlanningProblem` y que define todo lo necesario y además una función heurística que se explica más adelante.
 
 
-Para desarrollar la planificación se utilizó un algoritmo de búsqueda con un recorrido BFS que se detiene cuando encuentra la meta especificada o alcanza el máximo número de pasos especificado, en caso de que no se encuentre la meta se devuelve `None`. 
+Para desarrollar la planificación se utilizó un algoritmo de búsqueda con un recorrido que simula un BFS, este se detiene cuando encuentra la meta especificada o alcanza el máximo número de pasos especificado, en caso de que no se encuentre la meta se devuelve `None`. 
 
 Para mejorar el rendimiento de este algoritmo se utilizó una función heurística que en un estado, para cada acción que se puede tomar se calcula un valor estimado de tomar esta acción, esto a partir de la distancia que está el estado actual del estado meta y se toman en cuenta también las categorías de la acción y del evento al que se está dando respuesta, esto para que se prioricen las acciones que se encuentren más cerca del estado meta y que sean de categorías más similares. Con el costo de la heurística y  el costo de la acción se calcula (en este caso igual a 0) el valor final de la acción, `f(s)=g(s)+h(s)`, por lo que algoritmo de búsqueda + heurística = A*. En este punto también para acciones con un valor superior al estimado se quitan de la posibilidad de ser escogidas, de las acciones que quedan luego de esta poda se colocan en la cola cada una de estas acciones con el estado que generan y además se va construyendo un árbol para cuando se llegue al estado meta sea posible devolver cada estado con la acción que lo genera y tomar en orden todas las acciones a realizar.
 
@@ -183,7 +183,7 @@ Al final es retornada una o varias tablas con los datos obtenidos de la consulta
 
 
 
-### Ejemplos de código
+### Ejemplos de código DSL
 
 ```
 #categories
