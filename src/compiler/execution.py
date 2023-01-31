@@ -24,7 +24,7 @@ class Code:
     
     @property
     def elements(self):
-        return {**self.map.all, **self.logs.logs}
+        return {**self.map.all, **self.logs.all}
     
     @property
     def events(self):
