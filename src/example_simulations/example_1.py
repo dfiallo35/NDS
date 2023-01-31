@@ -28,9 +28,9 @@ nations='''
 decisions = ''' 
 
     decision event industrialization_increases(economic)<<n>>{
-        inversion = n->extension * 0.0002;
-        n->aviable_economic_resources = n->aviable_economic_resources-inversion;
-        n->industrialization = n->industrialization*1.2;
+        inversion  =  n->extension * 0.0002;
+        n->aviable_economic_resources = n-> aviable_economic_resources - inversion;
+        n->industrialization = n->industrialization * 1.2;
     }    
     decision industrialization_increases_dec(n->aviable_economic_resources >= n->extension * 0.0002, industrialization_increases)<< n >>;
 
@@ -88,19 +88,19 @@ events='''
         }
     }
 
-    simulation event decrease_industrialization(pg,economic,true,[]){
+    simulation event decrease_industrialization(pg, economic, true,[]){
         foreach <<nat>> (map->nations){
-            nat->industrialization=nat->industrialization*0.9;
+            nat->industrialization = nat->industrialization * 0.9;
         }
     }
 
-    simulation event blockade_effects(block,economic,true,[]){        
+    simulation event blockade_effects(block, economic, true,[]){        
         foreach <<nat>> (map->nations){
             if nat == Cuba {
-                nat->industrialization=nat->industrialization*0.9;
-                nat->tourism=nat->tourism*0.9;
-                nat->average_living_standard=nat->average_living_standard*0.9;
-                nat->inflation=nat->inflation*1.1;
+                nat->industrialization = nat->industrialization * 0.9;
+                nat->tourism = nat->tourism * 0.9;
+                nat->average_living_standard = nat->average_living_standard * 0.9;
+                nat->inflation= nat->inflation * 1.1;
             }
         }
     }
@@ -133,8 +133,8 @@ events='''
 
     simulation event collect_taxes(pg,social, true ,[]){
         foreach <<nat>> (map->nations){
-            increment=nat->industrialization * nat->tourism * nat->employment * nat->population / nat->extension;
-            nat->aviable_economic_resources = nat->aviable_economic_resources+ increment;
+            increment = nat->industrialization * nat->tourism * nat->employment * nat->population / nat->extension;
+            nat->aviable_economic_resources = nat->aviable_economic_resources + increment;
         }
     }
 
