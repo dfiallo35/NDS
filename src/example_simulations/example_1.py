@@ -28,18 +28,18 @@ nations='''
 decisions = ''' 
 
     decision event industrialization_increases(economic)<<n>>{
-        inversion=n->extension * 0.0002;
+        inversion = n->extension * 0.0002;
         n->aviable_economic_resources = n->aviable_economic_resources-inversion;
         n->industrialization = n->industrialization*1.2;
     }    
     decision industrialization_increases_dec(n->aviable_economic_resources >= n->extension * 0.0002, industrialization_increases)<< n >>;
 
     decision event build_tourist_spots(economic)<<n>>{
-        inversion=n->extension * 0.0002;
+        inversion = n->extension * 0.0002;
         n->aviable_economic_resources = n->aviable_economic_resources-inversion;
         n->tourism = n->tourism * 1.2;
     }
-    decision build_tourist_spots_dec(n->aviable_economic_resources >= extension*0.0002, build_tourist_spots)<< n >>;
+    decision build_tourist_spots_dec(n->aviable_economic_resources >= n->extension*0.0002, build_tourist_spots)<< n >>;
 
     decision event social_investments(social)<<n>>{
         inversion = n->population * 0.0002;
