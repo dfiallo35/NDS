@@ -283,13 +283,16 @@ class Map:
         :param distribution: the distribution
         '''
         name= self.element_name(name)
-        dist= self.element_name(dist)
-
         self.alredy_exist(name)
-        self.not_exist(dist)
+        if isinstance(dist, list):
+            dist= Distribution.generate_distribution(name, dist, *args, **kwargs)
+            self.distributiondict[name]= dist
+        else:
+            dist= self.element_name(dist)
+            self.not_exist(dist)
 
-        dist= Distribution(name, dist, *args, **kwargs)
-        self.distributiondict[name]= dist
+            dist= Distribution(name, dist, *args, **kwargs)
+            self.distributiondict[name]= dist
 
     def add_decision(self, name: str, event: Event, cond, execution, params: list= []):
         '''
