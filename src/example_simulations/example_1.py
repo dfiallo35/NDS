@@ -28,7 +28,7 @@ nations='''
 decisions = ''' 
 
     decision event industrialization_increases(economic)<<n>>{
-        inversion = n->extension * 0.0002;
+        inversion  =  n->extension * 0.0002;
         n->aviable_economic_resources = n-> aviable_economic_resources - inversion;
         n->industrialization = n->industrialization * 1.2;
     }    
