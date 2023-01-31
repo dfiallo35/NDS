@@ -23,6 +23,10 @@ a.compile(
     distribution pg(expon, scale: 20);
     distribution block(expon, scale: 50);
 
+    distribution new_dist([7]);
+
+    show(irvs(new_dist, size: 20));
+
 
 
     #decisions
