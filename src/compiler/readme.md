@@ -87,8 +87,27 @@ simulate(<time>);
 pos(<list>, <index>);
 
 #to get the length of a list
-size(<list>);
+len(<list>);
+
+#to get the list of neighbors
+neighbors(<nation>)
 
 #to get the type
 type(<value>);
+
+#simulation
+simulate(<total_time>);
+simulate(<total_time>, <number_of_simulations>);
+
+
+#plots
+#property list
+plot(<logs>, <nation>, <property list>, <graphic> );
+#nation list
+plot(<log>, <nations list>, <property>, <graphic>);
+#data list
+plot(logs->all, <nation>, <property>, 'dataframe');
+graphic= ['line','bar','area']
+log=[log1,log2,...] #number of the simulation carried out
+
 ```

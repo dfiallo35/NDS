@@ -1,9 +1,6 @@
 from compiler.execution import *
-from example_simulation.decisions import decisions 
-from example_simulation.categories import categories 
-from example_simulation.distributions import distributions 
-from example_simulation.nations import nations 
-from example_simulation.events import events 
+from example_simulations.example_1 import *#decisions ,categories,distributions,nations,events
+
 
 t=cp_time.time()
 a= Code()

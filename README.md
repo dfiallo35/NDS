@@ -2,9 +2,9 @@
 
 ### Integrantes
 
-Lauren Guerra Hernandez C312
-Paula Rodríguez Pérez C311
-Dennis Fiallo Muñoz C311
+Lauren Guerra Hernandez C-312
+Paula Rodríguez Pérez C-311
+Dennis Fiallo Muñoz C-311
 
 ### Ejecución del programa
 
@@ -12,7 +12,8 @@ Para ejecutar el código, primero debe instalar las dependencias de Python que s
 
 ### Introducción
 
-El objetivo que se persigue con este poryecto es facilitar, mediante el uso de un DSL propio, la generación de simulaciones sobre el desarrollo de algunas Naciones en un tiempo definido y las respuestas de estas naciones a ciertos eventos, para luego recopilar datos sobre los cambios territoriales, el desarrollo, la población y las características de las Naciones y con estos analizar la influencia de las características de una Nación ya sean geográficas, políticas o económicas en el desarrollo que esta sea capaz de alcanzar.
+El objetivo que se persigue con este poryecto es facilitar, mediante el uso de un DSL propio, la generación de simulaciones sobre el desarrollo de  Naciones en un tiempo definido y las respuestas de estas naciones a ciertos eventos, para luego recopilar datos sobre los cambios territoriales, el desarrollo de las diferentes esferas de la economía y situación de la población y con estos analizar el desarrollo que esta sea capaz de alcanzar, en una esfera particular o de forma general.
+Para esto el usuario tiene la facilidad de crear naciones, decisiones y eventos con sus categorías y distribuciones con todas las libertades que le ofrece el proceso de simulación definido.
 
 
 ### Modelo de Simulación
@@ -30,7 +31,7 @@ Las decisiones son las acciones que pueden tomar las naciones para lograr sus ob
 El flujo de la simulación consta de los siguientes pasos:
 
 + Se toman todos los eventos de cola de prioridad que tengan el menor tiempo.
-+ Cada evento se ejecuta, en caso de que se deba generar se agrega de nuevo a la cola de prioridad con el tiempo en el cual se ejecutará nuevamente.
++ Cada evento se ejecuta, en caso de que se deba generar se agrega de nuevo a la cola de prioridad con el tiempo en el cual se ejecutará nuevamente, obtenido de una variable aleatoria generada a partir de la distribución propia del evento.
 + Se buscan los cambios ocurridos en el mapa, en específico en cada nación y la que presente cambios negativos se realiza la planificación con el objetivo de llevar esta característica dañada a su valor anterior, los eventos generados por las decisiones se agregan a la cola de prioridad con el tiempo en el cual se ejecutarán, obtenido a partir de una disttribución uniforme.
 + se repiten los pasos anteriores hasta que se alcance el tiempo máximo de la simulación.
 
@@ -40,32 +41,32 @@ El flujo de la simulación consta de los siguientes pasos:
 El modelo de simulación que se implementó se va a dividir en dos tipos de eventos:
 
 + **simulation event**: Evento que va a pertenecer a la simulación agregandose a una cola de prioridad según el tiempo en que se debe ejecutar. Este va a estar constituido por:
-    + **distribución**: Distribución de la cual se va a tomar la variable aleatoria de las siguiente ejecución del evento.
-    + **categoría**: Categoría a la que pertenece este evento, esto se usa para diferenciar los tipod de eventos y sus posibles acciones a tomar. Se usa como apoyo para la heurística de la toma de decisiones.
-    + **activado**: Valor buleano que define si al inicio de la simulación el evento va a pertenecer a la cola de ejecución.
+    + **distribution**: Distribución de la cual se va a tomar la variable aleatoria de las siguiente ejecución del evento.
+    + **category**: Categoría a la que pertenece este evento, esto se usa para diferenciar los tipod de eventos y sus posibles acciones a tomar. Se usa como apoyo para la heurística de la toma de decisiones.
+    + **enabled**: Valor buleano que define si al inicio de la simulación el evento va a pertenecer a la cola de ejecución.
 
 + **decision event**: Evento destinado a ejecutarse como respuesta a ciertos cambios en el mapa. Este cuenta con:
-    + **categoría**: Categoría a la que pertenece este evento, esto se usa para diferenciar los tipod de eventos y sus posibles acciones a tomar. Se usa como apoyo para la heurística de la toma de decisiones.
+    + **category**: Categoría a la que pertenece este evento, esto se usa para diferenciar los tipos de eventos y sus posibles acciones a tomar. Se usa como apoyo para la heurística de la toma de decisiones.
 
 Los elementos principales de la simulación serían:
 
 + **nation**: Toda la simulación gira en torno a estas. Poseen ciertas características por defecto, pero es posible agregarle todo tipo de datos que sean necesarios para la simulación que se plantea.
-    + **población**: Cantidad total de habitante.
+    + **population**: Cantidad total de habitante.
     + **extension**: Extensión total de esta.
-    + **vecinos**: Lista de naciones vecinas. Solo es necesario agregar como vecino en una de las naciones vecinas.
+    + **neighbors**: Lista de naciones vecinas. Solo es necesario agregar como vecino en una de las naciones vecinas.
     + **kwargs**: Es posible agregar cualquier dato que se desee para la simulación.
 
 + **sea**: Elemento necesario en algunas simulaciones.
     + **extension**: Extensión total de esta.
 
-+ **map**: Elemento que se usa coomo contenedor de todos los elementos de la simulación. Este es único y es generado la promera vez que se corre el código.
++ **map**: Elemento que se usa coomo contenedor de todos los elementos de la simulación. Este es único y es generado la primera vez que se corre el código.
 
 
 Como apoyo a la simulación se tienen los siguientes elementos que se pueden crear:
 
 + **decision**: Es donde se plantea el momento en que se va a ejecutar un **decision event** en caso de cumplirse la condición de activación. Este contiene:
     + **decision event**: Evento que debe ser ejecutado cuando se cumple la condición.
-    + **condición**: Condición para que se tome la decisión.
+    + **precondition**: Condición para que se tome la decisión.
 
 + **distribution**: En un principio se cuenta con las 123 distribuciones básicas que brinda el módulo de Python `scipy`. Para generar una nueva distribución es necesario:
     + **distribution**: Una de las distribuciones básicas.
@@ -93,6 +94,32 @@ Para la visualización de los resultados se cuenta con un módulo que permite ge
 
 Para el caso de este método `plot` solo uno de los parámetros `log`, `nación` y `dato` puede ser una lista, los otros dos deben ser un solo elemento.
 
+### Inteligencia Artificial
+
+
+#### Planificación y A*
+
+El algoritmo de planificación utilizado primeramente se define de forma general para que con este algoritmo se pueda resolver cualquier problema de planificación que herede de `PlanningProblem`,para esto solo debe contar con un estado inicial, una lista de acciones, cada una definida como `Action` o derivada de esta, las que son decisiones en el problema específico, y una función que pasado un estado devuelva si este es la meta a alcanzar o no. Para este problema en específico se definió una clase `PlanningDecisions` que hereda de `PlanningProblem` y que define todo lo necesario y además una función heurística que se explica más adelante.
+
+
+Para desarrollar la planificación se utilizó un algoritmo de búsqueda con un recorrido que simula un BFS, este se detiene cuando encuentra la meta especificada o alcanza el máximo número de pasos especificado, en caso de que no se encuentre la meta se devuelve `None`. 
+
+Para mejorar el rendimiento de este algoritmo se utilizó una función heurística que en un estado, para cada acción que se puede tomar se calcula un valor estimado de tomar esta acción, esto a partir de la distancia que está el estado actual del estado meta y se toman en cuenta también las categorías de la acción y del evento al que se está dando respuesta, esto para que se prioricen las acciones que se encuentren más cerca del estado meta y que sean de categorías más similares. Con el costo de la heurística y  el costo de la acción se calcula (en este caso igual a 0) el valor final de la acción, `f(s)=g(s)+h(s)`, por lo que algoritmo de búsqueda + heurística = A*. En este punto también para acciones con un valor superior al estimado se quitan de la posibilidad de ser escogidas, de las acciones que quedan luego de esta poda se colocan en la cola cada una de estas acciones con el estado que generan y además se va construyendo un árbol para cuando se llegue al estado meta sea posible devolver cada estado con la acción que lo genera y tomar en orden todas las acciones a realizar.
+
+#### NLP
+
+Para facilitar el trabajo del usuario en cuanto a la busqueda de información real sobre las naciones se implementó un sistema de procesamiento de lenguaje natural que permite al usuario ingresar una pregunta en lenguaje natural y obtener los resultados de la busqueda en forma de dataframe.
+
+Para el procesamiento de lenguaje natural se utilizó la biblioteca `spacy` de python, la cual permite realizar el análisis de texto en inglés, así como el análisis de las entidades nombradas en el texto. Para el caso de este proyecto se utilizó el modelo `en_core_web_sm` el cual es un modelo entrenado con datos de wikipedia y otros textos en inglés. Por otra parte, se hace uso de una API de **World Bank Data** en Python para obtener información de las naciones del mundo.
+
+El procesamiento de lenguaje natural se realiza en la función `process_text` de la clase `NLP`. En un principio el texto de la consulta es normalizado para eliminar `stopwords` y dejar solamente el `lema` de las palabras, esto con el fin de que el usuario pueda ingresar una consulta en lenguaje natural y que el sistema pueda entenderla. Luego se realiza el análisis de texto y se obtienen las entidades nombradas, las cuales se utilizan para determinar la consulta que se quiere realizar. Haciendo uso de las funciones de Matching de `spacy` se determinan las entidades nombradas que se encuentran en el texto, así como el tipo de entidad que es, si es un país, un año o un tipo de dato de la nación, para luego realizar la consulta a la API de **World Bank Data**.
+
+Para el caso de los match se utiliza la clase `NLPMatch` la cual se apoya en el `Match` de `spacy`. Para el caso de las naciones se crea un `Matcher` que busca coincidencias de `tokens` a partir de un patrón determinado para cada país, para los años se utiliza uno con un patrón de 4 dígitos, y para los tipos de datos se utiliza un `Matcher` que busca coincidencias de `tokens` a partir de un patrón determinado para cada tipo de dato.
+
+Luego de tener las entidades se pasa a realizar la consulta a la API de **World Bank Data**. Para el caso de las naciones ya se sabe el nombre de estas y su código ISO, por lo que se realiza la consulta a la API con el código ISO de la nación y el tipo de dato que se quiere obtener. Para el caso de los años solo se tienen datos desde 1960 hasta la actualidad.
+
+Al final es retornada una o varias tablas con los datos obtenidos de la consulta según el tipo de consulta que se haya realizado.
+
 
 
 
@@ -104,7 +131,7 @@ Para facilitar la creación de escenarios para la simulación se implementó un 
 
 Para la lexemización, tokenización y parser se utilizaron los tokens definidos en `lexer.py` y la biblioteca de python `SLY`. Esta es una biblioteca para escribir analizadores y compiladores. Se basa libremente en las herramientas tradicionales de construcción de compiladores lex(tokenizar) y yacc (yet another compiler-compiler).
 
-Para la obtención del AST se utilizó el algoritmo de análisis sintáctico (parser) LALR(1) implementado en SLY. Un analizador LALR (Look-Ahead LR)  es una versión simplificada de un analizador LR canónico, para analizar un texto de acuerdo con un conjunto de reglas de producción especificadas por una gramática formal para un lenguaje.
+Para la obtención del AST se utilizó el algoritmo de análisis sintáctico (parser) LALR(1) implementado en `SLY`. Un analizador LALR (Look-Ahead LR)  es una versión simplificada de un analizador LR canónico, para analizar un texto de acuerdo con un conjunto de reglas de producción especificadas por una gramática formal para un lenguaje.
 
 SLY utiliza una técnica de análisis conocida como análisis LR o análisis shift-reduce. El análisis LR es una técnica de abajo hacia arriba que intenta reconocer el lado derecho de varias reglas gramaticales. Cada vez que se encuentra un lado derecho válido en la entrada, se activa el método de acción apropiado y los símbolos gramaticales del lado derecho se reemplazan por el símbolo gramatical del lado izquierdo.
 
@@ -114,7 +141,7 @@ El flujo que sigue el compilador es: pasar por el lexer para tokenizar el script
 
 Todos los detalles acerca de las reglas de gramática utilizada se puede ver en `parser.out`, además de visualizar cada uno de los estados de la ejecución actual.
 
-##### Diseño del Lenguaje
+#### Diseño del Lenguaje
 
 ##### Tipos
 
@@ -154,39 +181,14 @@ Todos los detalles acerca de las reglas de gramática utilizada se puede ver en 
 
 - Clásicos `if` y `else`.
 
-
-
-### Inteligencia Artificial
-
-##### Planificación y A*
-
-El algoritmo de planificación utilizado primeramente se define de forma general para que con este algoritmo se pueda resolver cualquier problema de planificación que herede de `PlanningProblem`,para esto solo debe contar con un estado inicial, una lista de acciones, cada una definida como `Action` o derivada de esta, las que son decisiones en el problema específico, y una función que pasado un estado devuelva si este es la meta a alcanzar o no. Para este problema en específico se definió una clase `PlanningDecisions` que hereda de `PlanningProblem` y que define todo lo necesario y además una función heurística que se explica más adelante.
-
-
-Para desarrollar la planificación se utilizó un algoritmo de búsqueda con un recorrido que simula un BFS, este se detiene cuando encuentra la meta especificada o alcanza el máximo número de pasos especificado, en caso de que no se encuentre la meta se devuelve `None`. 
-
-Para mejorar el rendimiento de este algoritmo se utilizó una función heurística que en un estado, para cada acción que se puede tomar se calcula un valor estimado de tomar esta acción, esto a partir de la distancia que está el estado actual del estado meta y se toman en cuenta también las categorías de la acción y del evento al que se está dando respuesta, esto para que se prioricen las acciones que se encuentren más cerca del estado meta y que sean de categorías más similares. Con el costo de la heurística y  el costo de la acción se calcula (en este caso igual a 0) el valor final de la acción, `f(s)=g(s)+h(s)`, por lo que algoritmo de búsqueda + heurística = A*. En este punto también para acciones con un valor superior al estimado se quitan de la posibilidad de ser escogidas, de las acciones que quedan luego de esta poda se colocan en la cola cada una de estas acciones con el estado que generan y además se va construyendo un árbol para cuando se llegue al estado meta sea posible devolver cada estado con la acción que lo genera y tomar en orden todas las acciones a realizar.
-
-##### NLP
-
-Para facilitar el trabajo del usuario en cuanto a la busqueda de información real sobre las naciones se implementó un sistema de procesamiento de lenguaje natural que permite al usuario ingresar una pregunta en lenguaje natural y obtener los resultados de la busqueda en forma de dataframe.
-
-Para el procesamiento de lenguaje natural se utilizó la biblioteca `spacy` de python, la cual permite realizar el análisis de texto en inglés, así como el análisis de las entidades nombradas en el texto. Para el caso de este proyecto se utilizó el modelo `en_core_web_sm` el cual es un modelo entrenado con datos de wikipedia y otros textos en inglés. Por otra parte, se hace uso de una API de **World Bank Data** en Python para obtener información de las naciones del mundo.
-
-El procesamiento de lenguaje natural se realiza en la función `process_text` de la clase `NLP`. En un principio el texto de la consulta es normalizado para eliminar `stopwords` y dejar solamente el `lema` de las palabras, esto con el fin de que el usuario pueda ingresar una consulta en lenguaje natural y que el sistema pueda entenderla. Luego se realiza el análisis de texto y se obtienen las entidades nombradas, las cuales se utilizan para determinar la consulta que se quiere realizar. Haciendo uso de las funciones de Matching de `spacy` se determinan las entidades nombradas que se encuentran en el texto, así como el tipo de entidad que es, si es un país, un año o un tipo de dato de la nación, para luego realizar la consulta a la API de **World Bank Data**.
-
-Para el caso de los match se utiliza la clase `NLPMatch` la cual se apoya en el `Match` de `spacy`. Para el caso de las naciones se crea un `Matcher` que busca coincidencias de `tokens` a partir de un patrón determinado para cada país, para los años se utiliza uno con un patrón de 4 dígitos, y para los tipos de datos se utiliza un `Matcher` que busca coincidencias de `tokens` a partir de un patrón determinado para cada tipo de dato.
-
-Luego de tener las entidades se pasa a realizar la consulta a la API de **World Bank Data**. Para el caso de las naciones ya se sabe el nombre de estas y su código ISO, por lo que se realiza la consulta a la API con el código ISO de la nación y el tipo de dato que se quiere obtener. Para el caso de los años solo se tienen datos desde 1960 hasta la actualidad.
-
-Al final es retornada una o varias tablas con los datos obtenidos de la consulta según el tipo de consulta que se haya realizado.
+Para mejor comprensión del lenguaje generado se incluyó en la carpeta compiler un readme.m que ejemplifica como escribir código en este lenguaje.
 
 
 
-### Ejemplos de código DSL
+#### Ejemplos de código DSL
 
 ```
-#categories
+    #categories
     category social();
     category economic();
     category political();
@@ -194,14 +196,12 @@ Al final es retornada una o varias tablas con los datos obtenidos de la consulta
     category territorial();
 
     #nations
-    nation Cuba(11256372, 109884 , [], [], industrialization: 30, tourism:80);
-    nation USA(9147593, 337341954, [], [], industrialization: 80 , tourism:70);
     nation Canada(38246108, 9984670, [], [USA], industrialization: 70 , tourism:30);
     nation Mexico(128455567, 1964375 , [], [USA], industrialization: 60 , tourism:70);
 
     #distributions
     distribution pg(expon, scale: 20);
-    distribution block(expon, scale: 50);
+    distribution ud(uniform, scale: 20);
 
 
     #decisions
@@ -211,12 +211,6 @@ Al final es retornada una o varias tablas con los datos obtenidos de la consulta
     }    
     decision industrialization_increases_dec(n->aviable_economic_resources >= 5000, industrialization_increases)<< n >>;
 
-    decision event tourism_increases(economic)<<n>>{
-        n->aviable_economic_resources = n->aviable_economic_resources-7000;
-        n->tourism = n->tourism*1.2;
-    }
-    decision tourism_increases_dec(n->aviable_economic_resources >= 7000, tourism_increases)<< n >>;
-
 
     #events
     simulation event decrease_industrialization(pg,economic,true,[]){
@@ -225,15 +219,9 @@ Al final es retornada una o varias tablas con los datos obtenidos de la consulta
         }
     }
 
-    simulation event population_growth(pg, social, true, []){
+    simulation event population_growth(ud, social, true, []){
         foreach <<nat>> (map->nations){
             nat->population= irvs(expon, loc: nat->population);
-        }
-    }
-
-    simulation event population_mortality(pg, social, true, []){
-        foreach <<nat>> (map->nations){
-            nat->population= nat->population - irvs(expon, loc: 0);
         }
     }
 
@@ -254,6 +242,9 @@ Al final es retornada una o varias tablas con los datos obtenidos de la consulta
     info('What is the population and net migration of Cuba? And from Canada and Mexico in 2010 the population');
 
 ```
+###Ejemplo de Simulación realizada
+
+Para probar el funcionamiento del presente se desarrolló una simulación en la que se tiene como objetivo la observación del comportamiento de los parámetros PIB y población de cuatro naciones cercanas: México, Cuba, Estados Unidos y Canadá, estos parámetros están sujetos a variaciones a partir de la situación social y económica que presenta cada una de las naciones.
 
 
 ### Bibliografía
