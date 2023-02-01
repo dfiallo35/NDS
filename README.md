@@ -242,7 +242,7 @@ Para mejor comprensión del lenguaje generado se incluyó en la carpeta compiler
     info('What is the population and net migration of Cuba? And from Canada and Mexico in 2010 the population');
 
 ```
-###Ejemplo de Simulación realizada
+### Ejemplo de Simulación realizada
 
 Para probar el funcionamiento del presente se desarrolló una simulación en la que se tiene como objetivo la observación del comportamiento la migración de personas en cada nación a partir de su situación social y económica. Para esto se definieron eventos que afectan tanto la economía de los países como la vida de la población de estos, y se definieron decisiones afines a estos eventos. El código de esta simulación de ejemplo se encuentra en la carpeta example_simulations en example_1.py y se corre desde simulation_example.py. 
 
@@ -272,7 +272,7 @@ A continuación se muestran la utilización del visual para crear la simulación
 
 Se puede observar que la migración de personas es un proceso  que depende de muchos factores, con los factores que se tuvieron en cuenta en esta simulación se observa que la migración de personas disminuye con el tiempo en las naciones que tienen un mayor desarrollo económico dado por sus recursos económicos, mayor nivel de vida promedio y menores niveles de pobreza, taza de crimilnalidad y nivel de inflación. Esto se puede deber a que las personas buscan un mejor nivel de vida, y que las naciones con estas características. Esto se puede ver en la gráfica de migraciones, donde naciones como Cuba y México, las cuales son países con poco nivel de desarrollo, tienen una migración que va en aumento en todo momento, es decir, que más personas abandonan la nación que las que llegan, mientras que naciones como USA y Canadá, que aumentan su desarrollo a lo largo de la simulación, comienzan con una migración negativa y rápidamente su curva comienza a bajar, lo que significa que más personas llegan a la nación que las que se han ido. 
 
-###Conclusiones
+### Conclusiones
 
 El presente proyecto funciona debidamente y cumple con su objetivo de ser una herramienta relativamente sencilla de utilizar para la simulación del desarrollo de naciones. Se puede observar que la simulación de eventos en un mapa de naciones es un problema complejo y que requiere de una gran cantidad de recursos computacionales para poder ser simulado de manera eficiente, por lo que no se recomienda utilizar este proyecto para simulaciones largas y una gran cantidad de simulaciones a la vez ya que el costo espacio y tiempo es muy alto.
 
