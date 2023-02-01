@@ -300,13 +300,11 @@ class Code:
         else:
             if not type(params[1]) == integer:
                 raise Exception('Error: simulate() only accepts integer as second param')
-            
-            map= deepcopy(self.map)
             for i in range(0, self.to_python(params[1])):
                 if not type(params[0]) == time:
                     raise Exception('Error: simulate() only accepts time as first param')
             
-                
+                map= deepcopy(self.map)
                 self.logs.add(map)
                 sim= Simulate(map, Pqueue(map.event_enabled_list), self.logs.current_log)
                 sim.simulate(self.to_python(params[0]))
