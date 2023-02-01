@@ -24,10 +24,10 @@ distributions='''
 
 
 nations='''
-    nation Cuba(11256372, 109884 , [], [], aviable_economic_resources:112000, industrialization: 30 , PIB:  45510000000, tourism:80, average_living_standard:50, life_expectancy: 76, employment: 97.2, poverty_level: 4.5, inflation: 3.67, crime_rate: 4.4);
-    nation USA(9147593, 337341954, [], [], aviable_economic_resources:834500000, industrialization: 78 , PIB:15700000000000000, tourism:70, average_living_standard:94, life_expectancy: 73, employment: 94.5, poverty_level: 10.5, inflation: 1.5, crime_rate: 5);
-    nation Canada(38246108, 9984670, [], [USA], aviable_economic_resources:53120000, industrialization: 72 , PIB:2027371000000, tourism:30, average_living_standard:94, life_expectancy: 82, employment: 98.5, poverty_level: 10, inflation: 2.1, crime_rate: 5.1);
-    nation Mexico(128455567, 1964375 , [], [USA], aviable_economic_resources:93410000, industrialization: 63 , PIB:2890685000000, tourism:70, average_living_standard:68, life_expectancy: 70, employment: 94.9, poverty_level: 52.4 , inflation: 4.2, crime_rate: 8.7);
+    nation Cuba(11256372, 109884 , [], [], aviable_economic_resources:112000, industrialization: 30 , PIB:  45510000000, tourism:80, average_living_standard:50, life_expectancy: 76, employment: 97.2, poverty_level: 4.5, inflation: 3.67, crime_rate: 4.4, total_migration: 1);
+    nation USA(331449281, 337341954, [], [], aviable_economic_resources:834500000, industrialization: 78 , PIB:15700000000000000, tourism:70, average_living_standard:94, life_expectancy: 73, employment: 94.5, poverty_level: 10.5, inflation: 1.5, crime_rate: 5, total_migration: 1);
+    nation Canada(38246108, 9984670, [], [USA], aviable_economic_resources:53120000, industrialization: 72 , PIB:2027371000000, tourism:30, average_living_standard:94, life_expectancy: 82, employment: 98.5, poverty_level: 10, inflation: 2.1, crime_rate: 5.1, total_migration: 1);
+    nation Mexico(128455567, 1964375 , [], [USA], aviable_economic_resources:93410000, industrialization: 63 , PIB:2890685000000, tourism:70, average_living_standard:68, life_expectancy: 70, employment: 94.9, poverty_level: 52.4 , inflation: 4.2, crime_rate: 8.7, total_migration: 1);
 
 '''
 
@@ -115,17 +115,16 @@ events='''
 
     simulation event population_mortality(mortality, social, true, []){
         foreach <<nat>> (map->nations){
-            nat->population= nat->population - irvs(expon, loc: 0);
+            nat->population = nat->population - irvs(expon, loc: 0);
         }
     }
 
-
-    #IMPLEMENT
     simulation event population_migration(migration, social, true ,[]){
         foreach <<nat>> (map->nations){
             balance = (75 - nat->life_expectancy) + (100 - nat->employment) + (nat->poverty_level - 10)*5 + (nat->inflation-10) - (nat->crime_rate-5)*10 + (100-nat->average_living_standard)*5;
             rv = irvs(uniform, loc: balance * 10);
             nat->population = nat->population - rv;
+            nat->total_migration = nat->total_migration + rv;
         }    
     }
 
@@ -149,7 +148,7 @@ events='''
 '''
 
 
-simulate= 'simulate(50d,5);'
+simulate= 'simulate(1y,5);'
 
 
 plots='''
