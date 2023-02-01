@@ -244,31 +244,31 @@ Para mejor comprensión del lenguaje generado se incluyó en la carpeta compiler
 ```
 ### Ejemplo de Simulación realizada
 
-Para probar el funcionamiento del presente se desarrolló una simulación en la que se tiene como objetivo la observación del comportamiento la migración de personas en cada nación a partir de su situación social y económica. Para esto se definieron eventos que afectan tanto la economía de los países como la vida de la población de estos, y se definieron decisiones afines a estos eventos. El código de esta simulación de ejemplo se encuentra en la carpeta example_simulations en example_1.py y se corre desde simulation_example.py. 
+Para probar el funcionamiento del presente se desarrolló una simulación en la que se tiene como objetivo la observación del comportamiento la migración de personas en cada nación a partir de su situación social y económica. Para esto se definieron eventos que afectan tanto la economía de los países como la vida de la población de estos, y se definieron decisiones afines a estos eventos. El código de esta simulación de ejemplo se encuentra en la carpeta `example_simulations` en `example_1.py` y se corre desde `simulation_example.py`. 
 
-Para todos los valores iniciales de los recursos que poseen los países se buscó en internet en sitios fiables, como nunca en un solo sitio se encontraba toda la información necesaria se hizo necesario utilizar varias fuentes como el worldbank o la wikipedia y finalmente para cada valor inicial de cada recurso se utilizó la información más actualizada.
+Para todos los valores iniciales de los recursos que poseen los países se buscó en internet en el sitio oficial de **World Bank Data**, mientras que para los casos de las distribuciones y los eventos se usan datos extraídos en **Wikipedia**. Para esto se usaron los datos más actualizados de cada tipo.
 
 Para obtener los resultados que se muestran a continuación, como consecuencia de la baja potencia computacional con que contamos y gran costo espacial que requieren las simulaciones, se realizaron 10 simulaciones todas de 100 días, y se guardaron los todos los cambios que se realizan en el mapa en cada simulación, para luego obtener los promedios de los valores de cada recurso de cada país en cada simulación.
 
 A continuación se muestran la utilización del visual para crear la simulación y observar los resultados obtenidos.
 
-![aguacate](./md_pictures/01.jpg) Creación de las distribuciones, categorías y países.
+![aguacate](./md_pictures/01.jpg) *Creación de las distribuciones, categorías y países.*
 
-![](./md_pictures/02.jpg) Creación de las decisiones.
+![](./md_pictures/02.jpg) *Creación de las decisiones.*
 
-![](./md_pictures/03.jpg) Creación de las los eventos de la simulación parte 1.
+![](./md_pictures/03.jpg) *Creación de las los eventos de la simulación parte 1.*
 
-![](./md_pictures/04.jpg) Creación de las los eventos de la simulación parte 2.
+![](./md_pictures/04.jpg) *Creación de las los eventos de la simulación parte 2.*
 
-![](./md_pictures/industrialization.png) Resultado de la simulación de variaciones en la industrialización en las naciones.
+![](./md_pictures/industrialization.png) *Resultado de la simulación de variaciones en la industrialización en las naciones.*
 
-![](./md_pictures/USAresources.png) Resultados de la simulación de variaciones en los recursos como ejemplo para la nación USA.
+![](./md_pictures/USAresources.png) *Resultados de la simulación de variaciones en los recursos como ejemplo para la nación USA.*
 
-![](./md_pictures/population.png) Gráfico de la población de las naciones. Como se ve demasiado lineal porque los cambios son muy pequeños con respecto a los valores que se representan, se observa a continuación los datos representados en un dataframe.
+![](./md_pictures/population.png) *Gráfico de la población de las naciones. Como se ve demasiado lineal porque los cambios son muy pequeños con respecto a los valores que se representan, se observa a continuación los datos representados en un dataframe.*
 
-![](./md_pictures/dataframe_population.jpg) Dataframe de la población de las naciones donde se observan, solo para los primeros 20 días, las variaciones en la población de cada nación.
+![](./md_pictures/dataframe_population.jpg) *Dataframe de la población de las naciones donde se observan, solo para los primeros 20 días, las variaciones en la población de cada nación.*
 
-![](./md_pictures/migration.png) Esta gráfica muestra la migración de personas de cada nación a lo largo de los 100 días simulados, representa en cada día la diferencia entre la cantidad de personas que abandonan la nación y la cantidad que migran hacia ella.
+![](./md_pictures/migration.png) *Esta gráfica muestra la migración de personas de cada nación a lo largo de los 100 días simulados, representa en cada día la diferencia entre la cantidad de personas que abandonan la nación y la cantidad que migran hacia ella.*
 
 Se puede observar que la migración de personas es un proceso  que depende de muchos factores, con los factores que se tuvieron en cuenta en esta simulación se observa que la migración de personas disminuye con el tiempo en las naciones que tienen un mayor desarrollo económico dado por sus recursos económicos, mayor nivel de vida promedio y menores niveles de pobreza, taza de crimilnalidad y nivel de inflación. Esto se puede deber a que las personas buscan un mejor nivel de vida, y que las naciones con estas características. Esto se puede ver en la gráfica de migraciones, donde naciones como Cuba y México, las cuales son países con poco nivel de desarrollo, tienen una migración que va en aumento en todo momento, es decir, que más personas abandonan la nación que las que llegan, mientras que naciones como USA y Canadá, que aumentan su desarrollo a lo largo de la simulación, comienzan con una migración negativa y rápidamente su curva comienza a bajar, lo que significa que más personas llegan a la nación que las que se han ido. 
 
