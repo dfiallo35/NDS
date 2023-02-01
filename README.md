@@ -244,9 +244,10 @@ Para mejor comprensión del lenguaje generado se incluyó en la carpeta compiler
 ```
 ###Ejemplo de Simulación realizada
 
-Para probar el funcionamiento del presente se desarrolló una simulación en la que se tiene como objetivo la observación del comportamiento de los parámetros PIB y población de cuatro naciones cercanas: México, Cuba, Estados Unidos y Canadá, estos parámetros están sujetos a variaciones a partir de la situación social y económica que presenta cada una de las naciones.
+Para probar el funcionamiento del presente se desarrolló una simulación en la que se tiene como objetivo la observación del comportamiento la migración de personas en cada nación a partir de su situación social y económica. Para esto se definieron eventos
 
 
+Para todos los valores de los recursos que poseen los países se buscó en internet en sitios fiables, como nunca en un solo sitio se encontraba toda la información necesaria se hizo necesario utilizar varias fuentes como el worldbank o la wikipedia y finalmente para cada valor inicial de cada recurso se utilizó la información más actualizada.
 ### Bibliografía
 
 1. Dr. Luciano García Garrido, Lic. Luis Martí Orosa, Lic. Luis Pérez Sánchez: Temas de Simulación.

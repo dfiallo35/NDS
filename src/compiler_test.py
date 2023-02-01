@@ -25,7 +25,7 @@ a.compile(
 
     distribution new_dist([7]);
 
-    show(irvs(new_dist, size: 20));
+    # show(irvs(new_dist, size: 20));
 
 
 

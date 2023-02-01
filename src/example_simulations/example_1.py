@@ -4,14 +4,21 @@ categories='''
     category social();
     category economic();
     category political();
-    category military();
-    category territorial();
 '''
 
 
 distributions='''
-    distribution pg(expon, scale: 20);
-    distribution block(expon, scale: 50);
+    distribution di(expon, scale: 20);
+    distribution block(uniform, scale: 50);
+    distribution unemployment(expon, scale: 75);
+    distribution we(expon,scale:30);
+    distribution pg(expon,scale:30);
+    distribution mortality([7]);
+    distribution migration([7]);
+    distribution PIB([365]);
+    distribution taxes([30]);
+    
+
 
 '''
 
@@ -31,6 +38,7 @@ decisions = '''
         inversion  =  n->extension * 0.0002;
         n->aviable_economic_resources = n-> aviable_economic_resources - inversion;
         n->industrialization = n->industrialization * 1.2;
+        n->inflation=n->inflation*0.95;
     }    
     decision industrialization_increases_dec(n->aviable_economic_resources >= n->extension * 0.0002, industrialization_increases)<< n >>;
 
@@ -51,7 +59,7 @@ decisions = '''
     decision social_investments_dec(n->aviable_economic_resources >= n->population * 0.0002, social_investments)<< n >>;
 
     decision event create_jobs(social)<<n>>{
-        inversion = 1/n->employment * 1000;
+        inversion = 1/n -> employment * 1000;
         n->poverty_level=n->poverty_level * 0.9;
         n->aviable_economic_resources = n->aviable_economic_resources-inversion;
         n->employment = n->employment*1.2;
@@ -64,7 +72,7 @@ decisions = '''
 
 events='''
 
-    simulation event unemployment_increases(pg, social, true, []){
+    simulation event unemployment_increases(unemployment, social, true, []){
         foreach <<nat>> (map->nations){
         nat->employment= nat->employment*0.9;
         nat->average_living_standard= nat->average_living_standard*0.9;
@@ -77,7 +85,7 @@ events='''
         }
     }
 
-    simulation event worsening_economy(pg,economic,true,[]){        
+    simulation event worsening_economy(we,economic,true,[]){        
         foreach <<nat>> (map->nations){
             
             nat->industrialization=nat->industrialization*0.9;
@@ -88,9 +96,9 @@ events='''
         }
     }
 
-    simulation event decrease_industrialization(pg, economic, true,[]){
+    simulation event decrease_industrialization(di, economic, true,[]){
         foreach <<nat>> (map->nations){
-            nat->industrialization = nat->industrialization * 0.9;
+            nat->industrialization = nat->industrialization * 0.95;
         }
     }
 
@@ -105,7 +113,7 @@ events='''
         }
     }
 
-    simulation event population_mortality(pg, social, true, []){
+    simulation event population_mortality(mortality, social, true, []){
         foreach <<nat>> (map->nations){
             nat->population= nat->population - irvs(expon, loc: 0);
         }
@@ -113,27 +121,26 @@ events='''
 
 
     #IMPLEMENT
-    # simulation event migration(pg,social, true ,[]){
-    #     foreach <<nat>> (map->nations){
-    #         nat->population
-    #         employment
-    #         average_living_standard
-
-    #     }    
-    # }
-
-    # simulation event recalculate_PIB (pg,social, true ,[]){
-    #     foreach <<nat>> (map->nations){
-    #         nat->population
-    #         employment
-    #         average_living_standard
-
-    #     }
-
-
-    simulation event collect_taxes(pg,social, true ,[]){
+    simulation event population_migration(migration, social, true ,[]){
         foreach <<nat>> (map->nations){
-            increment = nat->industrialization * nat->tourism * nat->employment * nat->population / nat->extension;
+            balance = (75 - nat->life_expectancy) + (100 - nat->employment) + (nat->poverty_level - 10)*5 + (nat->inflation-10) - (nat->crime_rate-5)*10 + (100-nat->average_living_standard)*5;
+            rv = irvs(uniform, loc: balance * 10);
+            nat->population = nat->population - rv;
+        }    
+    }
+
+     simulation event recalculate_PIB (PIB, social, true ,[]){
+            foreach <<nat>> (map->nations){
+            balance = (nat->employment-70)*500 + (10 - nat->poverty_level)*2000 + (10 - nat->inflation)*2000 + (nat->tourism-50)*1000 + (nat->industrialization-50)*1000;
+            nat->PIB = nat->PIB + balance;
+            nat->PIB = irvs(expon, loc: nat->PIB);
+        }
+    }
+
+    simulation event collect_taxes(taxes, social, true ,[]){
+        foreach <<nat>> (map->nations){
+            increment = (nat->tourism-50)*1000 + (nat->industrialization-50)*1000;
+            increment = irvs(uniform, loc: increment);
             nat->aviable_economic_resources = nat->aviable_economic_resources + increment;
         }
     }
